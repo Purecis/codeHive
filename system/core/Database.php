@@ -67,8 +67,9 @@ class Database{
 				self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);//set character set utf8
 				
 			}catch(PDOException $e){
-				if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",$e->getMessage());
-				else die("Database Error :".$e->getMessage());
+				//if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",$e->getMessage());
+				//else 
+				die("Database Error :".$e->getMessage());
 			}
     	}
 		return self::$db;
