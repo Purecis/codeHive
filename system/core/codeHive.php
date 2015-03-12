@@ -48,7 +48,7 @@ class codeHive{//composer, artisan, Hive , Arti, Zorba, codeHive, iBuilder
 		define(VersionMinor,"0");
 		define(VersionPatch,"00");
 		define(VersionCode,"Alpha");
-		define(VersionBuild,"2094");
+		define(VersionBuild,"2095");
 		
 		define(VERSION,"v.".VersionMajor.".".VersionMinor.".".VersionPatch." ".VersionCode.", Build ".VersionBuild);
 		

@@ -459,6 +459,7 @@ class Query{
 			return "`{$key}` != {$value}";
 
 		}else if(strpos($value, ":in:") !== false){
+			$value = stripslashes($value);
 			$value = str_replace(":in:", "", $value);
 			return "`{$key}` in ({$value})";
 

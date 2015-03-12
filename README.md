@@ -42,7 +42,7 @@ Documentation for the framework can be found on the [Purecis website](http://cod
 
 or you can build it by your self using spinix after you checkout the code and for API documentation use APIGen to Generate new api documentation by using :
 
-apigen generate -s system -d docs --template-theme "bootstrap"
+apigen generate -s system -d api --template-theme "bootstrap"
 
 
 ## Contributing
