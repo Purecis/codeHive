@@ -20,7 +20,7 @@ session_start();
 include "system/core/codeHive.php";
 
 $start = array(
-	"app" 		=> "apps/sample",
+	"app" 		=> "apps/online-exam",
 	"assets" 	=> "assets",
 	"system" 	=> "system"
 ); 
