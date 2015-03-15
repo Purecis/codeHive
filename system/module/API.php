@@ -73,6 +73,71 @@ class API{
 	// --------------------------------------------------------------------
 
 	/**
+	 * api router
+	 *
+	 * @return	array
+	 */
+	public static function router($arr){
+		array_unshift($arr, "api");
+		return Router::parse($arr);
+	}
+
+	/**
+	 * api then
+	 *
+	 * @return	array
+	 * @todo  creating scope, router, multi call in same scope
+	 */
+	private static $current = 0;
+	public static function then($text,$args,$callback = false, $method = true){
+		if(!$callback){
+			$callback = $args;
+			$args = array();
+		}
+
+		$arr = array();
+		for ($i=0; $i <= self::$current; $i++) { 
+			array_push($arr, "api-{$i}");
+		}
+
+		$router = Router::parse($arr);
+		
+		//echo $text;
+		$curr = "api-".self::$current;	
+
+		if($router->$curr == $text && $method){
+			self::$current++;
+			
+			$cb = call_user_func($callback);
+			if(is_array($cb) || is_object($cb))$cb = json_encode($cb);
+			echo $cb;
+			exit;
+		};
+	}
+
+	public static function group($text,$args,$callback = false){
+		return self::then($text,$args,$callback);
+	}
+
+	public static function get($text,$args,$callback = false){
+		return self::then($text,$args,$callback,Request::method() == "GET");
+	}
+
+	public static function post($text,$args,$callback = false){
+		return self::then($text,$args,$callback,Request::method() == "POST");
+	}
+
+	public static function delete($text,$args,$callback = false){
+		return self::then($text,$args,$callback,Request::method() == "DELETE");
+	}
+
+	public static function put($text,$args,$callback = false){
+		return self::then($text,$args,$callback,Request::method() == "PUT");
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * api access : check token if send to make query
 	 *
 	 * @return	boolean

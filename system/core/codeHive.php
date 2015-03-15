@@ -18,9 +18,8 @@
 /**
  * auto load class when it called (Library classes only)
  */
-function __autoload($class) {
+spl_autoload_register(function($class) {
 	global $config;
-
 	//if(strpos($class,"codeHive\Module\\") !== false){
 	//	$class = substr($class,strlen("codeHive\Module\\"));
 	//	Module::import($class);
@@ -34,7 +33,7 @@ function __autoload($class) {
 			if($config['ENVIRONMENT'] == 'debug')debug::error("System Cores Faild",$class);
 		}
 	//}
-}
+});
 
 /**
  * Class Start
@@ -44,6 +43,10 @@ class codeHive{//composer, artisan, Hive , Arti, Zorba, codeHive, iBuilder
 	public static function start($start = array('app'=>'app')){
 		global $config;
 
+		if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+		  throw new Exception('The codeHive Framework v2 requires PHP version 5.3 or higher, (5.4) is Recomonded.');
+		}
+		
 		define(VersionMajor,"2");
 		define(VersionMinor,"0");
 		define(VersionPatch,"00");

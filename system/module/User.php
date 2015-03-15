@@ -345,7 +345,7 @@ class User{
 	 * use license hash which defined on config
 	 *
 	 * @access	public
-	 * @param 	array of user data (email,pass[,oauth,login,name,rules,registered,status,group,rel])
+	 * @param 	string
 	 * @return	string
 	 */
 	public static function encpass($pass){
