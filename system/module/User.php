@@ -243,8 +243,8 @@ class User{
 	 * @access	public
 	 * @return	string
 	 */
-	public static function logout(){
-		return Session::remove(array('userId'));
+	public static function logout($force=false){
+		return Session::remove(array('userId'),$force);
 	}
 
 	// --------------------------------------------------------------------

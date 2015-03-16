@@ -31,16 +31,16 @@ class Router{
 	public static function get($name=0){
 		$ret = false;
 		$url = Request::parser();
+
 		if(isset(self::$router[$url[0]])){
 			$rarr = self::$router[$url[0]];
 		}else{
-			$rarr = self::$router['_otherwise'];
-			if(!$rarr)$rarr = array();
+			$rarr = (isset(self::$router['_otherwise']))?self::$router['_otherwise']:array();
 		}
-		if($name !== 0 && sizeof($rarr) > 0){
-			if($name == 'pagename'){
-				$ret = $url[0];
-			}else{
+		if($name == 'pagename'){
+			$ret = $url[0];
+		}else{
+			if($name !== 0 && sizeof($rarr) > 0){
 				$arrSearch = array_search($name, $rarr);
 				if($arrSearch !== false){
 					if(isset($url[$arrSearch+1]))$ret = $url[$arrSearch+1];
@@ -53,8 +53,12 @@ class Router{
 	public static function on($name,$val,$cb=false){
 		$name = urlencode($name);
 
-		if($cb != false)self::$router[$name] = $val;
-		else $cb = $val;
+		if($cb != false){
+			self::$router[$name] = $val;
+		}else{
+			//self::$router[$name] = array();
+			$cb = $val;
+		}
 		
 		self::$callback[$name] = $cb;
 		
@@ -62,6 +66,7 @@ class Router{
 	}
 
 	public static function parse($arr){
+		if(!is_array($arr))$arr = array($arr);
 		$mod = self::get("pagename");
 		self::$router[$mod] = $arr;
 		$cls = new stdClass();
