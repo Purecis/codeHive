@@ -96,8 +96,8 @@ class Session{
 	 * @param	array 	str or array key value
 	 * @return	void
 	 */
-	public static function remove($arr=array()){
-		if(sizeof($arr) < 1){
+	public static function remove($arr=array(),$all=false){
+		if(sizeof($arr) < 1 || $all){
 			@session_unset(); 
 			@session_destroy(); 
 		}else{
