@@ -113,6 +113,41 @@ class User{
 	// --------------------------------------------------------------------
 
 	/**
+	 * User get
+	 *
+	 * @access	public
+	 * @param 	array of user data (email,pass,name,rules,status,group,rel)
+	 * @param 	array where
+	 * @return	mixen
+	 */
+	public static function get($data=false,$where=false){
+		$cls = new stdClass();
+
+		if(!$where){
+			if(self::logged()){
+				$where = array('id'=>Session::get(array("userId")));
+			}else{
+				$cls->status = false;
+				$cls->error = "not logged";
+				return $cls;
+			}
+		}
+
+		if(!$data){
+			$data = array("id","email");
+		}
+
+		$q = Query::get("users",array(
+			"data" => $data,
+			"where" => $where
+		));
+
+		return $q;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * check if user data in database
 	 *
 	 * @access	public
@@ -207,19 +242,16 @@ class User{
 	 * User login
 	 *
 	 * @access	public
-	 * @param 	array of user data (email,pass)
+	 * @param 	array of user data (email,pass[,token])
 	 * @return	string
 	 */
 	public static function login($arr){
 		$arr = (Array)$arr;
-		$email = $arr['email'];
-		$pass = self::encpass($arr['pass']);
+		if(!isset($arr['token']))$arr['pass'] = self::encpass($arr['pass']);
+		
 		$q = Query::get("users",array(
 			"data" => array("id","rules"),
-			"where" => array(
-				"email" => $email,
-				"pass" 	=> $pass
-			)
+			"where" => $arr
 		));
 		if($q->count > 0){
 			Session::set(array(
