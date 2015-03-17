@@ -21,10 +21,9 @@ class Router{
 	protected static $callback;
 	protected static $router;
 
-	public static function _goto($to=false){
-		if(!$to)$to = Request::site();
-		else $to = Request::site().$to;
-		die("<meta http-equiv='refresh' content='0; url={$to}' />");
+	public static function refresh($to=false,$time=0){
+		//$to = Request::domain(true,$to);
+		die("<meta http-equiv='refresh' content='{$time}; url={$to}' />");
 		return $to;
 	}
 
@@ -87,7 +86,7 @@ class Router{
 	public static function callback(){
 		//$mod = Request::get('pagename');
 		$mod = Request::parser(0);
-
+		
 		$_exist = isset(self::$callback[$mod])?true:false;
 		if(!$_exist){
 			global $config;
