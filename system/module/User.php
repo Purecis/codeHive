@@ -204,10 +204,10 @@ class User{
 	// --------------------------------------------------------------------
 
 	/**
-	 * User register
+	 * User login
 	 *
 	 * @access	public
-	 * @param 	array of user data (email,pass[,oauth,login,name,rules,registered,status,group,rel])
+	 * @param 	array of user data (email,pass)
 	 * @return	string
 	 */
 	public static function login($arr){
@@ -233,6 +233,92 @@ class User{
 			self::logout(true);
 		}
 		return $q;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * User oauth
+	 *
+	 * @access	public
+	 * @param 	array of user data (oauth,oauth_type,email)
+	 * @return	string
+	 */
+	public static function oauth($arr){
+		$ret = new stdClass();
+		$ret->status = false;
+
+		$arr = (Array)$arr;
+		$oauth = $arr['oauth'];
+		$email = $arr['email'];
+		$name = $arr['name'];
+		$provider = $arr['provider'];
+		//$pass = self::encpass($arr['pass']);
+
+		$q = Query::get("users",array(
+			"data" => array("id"),
+			"where" => array(
+				"oauth_{$provider}" => $oauth,
+				//"email" => $email
+			)
+		));
+		// login
+		if($q->count > 0){
+			Session::set(array(
+				'userId' => $q->data[0]['id']
+			));
+			$ret = $q;
+			//$ret->status = true;
+			$ret->type = "login";
+		}
+
+		// is email exist to link with
+		if(!$ret->status){
+			$q = Query::get("users",array(
+				"data" => array("id"),
+				"where" => array(
+					"email" => $email
+				)
+			));
+			if($q->count > 0){
+				Query::set("users",array(
+					"data" => array(
+						"oauth_{$provider}" => $oauth
+					),
+					"where" => array(
+						"id" => $q->data[0]['id']
+					)
+				));
+				Session::set(array(
+					'userId' => $q->data[0]['id']
+				));
+				$ret = $q;
+				$ret->status = true;
+				$ret->type = "link";
+			}
+		}
+
+		// register user
+		if(!$ret->status){
+			$user = array(
+				"name" => $name,
+				"email" => $email,
+				"pass" => self::encpass(String::randomId(10)),
+				"oauth_{$provider}" => $oauth
+			);
+			$q = self::register($user);
+			$ret = $q;
+			$q->type = "register";
+		}
+
+		if(!$ret->status){
+			$q = new stdClass();
+			$q->error = "check your username and password";
+			$q->code = 3;
+			$q->status = false;
+			self::logout(true);
+		}
+		return $ret;
 	}
 
 	// --------------------------------------------------------------------
