@@ -90,6 +90,15 @@ class Router{
 
 		$_exist = isset(self::$callback[$mod])?true:false;
 		if(!$_exist){
+			global $config;
+			$path = "{$config['app']}/controller/{$mod}.php";
+			if(is_file($path)){
+				require_once $path;
+				$_exist = isset(self::$callback[$mod])?true:false;
+			}
+		}
+		
+		if(!$_exist){
 			$mod = '_otherwise';
 			$_exist = isset(self::$callback[$mod])?true:false;
 		}
