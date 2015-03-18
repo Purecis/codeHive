@@ -65,5 +65,5 @@ class View{
 		return Controller::scope($arr);
 	}}
 
-/* End of file Controller.php */
-/* Location: ./system/core/Controller.php */
+/* End of file View.php */
+/* Location: ./system/core/View.php */
