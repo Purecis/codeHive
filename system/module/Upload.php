@@ -440,6 +440,43 @@ class Upload{
 
 	}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Upload remove
+	 *
+	 * @access	public
+	 * @param	array 	Library Ids
+	 * @param	boolean is admin
+	 * @return	mixen
+	 */
+	public static function remove($ids,$force=false){
+		$cls = new stdClass();
+		if(!isset($ids)){
+			$cls->status = false;
+			$cls->error = "id not set";
+			$cls->code = 1;
+			return $cls;			
+		}
+		if(!is_array($ids))$ids = array($ids);
+		$ids = implode(",", $ids);
+
+		Module::import("Query");
+		Module::import("User");
+		$user = User::info();
+		if(!$user->status)return $user;
+
+		$where = array("id"=>":in:{$ids}");
+		if(!$force)$where['author'] = $user->data[0]['id'];
+
+		$q = Query::get("library",array("where"=>$where));
+		foreach($q->data as $row){
+			$data = json_decode($row['path']);
+			foreach($data as $img)if(is_file($img))unlink($img);
+		}
+
+		return Query::remove("library",array("where"=>$where));
+	}
 }
 
 /* End of file Upload.php */
