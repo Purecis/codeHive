@@ -325,7 +325,8 @@ class Query{
 				array_push($wh, self::parse_eq($key, $value, $table));
 			}
 			$seperate = isset($arr['whereSeperator'])?$arr['whereSeperator']:'and';
-			array_push($sql, implode($wh, " {$seperate} "));
+			$where = implode($wh, " {$seperate} ");
+			array_push($sql, $where);
 		}
 		if(isset($arr['groupby'])){
 			array_push($sql, "GROUP BY {$arr['groupby']}");
@@ -347,9 +348,13 @@ class Query{
 			}
 		}
 		if(isset($arr['limit'])){
-			array_push($sql, 'limit '.$arr['limit']);
+			$limit = 'limit '.$arr['limit'];
+			array_push($sql, $limit);
 		}else{
-			if($arr['type'] == 'select')array_push($sql, 'limit 1000');
+			if($arr['type'] == 'select'){
+				$limit = 'limit 1000';
+				array_push($sql, $limit);
+			}
 		}
 		
 		$sql = implode($sql, ' ').";";
@@ -411,12 +416,31 @@ class Query{
 				else $sql = $extra;
 			}
 		}else if($arr['type'] == 'delete'){
+			if(!isset($where))$where="";
+			if(!isset($limit))$limit="";
+			print_r($limit);
+			$idsQ = Database::query("select id from {$table} where {$where} {$limit};");
+			if($idsQ->status){
+				$ids = array();
+				foreach($idsQ->data as $row)array_push($ids, $row['id']);// todo : need optimization
+			}
+			//print_r($ids);
+			$ids = implode(",", $ids);
 			// delete more than 1
-			// $sql .= "delete from meta where `oid` = OLD.id  and `table` = 'terms';";
-			// Database::query("delete from meta where id in (ids)");
+			if(in_array($table, ['users','terms','objects','library'])){ // todo : create group definer function
+				$sql .= "DELETE FROM meta WHERE `oid` in ({$ids})  AND `table` = '{$table}';";
+			}
+			if(in_array($table, ['terms','library'])){ // todo : create group definer function
+				$sql .= "DELETE FROM relations WHERE `rid` in ({$ids})  AND `table` = '{$table}';";
+			}
+			if(in_array($table, ['object'])){
+				$sql .= "DELETE FROM relations WHERE `oid` in ({$ids});";
+			}
+			// delete from meta where `oid` = OLD.id  and `table` = 'terms'; // as trigger
 		}
 		
 		//echo $sql;
+		
 		//return array();
 		return Database::query($sql);
 	}
