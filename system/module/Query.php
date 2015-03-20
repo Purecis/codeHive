@@ -344,7 +344,11 @@ class Query{
 				array_push($sql,$col." ".$or[1]);
 			
 			}else{
-				array_push($sql, "id {$or}");
+				if(strpos($or, "(")){
+					array_push($sql, "{$or}");
+				}else{
+					array_push($sql, "id {$or}");
+				}
 			}
 		}
 		if(isset($arr['limit'])){
