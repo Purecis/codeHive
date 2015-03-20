@@ -89,9 +89,13 @@ class API{
 	 * @todo  creating scope, router, multi call in same scope
 	 */
 	private static $current = 0;
-	public static function then($text,$args,$callback = false, $method = true){
+	public static function then($text,$args = false,$callback = false, $method = true){		
 		if(!$callback){
-			$callback = $args;
+			if(!$args){
+				$callback = $text;
+			}else{
+				$callback = $args;
+			}
 			$args = array();
 		}
 
@@ -105,7 +109,7 @@ class API{
 		//echo $text;
 		$curr = "api-".self::$current;	
 
-		if($router->$curr == $text && $method){
+		if((($router->$curr == $text) || (is_object($text) && empty($router->$curr))) && $method){
 			self::$current++;
 			
 			$cb = call_user_func($callback);
@@ -115,23 +119,23 @@ class API{
 		};
 	}
 
-	public static function group($text,$args,$callback = false){
+	public static function group($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback);
 	}
 
-	public static function get($text,$args,$callback = false){
+	public static function get($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "GET");
 	}
 
-	public static function post($text,$args,$callback = false){
+	public static function post($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "POST");
 	}
 
-	public static function delete($text,$args,$callback = false){
+	public static function delete($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "DELETE");
 	}
 
-	public static function put($text,$args,$callback = false){
+	public static function put($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "PUT");
 	}
 
