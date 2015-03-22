@@ -113,6 +113,41 @@ class User{
 	// --------------------------------------------------------------------
 
 	/**
+	 * User get
+	 *
+	 * @access	public
+	 * @param 	array of user data (email,pass,name,rules,status,group,rel)
+	 * @param 	array where
+	 * @return	mixen
+	 */
+	public static function get($data=false,$where=false){
+		$cls = new stdClass();
+
+		if(!$where){
+			if(self::logged()){
+				$where = array('id'=>Session::get(array("userId")));
+			}else{
+				$cls->status = false;
+				$cls->error = "not logged";
+				return $cls;
+			}
+		}
+
+		if(!$data){
+			$data = array("id","email");
+		}
+
+		$q = Query::get("users",array(
+			"data" => $data,
+			"where" => $where
+		));
+
+		return $q;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * check if user data in database
 	 *
 	 * @access	public
@@ -194,7 +229,7 @@ class User{
 				unset($array[$k]);
 			}
 		}
-		print_r($rules);
+		//print_r($rules);
 		$rules = implode(",", $rules);
 
 		$q = Query::set("users",['data'=>['rules'=>$rules],'where'=>$where]);
@@ -207,19 +242,16 @@ class User{
 	 * User login
 	 *
 	 * @access	public
-	 * @param 	array of user data (email,pass)
+	 * @param 	array of user data (email,pass[,token])
 	 * @return	string
 	 */
 	public static function login($arr){
 		$arr = (Array)$arr;
-		$email = $arr['email'];
-		$pass = self::encpass($arr['pass']);
+		if(!isset($arr['token']))$arr['pass'] = self::encpass($arr['pass']);
+		
 		$q = Query::get("users",array(
 			"data" => array("id","rules"),
-			"where" => array(
-				"email" => $email,
-				"pass" 	=> $pass
-			)
+			"where" => $arr
 		));
 		if($q->count > 0){
 			Session::set(array(
@@ -324,13 +356,25 @@ class User{
 	// --------------------------------------------------------------------
 
 	/**
+	 * User setlog
+	 *
+	 * @access	public
+	 * @return	void
+	 */
+	public static function setlog($id){
+		Session::set(array('userId' => $id));
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * User logout
 	 *
 	 * @access	public
-	 * @return	string
+	 * @return	void
 	 */
 	public static function logout($force=false){
-		return Session::remove(array('userId'),$force);
+		Session::remove(array('userId'),$force);
 	}
 
 	// --------------------------------------------------------------------
@@ -402,18 +446,23 @@ class User{
 	 * User hasRule
 	 *
 	 * @access	public
-	 * @return	string
+	 * @return	boolean
 	 */
-	public static function hasRule($rules = array()){
+	public static function hasRule($rules = array(),$defRules=false){
 
 		if(!is_array($rules))$arr = explode(",", $rules);
 		else $arr = $rules;
 
-		$user = self::info();
-		if(!$user->status)return false;
-
+		if(isset($defRules)){
+			if(!is_array($defRules))$rules = explode(",",$defRules);
+			else $rules = $defRules;
+		}else{
+			$user = self::info();
+			if(!$user->status)return false;
+			$rules = explode(",",$user->data[0]['rules']);
+		}
 		$ret = true;
-		$rules = explode(",",$user->data[0]['rules']);
+		
 
 		foreach($arr as $rule){
 			if(!in_array($rule, $rules))$ret = false;

@@ -17,11 +17,13 @@ class Assets{
 	public static function __bootstrap(){
 		// define globals (create function to globals .. call on listener & v get)
 		global $config;
-		self::define("base",Request::base());
-		self::define("app",Request::base($config['app']));
-		self::define("view",Request::base("{$config['app']}/view"));
-		self::define("vendor",Request::base("{$config['app']}/vendor"));
-		self::define("library",Request::base("{$config['assets']}/library"));
+		self::define("path","{}");
+		self::define("path.base",Request::base());
+		self::define("path.app",Request::base($config['app']));
+		self::define("path.view",Request::base("{$config['app']}/view"));
+		self::define("path.vendor",Request::base("{$config['app']}/vendor"));
+		self::define("path.library",Request::base("{$config['assets']}/library"));
+		self::define("path.domain",Request::domain());
 		
 		Event::addListener('defaults',function(){
 

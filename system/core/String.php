@@ -240,10 +240,10 @@ class String{
 	 * @return	string
 	 */
 	public static function randomId($len = 8,$characters = false){
-		if(!$characters){
+		if(!$characters && $len < 32){
 			return substr(md5(rand().rand()), 0, $len);
 		}else{
-			if($characters === true)$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			if($characters === false)$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 			$randomString = '';
 			for($i=0; $i<$len; $i++)$randomString .= $characters[rand(0, strlen($characters) - 1)];
 			return $randomString;			

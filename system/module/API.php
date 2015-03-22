@@ -89,49 +89,63 @@ class API{
 	 * @todo  creating scope, router, multi call in same scope
 	 */
 	private static $current = 0;
-	public static function then($text,$args,$callback = false, $method = true){
+	public static function then($text,$args = false,$callback = false, $method = true){		
 		if(!$callback){
-			$callback = $args;
-			$args = array();
+			if(!$args){
+				$callback = $text;
+			}else{
+				$callback = $args;
+			}
+			if(is_array($text))$args = $text;
+			else $args = array();
+
+			if(sizeof($args) > 0)self::$current--;
 		}
 
 		$arr = array();
 		for ($i=0; $i <= self::$current; $i++) { 
 			array_push($arr, "api-{$i}");
 		}
+		foreach ($args as $key)array_push($arr, $key);
 
 		$router = Router::parse($arr);
 		
-		//echo $text;
 		$curr = "api-".self::$current;	
 
-		if($router->$curr == $text && $method){
+		if((
+				($router->$curr == $text) || 
+				(is_object($text) && empty($router->$curr)) || 
+				(is_array($text) && !empty($router->$curr))) 
+			&& $method
+		){
 			self::$current++;
+			if(sizeof($args) > 0)self::$current++;
 			
-			$cb = call_user_func($callback);
+			$cb = call_user_func_array($callback, array(&Controller::$scope,$router));
+			//$cb = call_user_func($callback);
 			if(is_array($cb) || is_object($cb))$cb = json_encode($cb);
 			echo $cb;
 			exit;
 		};
 	}
 
-	public static function group($text,$args,$callback = false){
+	public static function group($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback);
 	}
 
-	public static function get($text,$args,$callback = false){
+	public static function get($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "GET");
 	}
 
-	public static function post($text,$args,$callback = false){
+	public static function post($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "POST");
 	}
 
-	public static function delete($text,$args,$callback = false){
+	public static function delete($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "DELETE");
 	}
 
-	public static function put($text,$args,$callback = false){
+	public static function put($text,$args = false,$callback = false){
 		return self::then($text,$args,$callback,Request::method() == "PUT");
 	}
 

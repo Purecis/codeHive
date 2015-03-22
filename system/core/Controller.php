@@ -40,6 +40,23 @@ class Controller{
 	}
 
 	// --------------------------------------------------------------------
+	
+	/**
+	 * Controller Define Scope
+	 *
+	 * @access	public
+	 * @param	array 	key:value
+	 * @return	array 	scope
+	 */
+	public static function scope($arr=array()){
+		if(empty(self::$scope))self::$scope = new stdClass();
+		foreach ($arr as $key => $value){
+			self::$scope->$key = $value;
+		}
+		return self::$scope;
+	}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Controller Register

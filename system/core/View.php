@@ -55,30 +55,15 @@ class View{
 	// --------------------------------------------------------------------
 
 	/**
-	 * Controller Trigger
+	 * Define Scope
 	 *
 	 * @access	public
-	 * @param	mixen 	controller
-	 * @param	mixen 	args to pass
-	 * @return	void
+	 * @param	array 	key:value
+	 * @return	array 	scope
 	 */
-	public static function trigger($name,$arg=null){
-		global $config;
+	public static function scope($arr=array()){
+		return Controller::scope($arr);
+	}}
 
-		if(empty(self::$scope))self::$scope = new stdClass();
-
-		if(is_callable($name)){
-			call_user_func_array($name, array(&self::$scope,$arg));
-		}else{
-			if(isset(self::$controllers[$name])){
-				call_user_func_array(self::$controllers[$name], array(&self::$scope,$arg));
-			}else{
-				if($config['ENVIRONMENT'] == 'debug')debug::error("Missing Controller",$name);
-				else die("Controller <b>{$name}</b> not Found.");
-			}
-		}
-	}
-}
-
-/* End of file Controller.php */
-/* Location: ./system/core/Controller.php */
+/* End of file View.php */
+/* Location: ./system/core/View.php */
