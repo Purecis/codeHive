@@ -229,7 +229,7 @@ class User{
 				unset($array[$k]);
 			}
 		}
-		print_r($rules);
+		//print_r($rules);
 		$rules = implode(",", $rules);
 
 		$q = Query::set("users",['data'=>['rules'=>$rules],'where'=>$where]);
@@ -356,13 +356,25 @@ class User{
 	// --------------------------------------------------------------------
 
 	/**
+	 * User setlog
+	 *
+	 * @access	public
+	 * @return	void
+	 */
+	public static function setlog($id){
+		Session::set(array('userId' => $id));
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * User logout
 	 *
 	 * @access	public
-	 * @return	string
+	 * @return	void
 	 */
 	public static function logout($force=false){
-		return Session::remove(array('userId'),$force);
+		Session::remove(array('userId'),$force);
 	}
 
 	// --------------------------------------------------------------------
@@ -434,18 +446,23 @@ class User{
 	 * User hasRule
 	 *
 	 * @access	public
-	 * @return	string
+	 * @return	boolean
 	 */
-	public static function hasRule($rules = array()){
+	public static function hasRule($rules = array(),$defRules=false){
 
 		if(!is_array($rules))$arr = explode(",", $rules);
 		else $arr = $rules;
 
-		$user = self::info();
-		if(!$user->status)return false;
-
+		if(isset($defRules)){
+			if(!is_array($defRules))$rules = explode(",",$defRules);
+			else $rules = $defRules;
+		}else{
+			$user = self::info();
+			if(!$user->status)return false;
+			$rules = explode(",",$user->data[0]['rules']);
+		}
 		$ret = true;
-		$rules = explode(",",$user->data[0]['rules']);
+		
 
 		foreach($arr as $rule){
 			if(!in_array($rule, $rules))$ret = false;
