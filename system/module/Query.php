@@ -98,6 +98,16 @@ class Query{
 	}
 
 	// --------------------------------------------------------------------
+	
+	public static function inStructure($col,$table){
+		global $config;
+		if(isset($config['database']['essential'])){
+			if($config['database']['essential'] == true)return true;
+		}
+		$st = self::__structure($table);
+		return array_key_exists($col, $st);
+	}
+	// --------------------------------------------------------------------
 
 	/**
 	 * Query execute
@@ -120,7 +130,6 @@ class Query{
 		//type, table, data, where, whereSeperator, order, limit
 		if(!isset($arr['type']))$arr['type'] = 'select';
 		
-		$st = self::__structure($arr['table']);
 		$table = $arr['table'];
 
 		if($arr['type'] == 'select'){
@@ -131,7 +140,7 @@ class Query{
 				foreach($arr['data'] as $k => $v){
 					//key
 					/*
-					if(!array_key_exists($k, $st)){
+					if(!self::inStructure($k, $table)){
 						if(!strpos($k, ".")){
 							$arr['join']["meta as {$k}"] = "{$k}.oid = {$table}.id and {$k}.key='{$k}' and {$k}.table = '{$table}'";
 							unset($arr['data'][$k]);
@@ -143,7 +152,7 @@ class Query{
 					}*/
 					//value on select only
 					if($arr['type'] == 'select'){
-						if(!array_key_exists($v, $st)){
+						if(!self::inStructure($v, $table)){
 							$v = trim($v);
 							//echo "{$v} not exist<hr>";
 							$arr['join']["meta as `{$v}`"] = "`{$v}`.`oid` = `{$table}`.`id` and `{$v}`.`key`='{$v}' and `{$v}`.`table` = '{$table}'";
@@ -177,9 +186,8 @@ class Query{
 			//	array_push($arr['data'], 'librarytable.name as libName');
 			//	array_push($arr['data'], 'librarytable.path as libPath');
 
-				$library_st = self::__structure("library");
 				foreach($arr['library'] as $library){
-					if(!array_key_exists($library, $library_st)){
+					if(!self::inStructure($library, "library")){
 					//	array_push($arr['data'], "thisusermeta.value as author_{$author}");
 					//	$arr['join']["meta as `thisusermeta`"] = "`thisusermeta`.`oid` = `{$table}`.`author` and `thisusermeta`.`key`='{$author}' and `thisusermeta`.`table` = 'users'";
 					}else{
@@ -192,9 +200,8 @@ class Query{
 				if(!isset($arr['join']))$arr['join'] = array();
 				$arr['join']["users as thisuser"] = "{$table}.author = thisuser.id";
 
-				$users_st = self::__structure("users");
 				foreach($arr['author'] as $author){
-					if(!array_key_exists($author, $users_st)){
+					if(!self::inStructure($library, "users")){
 						array_push($arr['data'], "thisusermeta.value as author_{$author}");
 						$arr['join']["meta as `thisusermeta`"] = "`thisusermeta`.`oid` = `{$table}`.`author` and `thisusermeta`.`key`='{$author}' and `thisusermeta`.`table` = 'users'";
 					}else{
@@ -214,7 +221,7 @@ class Query{
 
 					$v = str_replace("~", "", $v);
 					if(!strpos($v, ".")){
-						if(!array_key_exists($v, $st)){
+						if(!self::inStructure($v, $table)){
 							$arr['join']["meta as `{$k}`"] = "`{$k}`.`oid` = `{$table}`.`id` and `{$k}`.`key`='{$k}' and `{$k}`.`table` = '{$table}'";
 							$v = "`{$k}`.`{$v}`";
 						}else{
@@ -227,7 +234,7 @@ class Query{
 				}
 				
 				//fix key
-				if(!array_key_exists($k, $st)){
+				if(!self::inStructure($k, $table)){
 					$k = trim($k);
 					if(!strpos($k, ".")){
 						$arr['join']["meta as `{$k}`"] = "`{$k}`.`oid` = `{$table}`.`id` and `{$k}`.`key`='{$k}' and `{$k}`.`table` = '{$table}'";
@@ -257,7 +264,7 @@ class Query{
 				$keys = array();
 				$values = array();
 				foreach($arr['data'] as $k => $v){
-					if(array_key_exists($k, $st)){
+					if(self::inStructure($k, $table)){
 						array_push($keys,"`$k`");
 						$v = string::escape($v);
 						array_push($values,"'{$v}'");
@@ -289,7 +296,7 @@ class Query{
 				array_push($sql, "set");
 				$values = array();
 				foreach($arr['data'] as $k => $v){
-					if(array_key_exists($k, $st)){
+					if(self::inStructure($k, $table)){
 						$v = string::escape($v);
 						array_push($values, self::parse_eq("{$table}.{$k}",$v,$table));
 						//array_push($values,"`{$table}`.`{$k}` = '{$v}'");
@@ -367,7 +374,7 @@ class Query{
 		if($arr['type'] == "insert"){
 			$values = array();
 			foreach($arr['data'] as $k => $v){
-				if(!array_key_exists($k, $st) && !empty($v)){
+				if(!self::inStructure($k, $table) && !empty($v)){
 					$v = string::escape($v);
 					array_push($values,"(LAST_INSERT_ID(), '{$k}', '{$v}','{$arr['table']}')");
 				}
@@ -385,7 +392,7 @@ class Query{
 			$meta_size = 0;
 			$schema_size = 0;
 			foreach($data_keys as $ks){
-				if(!array_key_exists($ks, $st)){
+				if(!self::inStructure($ks, $table)){
 					$meta_size ++;
 				}else{
 					$schema_size ++;
@@ -407,7 +414,7 @@ class Query{
 			if(isset($sid)){
 				$values = array();
 				foreach($arr['data'] as $k => $v){
-					if(!array_key_exists($k, $st)){
+					if(!self::inStructure($k, $table)){
 						$v = string::escape($v);
 						foreach($sid as $sid_k)array_push($values,"({$sid_k}, '{$k}', '{$v}','{$arr['table']}')");
 					}
@@ -451,12 +458,11 @@ class Query{
 
 	private static function parse_eq($key,$value,$table){
 		$key = str_replace(".", "`.`", $key);
-		$st = self::__structure($table);
 
 		if(!is_array($value) && strpos($value, "~") === 0){
 			$value = str_replace("~", "", $value);
 			if(!strpos($value, ".")){
-				if(!array_key_exists($value, $st)){
+				if(!self::inStructure($value, $table)){
 					$arr['join']["meta as `{$key}`"] = "`{$key}`.`oid` = `{$table}`.`id` and `{$key}`.`key`='{$key}' and `{$key}`.`table` = '{$table}'";
 					$value = "`{$key}`.`{$value}`";
 				}else{
@@ -470,7 +476,7 @@ class Query{
 		}else{
 			$normal_v = true;
 			if(is_array($value)){
-				if(!array_key_exists($key, $st))$key = $key."`.`value";
+				if(!self::inStructure($key, $table))$key = $key."`.`value";
 				else $key = "{$table}`.`{$key}";
 				$value = ":in:".implode(", ", $value);
 			}
