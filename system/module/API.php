@@ -96,23 +96,33 @@ class API{
 			}else{
 				$callback = $args;
 			}
-			$args = array();
+			if(is_array($text))$args = $text;
+			else $args = array();
+
+			if(sizeof($args) > 0)self::$current--;
 		}
 
 		$arr = array();
 		for ($i=0; $i <= self::$current; $i++) { 
 			array_push($arr, "api-{$i}");
 		}
+		foreach ($args as $key)array_push($arr, $key);
 
 		$router = Router::parse($arr);
 		
-		//echo $text;
 		$curr = "api-".self::$current;	
 
-		if((($router->$curr == $text) || (is_object($text) && empty($router->$curr))) && $method){
+		if((
+				($router->$curr == $text) || 
+				(is_object($text) && empty($router->$curr)) || 
+				(is_array($text) && !empty($router->$curr))) 
+			&& $method
+		){
 			self::$current++;
+			if(sizeof($args) > 0)self::$current++;
 			
-			$cb = call_user_func($callback);
+			$cb = call_user_func_array($callback, array(&Controller::$scope,$router));
+			//$cb = call_user_func($callback);
 			if(is_array($cb) || is_object($cb))$cb = json_encode($cb);
 			echo $cb;
 			exit;
