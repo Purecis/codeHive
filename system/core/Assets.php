@@ -23,6 +23,7 @@ class Assets{
 		self::define("path.view",Request::base("{$config['app']}/view"));
 		self::define("path.vendor",Request::base("{$config['app']}/vendor"));
 		self::define("path.library",Request::base("{$config['assets']}/library"));
+		self::define("path.domain",Request::domain());
 		
 		Event::addListener('defaults',function(){
 
