@@ -160,7 +160,7 @@ class Query{
 							//unset($arr['data'][$k]);
 							// fix where here ::value::
 						}else{
-							$arr['data'][$k] = "`{$table}`.`{$arr['data'][$k]}`";
+							if(!strpos($v, "."))$arr['data'][$k] = "`{$table}`.`{$arr['data'][$k]}`";
 						}
 					}
 				}
