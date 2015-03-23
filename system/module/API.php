@@ -112,10 +112,12 @@ class API{
 		
 		$curr = "api-".self::$current;	
 
+		$route = isset($router->$curr)?$router->$curr:'';
+
 		if((
-				($router->$curr == $text) || 
-				(is_object($text) && empty($router->$curr)) || 
-				(is_array($text) && !empty($router->$curr))) 
+				($route == $text) || 
+				(is_object($text) && empty($route)) || 
+				(is_array($text) && !empty($route))) 
 			&& $method
 		){
 			self::$current++;
