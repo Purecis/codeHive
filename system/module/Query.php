@@ -343,11 +343,15 @@ class Query{
 			$or = $arr['order'];
 			if(is_object($or)){
 				$a = (array)$or;
-				$col = "CAST(".key($or)." AS SIGNED)";
+				if(!isset($config['database']['essential'])){
+					$col = "CAST(".key($or)." AS SIGNED)";
+				}
 				array_push($sql,$col." ".$a[key($or)]);
 
 			}else if(is_array($or)){
-				$col = "CAST(".$or[0]." AS SIGNED)";
+				if(!isset($config['database']['essential'])){
+					$col = "CAST(".$or[0]." AS SIGNED)";
+				}
 				array_push($sql,$col." ".$or[1]);
 			
 			}else{
