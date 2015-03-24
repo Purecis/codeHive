@@ -201,7 +201,7 @@ class Query{
 				$arr['join']["users as thisuser"] = "{$table}.author = thisuser.id";
 
 				foreach($arr['author'] as $author){
-					if(!self::inStructure($library, "users")){
+					if(!self::inStructure($author, "users")){
 						array_push($arr['data'], "thisusermeta.value as author_{$author}");
 						$arr['join']["meta as `thisusermeta`"] = "`thisusermeta`.`oid` = `{$table}`.`author` and `thisusermeta`.`key`='{$author}' and `thisusermeta`.`table` = 'users'";
 					}else{
