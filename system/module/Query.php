@@ -500,6 +500,11 @@ class Query{
 			if($normal_v)$value = "'{$value}'";
 			return "`{$key}` != {$value}";
 
+		}else if(strpos($value, ":inset:") !== false){
+			$value = stripslashes($value);
+			$value = str_replace(":inset:", "", $value);
+			return "FIND_IN_SET ({$value},{$key})";
+
 		}else if(strpos($value, ":in:") !== false){
 			$value = stripslashes($value);
 			$value = str_replace(":in:", "", $value);
