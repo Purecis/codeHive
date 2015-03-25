@@ -77,8 +77,16 @@ class API{
 	 *
 	 * @return	array
 	 */
-	public static function router($arr){
-		array_unshift($arr, "api");
+	public static function router($args,$minus=false){
+		if(!$minus){
+			self::$current--;
+		}
+		$arr = array();
+		for ($i=1; $i <= self::$current; $i++) { 
+			array_push($arr, "api-{$i}");
+		}
+		foreach ($args as $key)array_push($arr, $key);
+
 		return Router::parse($arr);
 	}
 
@@ -88,47 +96,43 @@ class API{
 	 * @return	array
 	 * @todo  creating scope, router, multi call in same scope
 	 */
-	private static $current = 0;
-	public static function then($text,$args = false,$callback = false, $method = true){		
-		if(!$callback){
-			if(!$args){
-				$callback = $text;
+	private static $current = 1;
+	public static function then($a,$b = false,$c = false, $method = true){
+		if(is_object($c)){
+			$callback = $c;
+			$args = $b;
+			$text = $a;
+		}
+		if(is_object($b)){
+			$callback = $b;
+			if(is_array($a)){
+				$args = $a;
+				$text = false;
 			}else{
-				$callback = $args;
+				// todo : split string and check for :id arguments
+				$args = array();
+				$text = $a;
 			}
-			if(is_array($text))$args = $text;
-			else $args = array();
-
-			if(sizeof($args) > 0)self::$current--;
 		}
-
-		$arr = array();
-		for ($i=0; $i <= self::$current; $i++) { 
-			array_push($arr, "api-{$i}");
+		if(is_object($a)){
+			$callback = $a;
+			$args = array();
+			$text = false;
 		}
-		foreach ($args as $key)array_push($arr, $key);
+		if($text == false)self::$current--;
 
-		$router = Router::parse($arr);
-		
-		$curr = "api-".self::$current;	
+		$router = self::router($args,true);
+		$me = "api-".(self::$current);
 
-		$route = isset($router->$curr)?$router->$curr:'';
-
-		if((
-				($route == $text) || 
-				(is_object($text) && empty($route)) || 
-				(is_array($text) && !empty($route))) 
-			&& $method
+		if(
+			(($router->$me == $text) || ($text === false)) && $method
 		){
 			self::$current++;
-			if(sizeof($args) > 0)self::$current++;
-			
 			$cb = call_user_func_array($callback, array(&Controller::$scope,$router));
-			//$cb = call_user_func($callback);
 			if(is_array($cb) || is_object($cb))$cb = json_encode($cb);
 			echo $cb;
 			exit;
-		};
+		}
 	}
 
 	public static function group($text,$args = false,$callback = false){
