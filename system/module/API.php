@@ -132,6 +132,8 @@ class API{
 			if(is_array($cb) || is_object($cb))$cb = json_encode($cb);
 			echo $cb;
 			exit;
+		}else{
+			if($text != false)self::$current++;
 		}
 	}
 
