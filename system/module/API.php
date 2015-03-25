@@ -78,9 +78,9 @@ class API{
 	 * @return	array
 	 */
 	public static function router($args,$minus=false){
-		if(!$minus){
-			self::$current--;
-		}
+		if(!is_array($args))$args = array($args);
+		if(!$minus)self::$current--;
+		
 		$arr = array();
 		for ($i=1; $i <= self::$current; $i++) { 
 			array_push($arr, "api-{$i}");
@@ -133,7 +133,7 @@ class API{
 			echo $cb;
 			exit;
 		}else{
-			if($text != false)self::$current++;
+			if($text == false)self::$current++;
 		}
 	}
 
