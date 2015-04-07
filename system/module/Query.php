@@ -160,7 +160,10 @@ class Query{
 							//unset($arr['data'][$k]);
 							// fix where here ::value::
 						}else{
-							if(!strpos($v, "."))$arr['data'][$k] = "`{$table}`.`{$arr['data'][$k]}`";
+							if(!strpos($v, ".")){
+								if(strpos($arr['data'][$k], "~") === false)$arr['data'][$k] = "`{$table}`.`{$arr['data'][$k]}`";
+							}
+							$arr['data'][$k] = str_replace("~", "", $arr['data'][$k]);
 						}
 					}
 				}
@@ -467,6 +470,13 @@ class Query{
 	private static function parse_eq($key,$value,$table){
 		$key = str_replace(".", "`.`", $key);
 
+		if(strpos($key, "(") !== false){
+			$key = str_replace($table, "", $key);
+			$key = str_replace("`.`", "", $key);
+			$key = str_replace("~", "", $key);
+			//echo $key;
+		}
+
 		if(!is_array($value) && strpos($value, "~") === 0){
 			$value = str_replace("~", "", $value);
 			if(!strpos($value, ".")){
@@ -541,7 +551,8 @@ class Query{
 
 		}else{
 			if($normal_v)$value = "'{$value}'";
-			return "`{$key}` = {$value}";
+			if(strpos($key, "(") !== false)return "{$key} = {$value}";
+			else return "`{$key}` = {$value}";
 
 		}
 		// in set and things
