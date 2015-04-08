@@ -18,6 +18,7 @@ class User{
 	 * @access protected
 	 */
 	protected static $current;
+	public static $sessId = "userId";
 
 	// --------------------------------------------------------------------
 
@@ -66,7 +67,7 @@ class User{
 		$q = Query::set("users",['data'=>$arr]);
 		if($q->status == true){
 			Session::set(array(
-				'userId' => $q->last
+				static::$sessId => $q->last
 			));
 		}
 		return $q;
@@ -87,7 +88,7 @@ class User{
 
 		if(!$where){
 			if(self::logged()){
-				$where = array('id'=>Session::get(array("userId")));
+				$where = array('id'=>Session::get(array(static::$sessId)));
 			}else{
 				$cls->status = false;
 				$cls->error = "not logged";
@@ -125,7 +126,7 @@ class User{
 
 		if(!$where){
 			if(self::logged()){
-				$where = array('id'=>Session::get(array("userId")));
+				$where = array('id'=>Session::get(array(static::$sessId)));
 			}else{
 				$cls->status = false;
 				$cls->error = "not logged";
@@ -202,7 +203,7 @@ class User{
 				$where = $arr['where'];
 			}else{
 				if(self::logged()){
-					$where = array('id'=>Session::get(array("userId")));
+					$where = array('id'=>Session::get(array(static::$sessId)));
 				}else{
 					$cls->status = false;
 					$cls->error = "not logged";
@@ -255,7 +256,7 @@ class User{
 		));
 		if($q->count > 0){
 			Session::set(array(
-				'userId' => $q->data[0]['id']
+				static::$sessId => $q->data[0]['id']
 			));
 		}else{
 			$q = new stdClass();
@@ -297,7 +298,7 @@ class User{
 		// login
 		if($q->count > 0){
 			Session::set(array(
-				'userId' => $q->data[0]['id']
+				static::$sessId => $q->data[0]['id']
 			));
 			$ret = $q;
 			//$ret->status = true;
@@ -322,7 +323,7 @@ class User{
 					)
 				));
 				Session::set(array(
-					'userId' => $q->data[0]['id']
+					static::$sessId => $q->data[0]['id']
 				));
 				$ret = $q;
 				$ret->status = true;
@@ -362,7 +363,7 @@ class User{
 	 * @return	void
 	 */
 	public static function setlog($id){
-		Session::set(array('userId' => $id));
+		Session::set(array(static::$sessId => $id));
 	}
 
 	// --------------------------------------------------------------------
@@ -374,7 +375,7 @@ class User{
 	 * @return	void
 	 */
 	public static function logout($force=false){
-		Session::remove(array('userId'),$force);
+		Session::remove(array(static::$sessId),$force);
 	}
 
 	// --------------------------------------------------------------------
@@ -386,7 +387,7 @@ class User{
 	 * @return	string
 	 */
 	public static function logged(){
-		return Session::exist(array('userId'));
+		return Session::exist(array(static::$sessId));
 	}
 
 	/**
@@ -396,8 +397,8 @@ class User{
 	 * @return	string
 	 */
 	public static function Id(){
-		if(Session::exist(array('userId'))){
-			return Session::get(array("userId"));
+		if(Session::exist(array(static::$sessId))){
+			return Session::get(array(static::$sessId));
 		}else{
 			return 0;
 		}
@@ -423,7 +424,7 @@ class User{
 					$id = $more;
 					$more = $more2;
 				}
-				if(empty($id))$id = Session::get(array("userId"));
+				if(empty($id))$id = Session::get(array(static::$sessId));
 
 				$data = array("id","name","email","rules","status");
 				$data = array_merge($data,$more);
