@@ -135,6 +135,36 @@ class Directives{
 			}
 		));
 
+		/**
+		* directive Internationalization
+		* Description : trigger event
+		* Usage : __(You have :count messages and :days days :> {count:1,days:2} @ module.name)
+		*/
+		Shortcode::register(array(
+			'code' 		=> 'internationalization',
+			'pattern' 	=> '#\__\((.+)\)#Usi',
+			'callback' 	=> function($match){
+				$ar = array();
+				$at = false;
+
+				$ex = explode(":>", $match[1]);
+
+				if(isset($ex[1])){
+					$ex2 = explode("@", $ex[1]);
+					//
+					$a = explode(",", rtrim(ltrim(trim($ex2[0]),"{"),"}"));
+					foreach($a as $v){
+						$vv = explode(":", $v);
+						$ar[$vv[0]] = $vv[1];
+					}
+					//
+					if(isset($ex2[1]))$at = $ex2[1];
+				}
+				
+				return Internationalization::translate(trim($ex[0]),$ar,$at);
+			}
+		));
+
 /*
 		Shortcode::register(array(
 			'code' 		=> 'input',
