@@ -36,6 +36,17 @@ spl_autoload_register(function($class) {
 });
 
 /**
+ * Locale Alias __
+ *
+ * @access	public
+ * @param	mixen 	str or array keys only
+ * @return	mixen
+ */
+function __($e,$a=array(),$space=false){
+	return Internationalization::translate($e,$a,$space);
+}
+
+/**
  * Class Start
  */
 class codeHive{//composer, artisan, Hive , Arti, Zorba, codeHive, iBuilder
