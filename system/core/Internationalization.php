@@ -48,13 +48,12 @@ class Internationalization{
 
 		}
 
-		/*
+		// we use this bcz preg_replace Modifier /e deprecated 
 		$arr = array();
 		foreach($args as $k => $v)$arr[":{$k}"] = $v;
 		$msg = strtr($msg,$arr);
-		*/
-
-	 	$msg = preg_replace('/:(\w+)/e', 'isset($args["$1"])?$args["$1"]:0', $msg);
+		
+	 	//$msg = preg_replace('/:(\w+)/e', 'isset($args["$1"])?$args["$1"]:0', $msg);
 
 		
 		return $msg;
