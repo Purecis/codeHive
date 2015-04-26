@@ -72,9 +72,11 @@ class Debug{
 			$space = str_repeat("\t", $space);
 			echo "console.log('%c{$type}{$space}: %c{$msg}', 'color:#900', 'color:#111');";
 		}
-
+		$REQUEST_URI = $_SERVER['REQUEST_URI'];
+		echo "console.log('%cRequest \t\t\t: %c{$REQUEST_URI}', 'color: #999', 'color:#099');";
 		echo "console.log('%cCore Version \t\t: %c{$version}', 'color: #999', 'color:#ddd');";
 		echo "console.log('%cCopyright \t\t\t: %cPowered By Pure Core International Solutions (Purecis)', 'color: #999', 'color:#ddd');";
+		echo "console.log('%c-- -- -- -- -- -- -- -- -- -- -- -- -- -- --', 'color: #999');";
 
 		echo "</script>";
 
