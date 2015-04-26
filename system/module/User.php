@@ -454,7 +454,7 @@ class User{
 		if(!is_array($rules))$arr = explode(",", $rules);
 		else $arr = $rules;
 
-		if(isset($defRules)){
+		if($defRules != false){
 			if(!is_array($defRules))$rules = explode(",",$defRules);
 			else $rules = $defRules;
 		}else{
@@ -464,7 +464,6 @@ class User{
 		}
 		$ret = true;
 		
-
 		foreach($arr as $rule){
 			if(!in_array($rule, $rules))$ret = false;
 		}
