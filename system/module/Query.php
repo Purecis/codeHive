@@ -440,11 +440,13 @@ class Query{
 		}else if($arr['type'] == 'delete'){
 			if(!isset($where))$where="";
 			if(!isset($limit))$limit="";
-			print_r($limit);
-			$idsQ = Database::query("select id from {$table} where {$where} {$limit};");
+			//print_r($limit);
+			$idsQ = Database::query("select id from {$table} where {$where} {$limit};");// this to get ids for meta
 			if($idsQ->status){
 				$ids = array();
 				foreach($idsQ->data as $row)array_push($ids, $row['id']);// todo : need optimization
+			}else{
+				$ids = array();
 			}
 			//print_r($ids);
 			$ids = implode(",", $ids);
