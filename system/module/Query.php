@@ -507,6 +507,11 @@ class Query{
 			if($normal_v)$value = "'{$value}'";
 			return "`{$key}` like {$value}";
 
+		}else if(strpos($value, ":is:") !== false){
+			$value = str_replace(":is:", "", $value);
+			if($normal_v)$value = "'{$value}'";
+			return "`{$key}` is {$value}";
+
 		}else if(strpos($value, ":not:") !== false){
 			$value = str_replace(":not:", "", $value);
 			if($normal_v)$value = "'{$value}'";
