@@ -120,6 +120,36 @@ class Assets{
 	}
 
 	/**
+	 * element load
+	 *
+	 * @return	void
+	 */
+	public static function element($src,$folder="vendor",$listener='element'){
+		global $config;
+
+		$external = explode("://", $src);// chk external
+		if(sizeof($external) <= 1){
+
+			$ex = explode("@",$src);
+			$path = (sizeof($ex) > 1)?Module::path($ex[1]):false;
+			if(!$path)$path = "{$config['app']}";
+			else $src = $ex[0];
+
+			$path = Request::base($path);
+
+			if(!strpos($src, "."))$src="{$src}/{$src}.html";
+
+			$src = "{$path}/{$folder}/{$src}";
+		}
+
+		$extra = File::extension($src)=='less'?'/less':"";
+
+		Event::addListener($listener,function() use ($src, $extra){
+			return "\n\t<link rel='import' href='{$src}' />";
+		});
+	}
+
+	/**
 	 * style load
 	 *
 	 * @return	void
