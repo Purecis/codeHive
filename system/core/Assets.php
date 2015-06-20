@@ -70,7 +70,7 @@ class Assets{
 	 *
 	 * @return	void
 	 */
-	public static function script($src,$listener='script'){
+	public static function script($src,$folder="vendor",$listener='script'){
 		global $config;
 
 
@@ -83,7 +83,7 @@ class Assets{
 			else $src = $ex[0];
 
 			$path = Request::base($path);
-			$src = "{$path}/vendor/{$src}";
+			$src = "{$path}/{$folder}/{$src}";
 		}
 
 		Event::addListener($listener,function() use ($src){
@@ -96,7 +96,7 @@ class Assets{
 	 *
 	 * @return	void
 	 */
-	public static function style($src,$listener='style'){
+	public static function style($src,$folder="vendor",$listener='style'){
 		global $config;
 
 		$external = explode("://", $src);// chk external
@@ -109,7 +109,7 @@ class Assets{
 
 			$path = Request::base($path);
 
-			$src = "{$path}/vendor/{$src}";
+			$src = "{$path}/{$folder}/{$src}";
 		}
 
 		$extra = File::extension($src)=='less'?'/less':"";
