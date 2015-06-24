@@ -65,6 +65,8 @@ class Assets{
 		return self::$codev;
 	}
 
+	// TODO : load folder ( scripts )
+	
 	/**
 	 * load script
 	 *
