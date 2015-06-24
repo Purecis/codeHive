@@ -122,6 +122,8 @@ class Module{
 			$file = $mod;
 		}
 
+		// TODO : the module, plugins, etc folders called SPACE, PACKAGE in doc's
+		
 		$path = "{$config['app']}/module/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['app']}/hook/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['app']}/plugin/{$mod}/{$file}.php";
