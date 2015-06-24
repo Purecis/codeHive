@@ -20,6 +20,7 @@ class API{
 	 * @access protected
 	 */
 	private static $apis;
+	public static $route = "api";
 
 	// --------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ class API{
 	public static function __bootstrap(){
 		Module::import('Router');
 		// todo .. create function to change the api main url
-		Router::on("api",array('fire','do','token'),function(&$scope,$router){
+		Router::on(static::$route,array('fire','do','token'),function(&$scope,$router){
 			global $config;
 			if($config['ENVIRONMENT'] == "debug")$config['ENVIRONMENT'] = "development";
 
