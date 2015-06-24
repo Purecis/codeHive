@@ -123,6 +123,9 @@ class Module{
 		}
 
 		$path = "{$config['app']}/module/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/hook/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/plugin/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/extension/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['assets']}/extensions/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['system']}/module/{$mod}.php";
 
