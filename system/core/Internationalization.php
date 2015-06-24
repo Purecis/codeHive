@@ -148,6 +148,7 @@ class Internationalization{
 			$path = Module::path($space)."/{$locale}";
 		}else{
 			$path = "{$config['app']}/language/{$locale}";
+			if(!file_exists($path))$path = "{$config['app']}/locale/{$locale}";
 			if(!file_exists($path))$path = "{$config['system']}/language/{$locale}";
 		}
 		if(!is_dir($path)){
