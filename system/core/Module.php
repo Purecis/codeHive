@@ -130,7 +130,8 @@ class Module{
 		if(!is_file($path))$path = "{$config['app']}/extension/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['app']}/component/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['app']}/element/{$mod}/{$file}.php";
-		if(!is_file($path))$path = "{$config['app']}/extension/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/service/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/helper/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['assets']}/extensions/{$mod}/{$file}.php";
 		if(!is_file($path))$path = "{$config['system']}/module/{$mod}.php";
 
