@@ -49,7 +49,10 @@ class API{
 				$path = "{$mod}/controller/api.{$name}.php";
 				if(!is_file($path))$path = "{$mod}/controller/{$name}.php";
 				if(!is_file($path))$path = "{$mod}/controller/api.php";
-				if(is_file($path))require_once $path;
+				if(is_file($path)){
+					self::$current++;
+					require_once $path;
+				}
 			}
 
 			if(isset(self::$apis[$name])){
