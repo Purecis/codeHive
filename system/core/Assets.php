@@ -44,7 +44,7 @@ class Assets{
 		if($b != "{}" && $b != "[]"){
 			$b = "'{$b}'";
 		}else{
-			$b = "{$b} || codeHive.{$a}";
+			$b = "codeHive.{$a} || {$b}";
 		}
 
 		if(!$c){
