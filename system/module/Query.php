@@ -329,14 +329,16 @@ class Query{
 			array_push($sql, implode($j, " "));
 		}
 		if(isset($arr['where'])){
-			$wh = array();
-			array_push($sql, 'where');
-			foreach ($arr['where'] as $key => $value) {
-				array_push($wh, self::parse_eq($key, $value, $table));
+			if(sizeof($arr['where']) > 0){
+				$wh = array();
+				array_push($sql, 'where');
+				foreach ($arr['where'] as $key => $value) {
+					array_push($wh, self::parse_eq($key, $value, $table));
+				}
+				$seperate = isset($arr['whereSeperator'])?$arr['whereSeperator']:'and';
+				$where = implode($wh, " {$seperate} ");
+				array_push($sql, $where);
 			}
-			$seperate = isset($arr['whereSeperator'])?$arr['whereSeperator']:'and';
-			$where = implode($wh, " {$seperate} ");
-			array_push($sql, $where);
 		}
 		if(isset($arr['groupby'])){
 			array_push($sql, "GROUP BY {$arr['groupby']}");
