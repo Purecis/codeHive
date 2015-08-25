@@ -72,6 +72,7 @@ class Directives{
 				if(sizeof($ex) > 1){
 					foreach($ex as $k => $v){
 						if($k == 0)continue;
+						$val = (array)$val;
 						$val = isset($val[$v])?$val[$v]:null;
 						if($val == null)break;
 					}
