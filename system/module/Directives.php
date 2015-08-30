@@ -42,6 +42,59 @@ class Directives{
 		* Description : Looping array
 		*/
 		Shortcode::register(array(
+			'code' 		=> 'if',
+			'pattern' 	=> '%\<IF (\b[^<\>]*+)\>((?:(?:(?!\</?IF\b).)++| (?R))*+)(\</IF\s*+\>)%six',
+			'callback' 	=> function($match){
+
+				$parse = function($v){
+					if(strpos(trim($v),'"') === 0){
+						$v = rtrim($v,'"');
+						$v = ltrim($v,'"');
+						return $v;
+					}else if(strpos(trim($v),"'") === 0){
+						$v = rtrim($v,"'");
+						$v = ltrim($v,"'");
+						return $v;
+					}else if(is_numeric(trim($v))){
+						return $v;
+					}else if(trim($v) == "true"){
+						return true;
+					}else if(trim($v) == "false"){
+						return false;
+					}else{
+						return Directives::scope($v);
+					}
+				};
+				$ok = true;
+
+				if(strpos($match[1], "=") !== false){
+					$ex = explode("=",trim($match[1]));
+					if($parse($ex[0]) == $parse($ex[1]))return Shortcode::trigger($match[2]);
+
+				}else if(strpos($match[1], "!=") !== false){
+					$ex = explode("!=",trim($match[1]));
+					if($parse($ex[0]) != $parse($ex[1]))return Shortcode::trigger($match[2]);
+
+				}
+
+				return ;
+				/*
+				$str = "";
+				$ex = explode(' in ',trim($match[1]));
+				foreach(Controller::$scope->$ex[1] as $file){
+					Controller::$scope->$ex[0] = $file;
+					$str .= Shortcode::trigger($match[2]);
+				}
+				return $str;
+				*/
+			}
+		));
+
+		/**
+		* directive Each
+		* Description : Looping array
+		*/
+		Shortcode::register(array(
 			'code' 		=> 'each',
 			'pattern' 	=> '%\<EACH (\b[^<\>]*+)\>((?:(?:(?!\</?EACH\b).)++| (?R))*+)(\</EACH\s*+\>)%six',
 			'callback' 	=> function($match){
@@ -66,17 +119,8 @@ class Directives{
 				$filter = explode("|", $match[1]);//check ex for plugins like lower
 				$match[1] = $filter[0];
 
-				$val = Controller::$scope;
-				$ex = explode(".", $match[1]);
-				$val = isset($val->$ex[0])?$val->$ex[0]:null;
-				if(sizeof($ex) > 1){
-					foreach($ex as $k => $v){
-						if($k == 0)continue;
-						$val = (array)$val;
-						$val = isset($val[$v])?$val[$v]:null;
-						if($val == null)break;
-					}
-				}
+				$val = Directives::scope($match[1]);
+
 				if(isset($filter[1])){
 					$f = trim($filter[1]);
 					if($f == 'upper'){
@@ -184,6 +228,21 @@ class Directives{
 		));
 */
 
+	}
+
+	private static function scope($v){
+		$val = Controller::$scope;
+		$ex = explode(".", $v);
+		$val = isset($val->$ex[0])?$val->$ex[0]:null;
+		if(sizeof($ex) > 1){
+			foreach($ex as $k => $v){
+				if($k == 0)continue;
+				$val = (array)$val;
+				$val = isset($val[$v])?$val[$v]:null;
+				if($val == null)break;
+			}
+		}
+		return $val;
 	}
 }
 
