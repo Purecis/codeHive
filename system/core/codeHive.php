@@ -62,15 +62,16 @@ class codeHive{//composer, artisan, Hive , Arti, Zorba, codeHive, iBuilder
 		define(VersionMinor,"0");
 		define(VersionPatch,"00");
 		define(VersionCode,"Alpha");
-		define(VersionBuild,"2095");
+		define(VersionBuild,"2096");
 		
 		define(VERSION,"v.".VersionMajor.".".VersionMinor.".".VersionPatch." ".VersionCode.", Build ".VersionBuild);
 		
-
-		$config = self::config($start['app']);
+		$config = array();
 		$config['app'] = $start['app']?:"app";
 		$config['assets'] = $start['assets']?:"assets";
 		$config['system'] = $start['system']?:"system";
+
+		$config = array_merge($config,self::config($config['app']));
 
 		if(!$config['settings'])$config['settings'] = array();
 
