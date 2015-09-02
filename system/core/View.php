@@ -45,7 +45,7 @@ class View{
 		}
 		if(!file_exists($path)){
 			if($config['ENVIRONMENT'] == 'debug')debug::error("Missing View",$tpl);
-			else die("View <b>{$name}</b> not Found.");
+			else die("View <b>{$tpl}</b> not Found.");
 
 			return null;
 		}
