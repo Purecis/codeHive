@@ -138,14 +138,14 @@ class Internationalization{
 	 * @param	mixen 	str or array keys only
 	 * @return	mixen
 	 */
-	private static function prepare($space=false,$force=false){
+	public static function prepare($space=false,$force=false){
 		global $config;
 
 		$locale = Session::exist('locale')?Session::get('locale'):(isset($config['locale'])?$config['locale']:self::$locale);
 		
 		if($space){
 			if($force)Module::import($space);
-			$path = Module::path($space)."/{$locale}";
+			$path = Module::path($space)."/language/{$locale}";
 		}else{
 			$path = "{$config['app']}/language/{$locale}";
 			if(!file_exists($path))$path = "{$config['app']}/locale/{$locale}";
@@ -169,8 +169,10 @@ class Internationalization{
 		    }
 		}
 
-		return true;
+		if(!$space)return self::$phrases;
+		else return self::$phrases_space[$space];
 	}
+	
 	private static function localeFile($filename){
 		return require_once $filename;
 	}
