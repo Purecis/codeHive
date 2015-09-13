@@ -61,6 +61,8 @@ class Directives{
 						return true;
 					}else if(trim($v) == "false"){
 						return false;
+					}else if(trim($v) == "null"){
+						return '';
 					}else{
 						return Directives::scope($v);
 					}
@@ -69,6 +71,7 @@ class Directives{
 
 				if(strpos($match[1], "=") !== false){
 					$ex = explode("=",trim($match[1]));
+
 					if($parse($ex[0]) == $parse($ex[1]))return Shortcode::trigger($match[2]);
 
 				}else if(strpos($match[1], "!=") !== false){
