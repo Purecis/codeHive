@@ -21,6 +21,11 @@ class Debug{
 
 	private static $disabled = false;
 
+	private static $custom = array(
+		"time" => array(),
+		"memory" => array()
+	);
+
 	public static function __bootstrap(){
 		if(self::$disabled)return;
 		self::$microtime = microtime(true);
@@ -102,5 +107,19 @@ class Debug{
 	public static function disable(){
 		self::$disabled = true;
 	}
+
+
+	public static function start($name="default"){
+		self::$custom["time"][$name] = microtime(true);
+		self::$custom["memory"][$name] = memory_get_usage();
+	}
+
+	public static function finish($name="default"){
+		$cls = new stdClass();
+		$cls->time = round(microtime(true)-self::$custom["time"][$name],4);
+		$cls->memory = File::format(memory_get_usage()-self::$memory);
+		return $cls;
+	}
+
 }
 ?>
