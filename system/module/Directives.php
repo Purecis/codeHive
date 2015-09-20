@@ -37,6 +37,50 @@ class Directives{
 	 */
 	public static function __bootstrap(){
 
+
+		/**
+		* directive Each
+		* Description : Looping array
+		*/
+		Shortcode::register(array(
+			'code' 		=> 'each',
+			'pattern' 	=> '%\<EACH (\b[^<\>]*+)\>((?:(?:(?!\</?EACH\b).)++| (?R))*+)(\</EACH\s*+\>)%six',
+			'callback' 	=> function($match){
+				$str = "";
+				$ex = explode(' in ',trim($match[1]));
+				foreach(Controller::$scope->$ex[1] as $file){
+					Controller::$scope->$ex[0] = $file;
+					$str .= Shortcode::trigger($match[2]);
+				}
+				return $str;
+			}
+		));
+
+		/**
+		* directive Scope
+		* Description : Scoping variables
+		*/
+		Shortcode::register(array(
+			'code' 		=> 'scope',
+			'pattern' 	=> '#\{-(.+)\-}#Usi',
+			'callback' 	=> function($match){
+				$filter = explode("|", $match[1]);//check ex for plugins like lower
+				$match[1] = $filter[0];
+
+				$val = Directives::scope($match[1]);
+
+				if(isset($filter[1])){
+					$f = trim($filter[1]);
+					if($f == 'upper'){
+						$val = strtoupper($val);
+					}else if($f == 'escape'){
+						$val = htmlspecialchars($val,ENT_QUOTES,'UTF-8');
+					}
+				}
+				return $val;
+			}
+		));
+
 		/**
 		* directive Each
 		* Description : Looping array
@@ -90,49 +134,6 @@ class Directives{
 				}
 				return $str;
 				*/
-			}
-		));
-
-		/**
-		* directive Each
-		* Description : Looping array
-		*/
-		Shortcode::register(array(
-			'code' 		=> 'each',
-			'pattern' 	=> '%\<EACH (\b[^<\>]*+)\>((?:(?:(?!\</?EACH\b).)++| (?R))*+)(\</EACH\s*+\>)%six',
-			'callback' 	=> function($match){
-				$str = "";
-				$ex = explode(' in ',trim($match[1]));
-				foreach(Controller::$scope->$ex[1] as $file){
-					Controller::$scope->$ex[0] = $file;
-					$str .= Shortcode::trigger($match[2]);
-				}
-				return $str;
-			}
-		));
-
-		/**
-		* directive Scope
-		* Description : Scoping variables
-		*/
-		Shortcode::register(array(
-			'code' 		=> 'scope',
-			'pattern' 	=> '#\{-(.+)\-}#Usi',
-			'callback' 	=> function($match){
-				$filter = explode("|", $match[1]);//check ex for plugins like lower
-				$match[1] = $filter[0];
-
-				$val = Directives::scope($match[1]);
-
-				if(isset($filter[1])){
-					$f = trim($filter[1]);
-					if($f == 'upper'){
-						$val = strtoupper($val);
-					}else if($f == 'escape'){
-						$val = htmlspecialchars($val,ENT_QUOTES,'UTF-8');
-					}
-				}
-				return $val;
 			}
 		));
 
@@ -245,7 +246,7 @@ class Directives{
 				if($val == null)break;
 			}
 		}
-		return $val;
+		return stripcslashes($val);
 	}
 }
 
