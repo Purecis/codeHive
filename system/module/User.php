@@ -501,7 +501,8 @@ class User{
 	 * @param 	string
 	 * @return	string
 	 */
-	public static function accessDenied($rule=self::$lastRule){
+	public static function accessDenied($rule=false){
+		if($rule == false)$rule = self::$lastRule;
 		$cls = new stdClass;
 		$cls->status = false;
 		$cls->error = "you need rules {$rule}";
