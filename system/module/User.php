@@ -19,6 +19,7 @@ class User{
 	 */
 	protected static $current;
 	public static $sessId = "userId";
+	private static $lastRule = "";
 
 	// --------------------------------------------------------------------
 
@@ -450,6 +451,7 @@ class User{
 	 * @return	boolean
 	 */
 	public static function hasRule($rules = array(),$defRules=false){
+		self::$lastRule = $rules;
 
 		if(!is_array($rules))$arr = explode(",", $rules);
 		else $arr = $rules;
@@ -485,6 +487,25 @@ class User{
 	 */
 	public static function encpass($pass){
 		return md5(String::encrypt($pass)).sha1(String::encrypt($pass)); 
+	}
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Access Denied
+	 *
+	 * use license hash which defined on config
+	 *
+	 * @access	public
+	 * @param 	string
+	 * @return	string
+	 */
+	public static function accessDenied($rule=self::$lastRule){
+		$cls = new stdClass;
+		$cls->status = false;
+		$cls->error = "you need rules {$rule}";
+		return $cls;
 	}
 
 }
