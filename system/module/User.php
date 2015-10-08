@@ -451,6 +451,7 @@ class User{
 	 * @return	boolean
 	 */
 	public static function hasRule($rules = array(),$defRules=false){
+		// TODO: no has rule .. 
 		self::$lastRule = $rules;
 
 		if(!is_array($rules))$arr = explode(",", $rules);
@@ -467,7 +468,12 @@ class User{
 		$ret = true;
 		
 		foreach($arr as $rule){
-			if(!in_array($rule, $rules))$ret = false;
+
+			if(strpos($rule, "!") === 0){
+				if(in_array(ltrim($rule, '!'), $rules))$ret = false;
+			}else{
+				if(!in_array($rule, $rules))$ret = false;
+			}
 		}
 
 		return $ret;
