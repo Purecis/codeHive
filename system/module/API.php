@@ -173,4 +173,23 @@ class API{
 		$token = Request::get($name);
 		return ($token == md5($config['license']['key'].$config['license']['secret']));
 	}
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * accessDenied
+	 *
+	 * @access	public
+	 * @param 	string
+	 * @return	string
+	 */
+	public static function accessDenied($err="Access Denied",$code=false){
+		$cls = new stdClass;
+		$cls->status = false;
+		$cls->error = $err;
+		if($code)$cls->code = $code;
+		return $cls;
+	}
+
 }
