@@ -356,13 +356,15 @@ class Query{
 				array_push($sql,$col." ".$a[key($or)]);
 
 			}else if(is_array($or)){
-				if(!isset($config['database']['essential'])){
-					$col = "CAST(".$or[0]." AS SIGNED)";
-				}else{
-					$col = $or[0];
+				$a = array();
+				foreach ($or as $key => $value) {
+					if(!isset($config['database']['essential'])){
+						$key = "CAST(".$key." AS SIGNED)";
+					}
+					array_push($a,$key." ".$value);
 				}
-				array_push($sql,$col." ".$or[1]);
-			
+				array_push($sql,implode($a,", "));
+				
 			}else{
 				if(strpos($or, "(")){
 					array_push($sql, "{$or}");
