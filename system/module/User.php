@@ -43,7 +43,7 @@ class User{
 	 * @param 	array of user data (email,pass[,oauth,name,rules,status,group,rel])
 	 * @return	string
 	 */
-	public static function register($arr){
+	public static function register($arr,$login=false){
 		$cls = new stdClass();
 		$arr = (array)$arr;
 
@@ -66,7 +66,7 @@ class User{
 		}
 
 		$q = Query::set("users",['data'=>$arr]);
-		if($q->status == true){
+		if($q->status == true && $login){
 			Session::set(array(
 				static::$sessId => $q->last
 			));
