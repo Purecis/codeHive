@@ -280,8 +280,12 @@ class Upload{
 		array_push($arr['tags'], $arr['folder']);
 		array_push($arr['tags'], $ext);
 
+		if(!isset($arr['author'])){
+			$user = User::info();
+			$arr['author'] = $user->status?$user->data[0]['id']:0;
+		}
+		
 		Module::import("Query");
-		$user = User::info();
 		$q = Query::set('library',array(
 			'data' 		=> array(
 				'name' 		=> $filename,
@@ -290,7 +294,7 @@ class Upload{
 				'extension' => $ext,
 				'size' 		=> File::format(filesize($file['original'])),
 				'tags' 		=> implode(",", $arr['tags']),
-				'author' 	=> $user->data[0]['id'],
+				'author' 	=> $arr['author'],
 			//	'taxonomy' 	=> isset($arr['taxonomy'])?$arr['taxonomy']:''
 			)
 		));
