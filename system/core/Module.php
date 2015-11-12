@@ -66,18 +66,9 @@ class Module{
 	private static function register($k){
 		global $config;
 
-		// check here for modules based
-		if(strpos($k, ".")){
-			$ex = explode(".", $k);
-			$f = end($ex);
-		}else{
-			$f = $k;
-		}
+		$path = self::path($k,true);
 
-		$path = "{$config['app']}/module/{$k}/{$f}.php";
-		if(!is_file($path))$path = "{$config['assets']}/extensions/{$k}/{$f}.php";
-		if(!is_file($path))$path = "{$config['system']}/module/{$k}.php";
-		if(!is_file($path)){
+		if(!$path){
 			if($config['ENVIRONMENT'] == 'debug')debug::error("Missing Module","{$k}");
 			else die("Module <b>{$k}</b> not Found in {$path}.");
 		}else{
@@ -118,9 +109,35 @@ class Module{
 	 * @param	mixen 	module or array of modules
 	 * @return	boolean
 	 */
-	public static function path($mod){
+	public static function path($mod,$full=false){
 		if(isset(self::$modules[$mod])){
 			return self::$modules[$mod]['dir'];
+		}
+
+		global $config;
+		if(strpos($mod, ".")){
+			$ex = explode(".", $mod);
+			$file = end($ex);
+		}else{
+			$file = $mod;
+		}
+
+		// TODO : the module, plugins, etc folders called SPACE, PACKAGE in doc's
+		
+		$path = "{$config['app']}/module/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/hook/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/plugin/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/extension/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/component/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/element/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/service/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['app']}/helper/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['assets']}/extensions/{$mod}/{$file}.php";
+		if(!is_file($path))$path = "{$config['system']}/module/{$mod}.php";
+
+		if(is_file($path)){
+			if($full) return $path;
+			else return dirname($path);
 		}
 		return false;
 	}

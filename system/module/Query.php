@@ -160,7 +160,10 @@ class Query{
 							//unset($arr['data'][$k]);
 							// fix where here ::value::
 						}else{
-							$arr['data'][$k] = "`{$table}`.`{$arr['data'][$k]}`";
+							if(!strpos($v, ".")){
+								if(strpos($arr['data'][$k], "~") === false)$arr['data'][$k] = "`{$table}`.`{$arr['data'][$k]}`";
+							}
+							$arr['data'][$k] = str_replace("~", "", $arr['data'][$k]);
 						}
 					}
 				}
@@ -201,7 +204,7 @@ class Query{
 				$arr['join']["users as thisuser"] = "{$table}.author = thisuser.id";
 
 				foreach($arr['author'] as $author){
-					if(!self::inStructure($library, "users")){
+					if(!self::inStructure($author, "users")){
 						array_push($arr['data'], "thisusermeta.value as author_{$author}");
 						$arr['join']["meta as `thisusermeta`"] = "`thisusermeta`.`oid` = `{$table}`.`author` and `thisusermeta`.`key`='{$author}' and `thisusermeta`.`table` = 'users'";
 					}else{
@@ -326,14 +329,16 @@ class Query{
 			array_push($sql, implode($j, " "));
 		}
 		if(isset($arr['where'])){
-			$wh = array();
-			array_push($sql, 'where');
-			foreach ($arr['where'] as $key => $value) {
-				array_push($wh, self::parse_eq($key, $value, $table));
+			if(sizeof($arr['where']) > 0){
+				$wh = array();
+				array_push($sql, 'where');
+				foreach ($arr['where'] as $key => $value) {
+					array_push($wh, self::parse_eq($key, $value, $table));
+				}
+				$seperate = isset($arr['whereSeperator'])?$arr['whereSeperator']:'and';
+				$where = implode($wh, " {$seperate} ");
+				array_push($sql, $where);
 			}
-			$seperate = isset($arr['whereSeperator'])?$arr['whereSeperator']:'and';
-			$where = implode($wh, " {$seperate} ");
-			array_push($sql, $where);
 		}
 		if(isset($arr['groupby'])){
 			array_push($sql, "GROUP BY {$arr['groupby']}");
@@ -343,13 +348,23 @@ class Query{
 			$or = $arr['order'];
 			if(is_object($or)){
 				$a = (array)$or;
-				$col = "CAST(".key($or)." AS SIGNED)";
+				if(!isset($config['database']['essential'])){
+					$col = "CAST(".key($or)." AS SIGNED)";
+				}else{
+					$col = $or;
+				}
 				array_push($sql,$col." ".$a[key($or)]);
 
 			}else if(is_array($or)){
-				$col = "CAST(".$or[0]." AS SIGNED)";
-				array_push($sql,$col." ".$or[1]);
-			
+				$a = array();
+				foreach ($or as $key => $value) {
+					if(!isset($config['database']['essential'])){
+						$key = "CAST(".$key." AS SIGNED)";
+					}
+					array_push($a,$key." ".$value);
+				}
+				array_push($sql,implode($a,", "));
+				
 			}else{
 				if(strpos($or, "(")){
 					array_push($sql, "{$or}");
@@ -429,11 +444,13 @@ class Query{
 		}else if($arr['type'] == 'delete'){
 			if(!isset($where))$where="";
 			if(!isset($limit))$limit="";
-			print_r($limit);
-			$idsQ = Database::query("select id from {$table} where {$where} {$limit};");
+			//print_r($limit);
+			$idsQ = Database::query("select id from {$table} where {$where} {$limit};");// this to get ids for meta
 			if($idsQ->status){
 				$ids = array();
 				foreach($idsQ->data as $row)array_push($ids, $row['id']);// todo : need optimization
+			}else{
+				$ids = array();
 			}
 			//print_r($ids);
 			$ids = implode(",", $ids);
@@ -458,6 +475,13 @@ class Query{
 
 	private static function parse_eq($key,$value,$table){
 		$key = str_replace(".", "`.`", $key);
+
+		if(strpos($key, "(") !== false){
+			$key = str_replace($table, "", $key);
+			$key = str_replace("`.`", "", $key);
+			$key = str_replace("~", "", $key);
+			//echo $key;
+		}
 
 		if(!is_array($value) && strpos($value, "~") === 0){
 			$value = str_replace("~", "", $value);
@@ -487,11 +511,26 @@ class Query{
 			if($normal_v)$value = "'{$value}'";
 			return "`{$key}` like {$value}";
 
+		}else if(strpos($value, ":is:") !== false){
+			$value = str_replace(":is:", "", $value);
+			if($normal_v)$value = "'{$value}'";
+			return "`{$key}` is {$value}";
+
 		}else if(strpos($value, ":not:") !== false){
 			$value = str_replace(":not:", "", $value);
 			if($normal_v)$value = "'{$value}'";
 			return "`{$key}` != {$value}";
 
+		}else if(strpos($value, ":inset:") !== false){
+			$value = stripslashes($value);
+			$value = str_replace(":inset:", "", $value);
+			$ex = explode(",",$value);
+			$temp = array();
+			foreach($ex as $v){
+				array_push($temp,"FIND_IN_SET ({$v},`{$key}`)");
+			}
+			return "(".implode(" or ", $temp).")";
+			
 		}else if(strpos($value, ":in:") !== false){
 			$value = stripslashes($value);
 			$value = str_replace(":in:", "", $value);
@@ -528,7 +567,8 @@ class Query{
 
 		}else{
 			if($normal_v)$value = "'{$value}'";
-			return "`{$key}` = {$value}";
+			if(strpos($key, "(") !== false)return "{$key} = {$value}";
+			else return "`{$key}` = {$value}";
 
 		}
 		// in set and things

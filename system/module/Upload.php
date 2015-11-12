@@ -49,7 +49,7 @@ class Upload{
 		//	'target' => 'filename',
 		//	'library' => 'library_path',
 		);*/
-
+	
 		global $config;
 
 		if(!isset($arr['name']))$arr['name'] = 'file';
@@ -90,8 +90,9 @@ class Upload{
 		}
 
 		$cls = new stdClass();
-
-		if(user::hasRule('upload-private-ext')){
+		
+		Module::import("User");
+		if(User::hasRule('upload-private-ext')){
 			$allowed = explode(',',strtoupper($config['upload']['private']));
 			$type = 'UPLOAD_PRIVATE_EXT';
 		}else{
@@ -279,9 +280,12 @@ class Upload{
 		array_push($arr['tags'], $arr['folder']);
 		array_push($arr['tags'], $ext);
 
+		if(!isset($arr['author'])){
+			$user = User::info();
+			$arr['author'] = $user->status?$user->data[0]['id']:0;
+		}
+		
 		Module::import("Query");
-		Module::import("User");
-		$user = User::info();
 		$q = Query::set('library',array(
 			'data' 		=> array(
 				'name' 		=> $filename,
@@ -290,7 +294,7 @@ class Upload{
 				'extension' => $ext,
 				'size' 		=> File::format(filesize($file['original'])),
 				'tags' 		=> implode(",", $arr['tags']),
-				'author' 	=> $user->data[0]['id'],
+				'author' 	=> $arr['author'],
 			//	'taxonomy' 	=> isset($arr['taxonomy'])?$arr['taxonomy']:''
 			)
 		));

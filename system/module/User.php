@@ -18,6 +18,8 @@ class User{
 	 * @access protected
 	 */
 	protected static $current;
+	public static $sessId = "userId";
+	private static $lastRule = "";
 
 	// --------------------------------------------------------------------
 
@@ -41,7 +43,7 @@ class User{
 	 * @param 	array of user data (email,pass[,oauth,name,rules,status,group,rel])
 	 * @return	string
 	 */
-	public static function register($arr){
+	public static function register($arr,$login=false){
 		$cls = new stdClass();
 		$arr = (array)$arr;
 
@@ -64,9 +66,9 @@ class User{
 		}
 
 		$q = Query::set("users",['data'=>$arr]);
-		if($q->status == true){
+		if($q->status == true && $login){
 			Session::set(array(
-				'userId' => $q->last
+				static::$sessId => $q->last
 			));
 		}
 		return $q;
@@ -87,7 +89,7 @@ class User{
 
 		if(!$where){
 			if(self::logged()){
-				$where = array('id'=>Session::get(array("userId")));
+				$where = array('id'=>Session::get(array(static::$sessId)));
 			}else{
 				$cls->status = false;
 				$cls->error = "not logged";
@@ -125,7 +127,7 @@ class User{
 
 		if(!$where){
 			if(self::logged()){
-				$where = array('id'=>Session::get(array("userId")));
+				$where = array('id'=>Session::get(array(static::$sessId)));
 			}else{
 				$cls->status = false;
 				$cls->error = "not logged";
@@ -202,7 +204,7 @@ class User{
 				$where = $arr['where'];
 			}else{
 				if(self::logged()){
-					$where = array('id'=>Session::get(array("userId")));
+					$where = array('id'=>Session::get(array(static::$sessId)));
 				}else{
 					$cls->status = false;
 					$cls->error = "not logged";
@@ -255,7 +257,7 @@ class User{
 		));
 		if($q->count > 0){
 			Session::set(array(
-				'userId' => $q->data[0]['id']
+				static::$sessId => $q->data[0]['id']
 			));
 		}else{
 			$q = new stdClass();
@@ -297,7 +299,7 @@ class User{
 		// login
 		if($q->count > 0){
 			Session::set(array(
-				'userId' => $q->data[0]['id']
+				static::$sessId => $q->data[0]['id']
 			));
 			$ret = $q;
 			//$ret->status = true;
@@ -322,7 +324,7 @@ class User{
 					)
 				));
 				Session::set(array(
-					'userId' => $q->data[0]['id']
+					static::$sessId => $q->data[0]['id']
 				));
 				$ret = $q;
 				$ret->status = true;
@@ -362,7 +364,7 @@ class User{
 	 * @return	void
 	 */
 	public static function setlog($id){
-		Session::set(array('userId' => $id));
+		Session::set(array(static::$sessId => $id));
 	}
 
 	// --------------------------------------------------------------------
@@ -374,7 +376,7 @@ class User{
 	 * @return	void
 	 */
 	public static function logout($force=false){
-		Session::remove(array('userId'),$force);
+		Session::remove(array(static::$sessId),$force);
 	}
 
 	// --------------------------------------------------------------------
@@ -386,7 +388,7 @@ class User{
 	 * @return	string
 	 */
 	public static function logged(){
-		return Session::exist(array('userId'));
+		return Session::exist(array(static::$sessId));
 	}
 
 	/**
@@ -396,8 +398,8 @@ class User{
 	 * @return	string
 	 */
 	public static function Id(){
-		if(Session::exist(array('userId'))){
-			return Session::get(array("userId"));
+		if(Session::exist(array(static::$sessId))){
+			return Session::get(array(static::$sessId));
 		}else{
 			return 0;
 		}
@@ -423,7 +425,7 @@ class User{
 					$id = $more;
 					$more = $more2;
 				}
-				if(empty($id))$id = Session::get(array("userId"));
+				if(empty($id))$id = Session::get(array(static::$sessId));
 
 				$data = array("id","name","email","rules","status");
 				$data = array_merge($data,$more);
@@ -449,11 +451,13 @@ class User{
 	 * @return	boolean
 	 */
 	public static function hasRule($rules = array(),$defRules=false){
+		// TODO: no has rule .. 
+		self::$lastRule = $rules;
 
 		if(!is_array($rules))$arr = explode(",", $rules);
 		else $arr = $rules;
 
-		if(isset($defRules)){
+		if($defRules != false){
 			if(!is_array($defRules))$rules = explode(",",$defRules);
 			else $rules = $defRules;
 		}else{
@@ -463,9 +467,13 @@ class User{
 		}
 		$ret = true;
 		
-
 		foreach($arr as $rule){
-			if(!in_array($rule, $rules))$ret = false;
+
+			if(strpos($rule, "!") === 0){
+				if(in_array(ltrim($rule, '!'), $rules))$ret = false;
+			}else{
+				if(!in_array($rule, $rules))$ret = false;
+			}
 		}
 
 		return $ret;
@@ -485,6 +493,26 @@ class User{
 	 */
 	public static function encpass($pass){
 		return md5(String::encrypt($pass)).sha1(String::encrypt($pass)); 
+	}
+
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Access Denied
+	 *
+	 * use license hash which defined on config
+	 *
+	 * @access	public
+	 * @param 	string
+	 * @return	string
+	 */
+	public static function accessDenied($rule=false){
+		if($rule == false)$rule = self::$lastRule;
+		$cls = new stdClass;
+		$cls->status = false;
+		$cls->error = "you need rules {$rule}";
+		return $cls;
 	}
 
 }

@@ -21,6 +21,11 @@ class Debug{
 
 	private static $disabled = false;
 
+	private static $custom = array(
+		"time" => array(),
+		"memory" => array()
+	);
+
 	public static function __bootstrap(){
 		if(self::$disabled)return;
 		self::$microtime = microtime(true);
@@ -72,9 +77,11 @@ class Debug{
 			$space = str_repeat("\t", $space);
 			echo "console.log('%c{$type}{$space}: %c{$msg}', 'color:#900', 'color:#111');";
 		}
-
+		$REQUEST_URI = $_SERVER['REQUEST_URI'];
+		echo "console.log('%cRequest \t\t\t: %c{$REQUEST_URI}', 'color: #999', 'color:#099');";
 		echo "console.log('%cCore Version \t\t: %c{$version}', 'color: #999', 'color:#ddd');";
 		echo "console.log('%cCopyright \t\t\t: %cPowered By Pure Core International Solutions (Purecis)', 'color: #999', 'color:#ddd');";
+		echo "console.log('%c-- -- -- -- -- -- -- -- -- -- -- -- -- -- --', 'color: #999');";
 
 		echo "</script>";
 
@@ -100,5 +107,19 @@ class Debug{
 	public static function disable(){
 		self::$disabled = true;
 	}
+
+
+	public static function start($name="default"){
+		self::$custom["time"][$name] = microtime(true);
+		self::$custom["memory"][$name] = memory_get_usage();
+	}
+
+	public static function finish($name="default"){
+		$cls = new stdClass();
+		$cls->time = round(microtime(true)-self::$custom["time"][$name],4);
+		$cls->memory = File::format(memory_get_usage()-self::$memory);
+		return $cls;
+	}
+
 }
 ?>

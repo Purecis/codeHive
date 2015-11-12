@@ -11,7 +11,11 @@
  * @link		http://purecis.com/
  */
 
+//if (!defined('SESSION_PERFIX'))define(SESSION_PERFIX,"");
+
 class Session{
+
+	public static $SESSION_PERFIX = SESSION_PERFIX;
 
 	/**
 	 * Session get
@@ -28,15 +32,15 @@ class Session{
 		$cls = new stdClass();
 		if(sizeof($arr) > 1){
 			foreach($arr as $key => $val){
-				if(!isset($_SESSION[SESSION_PERFIX.$val])){
+				if(!isset($_SESSION[static::$SESSION_PERFIX.$val])){
 					$cls->$val = false;
 				}else{
-					$cls->$val = $_SESSION[SESSION_PERFIX.$val];
+					$cls->$val = $_SESSION[static::$SESSION_PERFIX.$val];
 				}
 			}
 			return $cls;
 		}else{
-			return isset($_SESSION[SESSION_PERFIX.$arr[0]])?$_SESSION[SESSION_PERFIX.$arr[0]]:false;
+			return isset($_SESSION[static::$SESSION_PERFIX.$arr[0]])?$_SESSION[static::$SESSION_PERFIX.$arr[0]]:false;
 		}
 	}
 
@@ -57,8 +61,8 @@ class Session{
 
 		foreach($arr as $key){
 			if(
-				!isset($_SESSION[SESSION_PERFIX.$key]) or 
-				$_SESSION[SESSION_PERFIX.$key] == false
+				!isset($_SESSION[static::$SESSION_PERFIX.$key]) or 
+				$_SESSION[static::$SESSION_PERFIX.$key] == false
 			){
 				return false;
 			}
@@ -80,7 +84,7 @@ class Session{
 	public static function set($arr){
 		
 		foreach($arr as $key => $val){
-			$_SESSION[SESSION_PERFIX.$key] = $val;
+			$_SESSION[static::$SESSION_PERFIX.$key] = $val;
 		}
 		
 	}
@@ -102,7 +106,7 @@ class Session{
 			@session_destroy(); 
 		}else{
 			foreach($arr as $val){
-				unset($_SESSION[SESSION_PERFIX.$val]);
+				unset($_SESSION[static::$SESSION_PERFIX.$val]);
 			}
 		}
 		

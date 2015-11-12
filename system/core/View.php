@@ -37,15 +37,15 @@ class View{
 		if(strpos($tpl, '@')){
 			$ex = explode("@", $tpl);
 			if($force)Module::import($ex[1]);
-			$path = "{$config['app']}/module/{$ex[1]}/view/{$ex[0]}.html";
-			if(!file_exists($path))$path = "{$config['assets']}/extensions/{$ex[1]}/view/{$ex[0]}.html";
+			$path = (sizeof($ex) > 1)?Module::path($ex[1]):false;
+			$path = "{$path}/view/{$ex[0]}.html";
 		}else{
 			$path = "{$config['app']}/view/{$tpl}.html";
 			if(!file_exists($path))$path = "{$config['system']}/view/{$tpl}.html";
 		}
 		if(!file_exists($path)){
 			if($config['ENVIRONMENT'] == 'debug')debug::error("Missing View",$tpl);
-			else die("View <b>{$name}</b> not Found.");
+			else die("View <b>{$tpl}</b> not Found.");
 
 			return null;
 		}

@@ -44,7 +44,7 @@ class Assets{
 		if($b != "{}" && $b != "[]"){
 			$b = "'{$b}'";
 		}else{
-			$b = "{$b} || codeHive.{$a}";
+			$b = "codeHive.{$a} || {$b}";
 		}
 
 		if(!$c){
@@ -65,12 +65,14 @@ class Assets{
 		return self::$codev;
 	}
 
+	// TODO : load folder ( scripts )
+	
 	/**
 	 * load script
 	 *
 	 * @return	void
 	 */
-	public static function script($src,$listener='script'){
+	public static function script($src,$folder="vendor",$listener='script'){
 		global $config;
 
 
@@ -83,7 +85,7 @@ class Assets{
 			else $src = $ex[0];
 
 			$path = Request::base($path);
-			$src = "{$path}/vendor/{$src}";
+			$src = "{$path}/{$folder}/{$src}";
 		}
 
 		Event::addListener($listener,function() use ($src){
@@ -96,7 +98,7 @@ class Assets{
 	 *
 	 * @return	void
 	 */
-	public static function style($src,$listener='style'){
+	public static function style($src,$folder="vendor",$listener='style'){
 		global $config;
 
 		$external = explode("://", $src);// chk external
@@ -109,13 +111,43 @@ class Assets{
 
 			$path = Request::base($path);
 
-			$src = "{$path}/vendor/{$src}";
+			$src = "{$path}/{$folder}/{$src}";
 		}
 
 		$extra = File::extension($src)=='less'?'/less':"";
 
 		Event::addListener($listener,function() use ($src, $extra){
 			return "\n\t<link rel='stylesheet{$extra}' type='text/css' href='{$src}' />";
+		});
+	}
+
+	/**
+	 * element load
+	 *
+	 * @return	void
+	 */
+	public static function element($src,$folder="vendor",$listener='element'){
+		global $config;
+
+		$external = explode("://", $src);// chk external
+		if(sizeof($external) <= 1){
+
+			$ex = explode("@",$src);
+			$path = (sizeof($ex) > 1)?Module::path($ex[1]):false;
+			if(!$path)$path = "{$config['app']}";
+			else $src = $ex[0];
+
+			$path = Request::base($path);
+
+			if(!strpos($src, "."))$src="{$src}/{$src}.html";
+
+			$src = "{$path}/{$folder}/{$src}";
+		}
+
+		$extra = File::extension($src)=='less'?'/less':"";
+
+		Event::addListener($listener,function() use ($src, $extra){
+			return "\n\t<link rel='import' href='{$src}' />";
 		});
 	}
 
