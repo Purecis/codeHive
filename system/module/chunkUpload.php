@@ -61,7 +61,8 @@ class chunkUpload {
 		self::$config = array();
 		self::$config['tempDir'] = isset($config['tempDir'])?$config['tempDir']:"temp";
 		self::$config['hashChunk'] = isset($config['hashChunk'])?$config['hashChunk']:true;
-		self::$config['deleteChunksOnSave'] = isset($config['deleteChunksOnSave'])?$config['deleteChunksOnSave']:true;
+        self::$config['deleteChunksOnSave'] = isset($config['deleteChunksOnSave'])?$config['deleteChunksOnSave']:true;
+		self::$config['flowNewVersion'] = isset($config['flowNewVersion'])?$config['flowNewVersion']:true;
 	}
 
 	// --------------------------------------------------------------------
@@ -78,7 +79,11 @@ class chunkUpload {
             if (self::checkChunk()) {
                 header("HTTP/1.1 200 Ok");
             } else {
-                header("HTTP/1.1 404 Not Found");
+                if(self::$config['flowNewVersion']){
+                    header("HTTP/1.1 204 No Content");
+                }else{
+                    header("HTTP/1.1 404 Not Found");
+                }
                 exit;
             }
         }
