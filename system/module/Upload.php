@@ -466,10 +466,11 @@ class Upload{
 		$ids = implode(",", $ids);
 
 		Module::import("Query");
-		Module::import("User");
-		$user = User::info();
-		if(!$user->status)return $user;
-
+		if(!$force){
+			Module::import("User");
+			$user = User::info();
+			if(!$user->status)return $user;
+		}
 		$where = array("id"=>":in:{$ids}");
 		if(!$force)$where['author'] = $user->data[0]['id'];
 
