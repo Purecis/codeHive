@@ -48,8 +48,12 @@ class Directives{
 			'callback' 	=> function($match){
 				$str = "";
 				$ex = explode(' in ',trim($match[1]));
-				foreach(Controller::$scope->$ex[1] as $file){
+				foreach(Controller::$scope->$ex[1] as $k => $file){
 					Controller::$scope->$ex[0] = $file;
+					$index = "{$ex[0]}Index";
+					echo $index;
+					Controller::$scope->$index = $k;
+					Controller::$scope->__index = $k;
 					$str .= Shortcode::trigger($match[2]);
 				}
 				return $str;
