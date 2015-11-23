@@ -51,7 +51,6 @@ class Directives{
 				foreach(Controller::$scope->$ex[1] as $k => $file){
 					Controller::$scope->$ex[0] = $file;
 					$index = "{$ex[0]}Index";
-					echo $index;
 					Controller::$scope->$index = $k;
 					Controller::$scope->__index = $k;
 					$str .= Shortcode::trigger($match[2]);
