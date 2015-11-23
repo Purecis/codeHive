@@ -159,6 +159,6 @@ class Assets{
 	public static function vendor($src=''){
 		global $config;
 
-		return Request::base("{$config['app']}/vendor");
+		return Request::base("{$config['app']}/vendor{$src}");
 	}
 }
