@@ -301,6 +301,7 @@ class Upload{
 		if($q->status){
 			$cls->status = true;
 			$cls->file = $file;
+			$cls->path = json_encode($file);
 		}else{
 			$cls = $q;
 		}
