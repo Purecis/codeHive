@@ -305,7 +305,7 @@ class Upload{
 		}else{
 			$cls = $q;
 		}
-		return $q;
+		return $cls;
 	}
 
 	/*
