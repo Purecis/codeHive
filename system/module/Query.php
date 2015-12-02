@@ -215,39 +215,41 @@ class Query{
 
 		}
 		if(isset($arr['where'])){
-			if(!isset($arr['join']))$arr['join'] = array();
-			foreach($arr['where'] as $k => $v){
-				//fix value
-				// if array then put or between them 
-				if(is_array($v))continue;
-				if(strpos($v, "~") === 0){
+			if(is_array($arr['where'])){
+				if(!isset($arr['join']))$arr['join'] = array();
+				foreach($arr['where'] as $k => $v){
+					//fix value
+					// if array then put or between them 
+					if(is_array($v))continue;
+					if(strpos($v, "~") === 0){
 
-					$v = str_replace("~", "", $v);
-					if(!strpos($v, ".")){
-						if(!self::inStructure($v, $table)){
-							$arr['join']["meta as `{$k}`"] = "`{$k}`.`oid` = `{$table}`.`id` and `{$k}`.`key`='{$k}' and `{$k}`.`table` = '{$table}'";
-							$v = "`{$k}`.`{$v}`";
+						$v = str_replace("~", "", $v);
+						if(!strpos($v, ".")){
+							if(!self::inStructure($v, $table)){
+								$arr['join']["meta as `{$k}`"] = "`{$k}`.`oid` = `{$table}`.`id` and `{$k}`.`key`='{$k}' and `{$k}`.`table` = '{$table}'";
+								$v = "`{$k}`.`{$v}`";
+							}else{
+								$v = "`{$table}`.`{$v}`";
+							}
 						}else{
-							$v = "`{$table}`.`{$v}`";
+							$v = str_replace(".", "`.`", $v);
+							$v = "`{$v}`";
+						}
+					}
+					
+					//fix key
+					if(!self::inStructure($k, $table)){
+						$k = trim($k);
+						if(!strpos($k, ".")){
+							$arr['join']["meta as `{$k}`"] = "`{$k}`.`oid` = `{$table}`.`id` and `{$k}`.`key`='{$k}' and `{$k}`.`table` = '{$table}'";
+							unset($arr['where'][$k]);
+							$arr['where']["{$k}.value"] = $v;
 						}
 					}else{
-						$v = str_replace(".", "`.`", $v);
-						$v = "`{$v}`";
-					}
-				}
-				
-				//fix key
-				if(!self::inStructure($k, $table)){
-					$k = trim($k);
-					if(!strpos($k, ".")){
-						$arr['join']["meta as `{$k}`"] = "`{$k}`.`oid` = `{$table}`.`id` and `{$k}`.`key`='{$k}' and `{$k}`.`table` = '{$table}'";
-						unset($arr['where'][$k]);
-						$arr['where']["{$k}.value"] = $v;
-					}
-				}else{
-					if(!strpos($k, ".")){
-						unset($arr['where'][$k]);
-						$arr['where']["{$table}.{$k}"] = $v;
+						if(!strpos($k, ".")){
+							unset($arr['where'][$k]);
+							$arr['where']["{$table}.{$k}"] = $v;
+						}
 					}
 				}
 			}
@@ -329,15 +331,20 @@ class Query{
 			array_push($sql, implode($j, " "));
 		}
 		if(isset($arr['where'])){
-			if(sizeof($arr['where']) > 0){
-				$wh = array();
-				array_push($sql, 'where');
-				foreach ($arr['where'] as $key => $value) {
-					array_push($wh, self::parse_eq($key, $value, $table));
+			if(is_array($arr['where'])){
+				if(sizeof($arr['where']) > 0){
+					$wh = array();
+					array_push($sql, 'where');
+					foreach ($arr['where'] as $key => $value) {
+						array_push($wh, self::parse_eq($key, $value, $table));
+					}
+					$seperate = isset($arr['whereSeperator'])?$arr['whereSeperator']:'and';
+					$where = implode($wh, " {$seperate} ");
+					array_push($sql, $where);
 				}
-				$seperate = isset($arr['whereSeperator'])?$arr['whereSeperator']:'and';
-				$where = implode($wh, " {$seperate} ");
-				array_push($sql, $where);
+			}else if(is_string($arr['where'])){
+				array_push($sql, 'where');
+				array_push($sql, $arr['where']);
 			}
 		}
 		if(isset($arr['groupby'])){
