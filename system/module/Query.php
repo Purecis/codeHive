@@ -532,13 +532,13 @@ class Query{
 			$value = stripslashes($value);
 			$value = str_replace(":inset:", "", $value);
 
-			$separator = "and";
-			if(strpos($value, "and:") !== false){
-				$value = str_replace("and:", "", $value);
-			}
+			$separator = "or";
 			if(strpos($value, "or:") !== false){
-				$separator = "or";
 				$value = str_replace("or:", "", $value);
+			}
+			if(strpos($value, "and:") !== false){
+				$separator = "and";
+				$value = str_replace("and:", "", $value);
 			}
 			$ex = explode(",",$value);
 			$temp = array();
