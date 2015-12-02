@@ -524,12 +524,21 @@ class Query{
 		}else if(strpos($value, ":inset:") !== false){
 			$value = stripslashes($value);
 			$value = str_replace(":inset:", "", $value);
+
+			$separator = "and";
+			if(strpos($value, "and:") !== false){
+				$value = str_replace("and:", "", $value);
+			}
+			if(strpos($value, "or:") !== false){
+				$separator = "or";
+				$value = str_replace("or:", "", $value);
+			}
 			$ex = explode(",",$value);
 			$temp = array();
 			foreach($ex as $v){
 				array_push($temp,"FIND_IN_SET ({$v},`{$key}`)");
 			}
-			return "(".implode(" or ", $temp).")";
+			return "(".implode(" {$separator} ", $temp).")";
 			
 		}else if(strpos($value, ":in:") !== false){
 			$value = stripslashes($value);
