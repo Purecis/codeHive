@@ -302,6 +302,8 @@ class Upload{
 			$cls->status = true;
 			$cls->file = $file;
 			$cls->path = json_encode($file);
+			$cls->name = $filename;
+			$cls->last = $q->last;
 		}else{
 			$cls = $q;
 		}
