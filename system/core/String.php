@@ -288,7 +288,43 @@ class String{
 	 * @param	string attribute string ex (name='abc' value='def')
 	 * @return	array
 	 */
-	public static function parse_attr($att){
+	public static function parse_attr($att,$removeQ=false){
+		$pattern = '/(\\w+)\s*=\\s*("[^"]*"|\'[^\']*\'|[^"\'\\s>]*)/';
+		preg_match_all($pattern, $att, $matches, PREG_SET_ORDER);
+		$attrs = array();
+		foreach ($matches as $match) {
+			if (($match[2][0] == '"' || $match[2][0] == "'") && $match[2][0] == $match[2][strlen($match[2])-1] && $removeQ) {
+				$match[2] = substr($match[2], 1, -1);
+			}
+			$name = strtolower($match[1]);
+			$value = html_entity_decode($match[2]);
+			switch ($name) {
+			case 'class':
+				$attrs[$name] = preg_split('/\s+/', trim($value));
+				break;
+			case 'style':
+				// parse CSS property declarations
+				$attrs[$name] = $value;
+				break;
+			default:
+				$attrs[$name] = $value;
+			}
+		}
+		return $attrs;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Parse Attr
+	 *
+	 * Parse XML, Shortcode Attributes
+	 *
+	 * @access	public
+	 * @param	string attribute string ex (name='abc' value='def')
+	 * @return	array
+	 */
+	public static function xml_parse_attr($att){
 		$att = self::decode($att,true);
 		$x = new SimpleXMLElement("<element {$att} />");
 		$attr = array();
