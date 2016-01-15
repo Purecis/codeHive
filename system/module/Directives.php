@@ -251,6 +251,45 @@ class Directives{
 		}
 		return stripcslashes($val);
 	}
+
+	public static function register($element, $cb){
+		Shortcode::register(array(
+			'code' 		=> "element_{$element}",
+			'pattern' 	=> "%\<{$element} (\b[^<\>]*+)\>((?:(?:(?!\</?{$element}\b).)++| (?R))*+)(\</{$element}\s*+\>)%six",
+			'callback' 	=> function($match) use ($cb, $element){
+				$cls = new stdClass();
+				$cls->content = $match[2];
+				$el = "element_content";
+				Controller::$scope->$el = $match[2];
+				if(!empty($match[1])){
+					$atts = String::parse_attr($match[1]);
+					foreach ($atts as $k => $v) {
+						if((strpos($v, "'") !== false || strpos($v, '"') !== false)){ // string here
+							$v = substr($v, 1, -1); // right left
+						}else{
+							$v = self::scope($v);//Controller::$scope->$v;
+						}
+						$cls->$k = $v;
+						$el = "element_{$k}";
+						Controller::$scope->$el = $v;
+					}
+				}
+				if(is_callable($cb)){
+					$call = call_user_func_array($cb, array($cls, $match[2]));
+				}else{
+					//echo $match[2];
+					$call = Shortcode::trigger($match[2]);
+				}
+				return Shortcode::trigger($call);
+				// trim($match[1]); // the args inside
+				//Controller::$scope->__index = $k; // loop on variables and set them in scope
+				//$str = Shortcode::trigger($match[2]);// run the match 2
+				//return $str;
+			}
+		));
+
+
+	}
 }
 
 /* End of file Query.php */
