@@ -54,7 +54,8 @@ CREATE TABLE `meta` (
   `autoload` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `oid` (`oid`,`key`,`table`),
-  KEY `key` (`key`)
+  KEY `key` (`key`),
+  KEY `value` (`value`(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
