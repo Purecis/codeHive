@@ -203,8 +203,7 @@ class Directives{
 
 				if(isset($ex[1])){
 					$ex2 = explode("@", $ex[1]);
-					//
-					$a = explode(",", rtrim(ltrim(trim($ex2[0]),"{"),"}"));
+					$a = explode(",",substr(trim($ex2[0]), 1, -1));
 					foreach($a as $v){
 						$vv = explode(":", $v);
 						$ar[$vv[0]] = $vv[1];
