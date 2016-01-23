@@ -412,23 +412,19 @@ class Upload{
 		//
 
 		if(isset($arr['library']) || isset($arr['author'])){
-			$data = array(
+			$sql = array(
 				"where" => array()
 			);
 			if(isset($arr['library'])){
 				if(is_array($arr['library']))$arr['library'] = implode(",",$arr['library']);
-				$data['where']['id'] = ":in:".$arr['library'];
+				$sql['where']['id'] = ":in:".$arr['library'];
 			}
 			if(isset($arr['author'])){
 				if(is_array($arr['author']))$arr['author'] = implode(",",$arr['author']);
-				$data['where']['author'] = ":in:".$arr['author'];
+				$sql['where']['author'] = ":in:".$arr['author'];
 			}
-
-
-			return Query::get("library",$data);
-		}
-
-		if(isset($arr['objects'])){
+			
+		}else if(isset($arr['objects'])){
 			if(is_array($arr['objects']))$arr['objects'] = implode(",",$arr['objects']);
 			$sql = array(
 				"join" => array(
@@ -442,9 +438,9 @@ class Upload{
 				$sql['join']['relations'] .= " AND relations.taxonomy = '{$arr['taxonomy']}'";
 			}
 			//if(isset($arr['taxonomy']))$sql['where']['taxonomy'] = $arr['taxonomy'];
-			return Query::get("library",$sql);
 		}
 
+		return Query::get("library",$sql);
 	}
 
 	// --------------------------------------------------------------------
