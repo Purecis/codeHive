@@ -42,9 +42,9 @@ class Object{
 	 * @param	array 	data array 
 	 * @return	void
 	 */
-	public static function fetch( $taxonomy, $data=array(), $where=array() ){
+	public static function fetch( $taxonomy, $data=array(), $where=array(), $additional=array() ){
 
-		return self::get($taxonomy,["data"=>$data, "where"=>$where]);
+		return self::get($taxonomy, array_merge(["data"=>$data, "where"=>$where],$additional));
 	}
 
 
