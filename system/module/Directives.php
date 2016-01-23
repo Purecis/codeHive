@@ -248,7 +248,7 @@ class Directives{
 				if($val == null)break;
 			}
 		}
-		return stripcslashes($val);
+		return is_string($val)?stripcslashes($val):$val;
 	}
 
 	public static function register($element, $cb){
@@ -274,7 +274,10 @@ class Directives{
 					}
 				}
 				if(is_callable($cb)){
-					$call = call_user_func_array($cb, array($cls, $match[2]));
+					$call = call_user_func_array($cb, array($cls, &Controller::$scope));
+
+				}else if(is_string($cb)){
+					$call = View::load($cb);
 				}else{
 					//echo $match[2];
 					$call = Shortcode::trigger($match[2]);
