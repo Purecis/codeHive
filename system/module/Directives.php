@@ -52,8 +52,6 @@ class Directives{
 				Controller::$scope->__index = $k;
 				$str .= Shortcode::trigger($args->content);
 			}
-			print_r($args);
-
 			return $str;
 
 			if($args->items){
