@@ -2,7 +2,7 @@
 /**
  * Purecis Directives Module
  *
- * Append Special Shortcodes to the core 
+ * Append Special Shortcodes to the core
  *
  * @package		codeHive
  * @subpackage	Module
@@ -10,7 +10,7 @@
  * @author		Tamer Zorba
  * @link		http://purecis.com/
  *
- * 
+ *
  * For Nasted directives
  * Spacial Thanx to http://stackoverflow.com/questions/5438133/how-to-remove-improper-nesting-bbcode-tags-using-php
  * and http://www.amazon.com/Mastering-Regular-Expressions-Jeffrey-Friedl/dp/0596528124
@@ -24,7 +24,7 @@
  *   )                         # End $2: Contents of URL tag.
  *   (\[/URL\s*+\])            # $3: Outermost closing [/URL]
  *   %six';
- * 
+ *
  */
 
 class Directives{
@@ -37,6 +37,31 @@ class Directives{
 	 */
 	public static function __bootstrap(){
 
+		/**
+		* directive repeat
+		* Description : repeat data
+		*/
+		self::register("repeat", function($args, &$scope) { // TODO : filter by ( like weither)
+			//print_r($args);
+			$str = "";
+
+			foreach(Controller::$scope->{$args->items} as $k => $v){
+				Controller::$scope->{$args->as} = $v;
+				if(is_null($args->{"index"}))Controller::$scope->{"{$ex[0]}Index"} = $k;
+				else Controller::$scope->{$args->{"index"}} = $k;
+				Controller::$scope->__index = $k;
+				$str .= Shortcode::trigger($args->content);
+			}
+			print_r($args);
+
+			return $str;
+
+			if($args->items){
+
+				//if($args->match == $args->equal)return Shortcode::trigger($args->content);
+			}
+
+		});
 
 		/**
 		* directive Each
@@ -102,8 +127,6 @@ class Directives{
 						$v = rtrim($v,"'");
 						$v = ltrim($v,"'");
 						return $v;
-					}else if(is_numeric(trim($v))){
-						return $v;
 					}else if(trim($v) == "true"){
 						return true;
 					}else if(trim($v) == "false"){
@@ -124,6 +147,18 @@ class Directives{
 				}else if(strpos($match[1], "!=") !== false){
 					$ex = explode("!=",trim($match[1]));
 					if($parse($ex[0]) != $parse($ex[1]))return Shortcode::trigger($match[2]);
+
+				}else if(strpos($match[1], "isset") !== false){
+					if(strpos(trim($match[1]),"!") === 0)$not = 1;
+					else $not = 0;
+
+					$ex = substr(trim($match[1]), 6+$not, -1);//explode("isset",trim());
+
+					if($not){
+						if(is_null($parse($ex)))return Shortcode::trigger($match[2]);
+					}else{
+						if(!is_null($parse($ex)))return Shortcode::trigger($match[2]);
+					}
 
 				}
 
@@ -211,7 +246,7 @@ class Directives{
 					//
 					if(isset($ex2[1]))$at = $ex2[1];
 				}
-				
+
 				return Internationalization::translate(trim($ex[0]),$ar,$at);
 			}
 		));
@@ -234,9 +269,34 @@ class Directives{
 		));
 */
 
+
+		/**
+		* directive approxlen
+		* Description : shorten the text
+		*/
+		self::register("approxlen", function($args, &$scope) {
+			if(!$args->length)$args->length = 200;
+			if(!$args->append)$args->append = '...';
+			return String::approxlen($args->content,$args->length,$args->append);
+		});
+
+		/**
+		* directive whether
+		* Description : check data
+		*/
+		self::register("whether", function($args, &$scope) { 	//neither // repeat
+			//print_r($args);
+			if($args->match){
+				if($args->match == $args->equal)return Shortcode::trigger($args->content);
+			}
+			// TODO : lt, gt, gte, lte, eq, // extract variable by eval if needed
+		});
+
+
 	}
 
 	private static function scope($v){
+		if(is_numeric(trim($v)))return $v;
 		$val = Controller::$scope;
 		$ex = explode(".", $v);
 		$val = isset($val->$ex[0])?$val->$ex[0]:null;
@@ -258,7 +318,7 @@ class Directives{
 			'callback' 	=> function($match) use ($cb, $element){
 				$cls = new stdClass();
 				$cls->content = $match[2];
-				$el = "element_content";
+				$el = "{$element}-content";
 				Controller::$scope->$el = $match[2];
 				if(!empty($match[1])){
 					$atts = String::parse_attr($match[1]);
@@ -269,10 +329,19 @@ class Directives{
 							$v = self::scope($v);//Controller::$scope->$v;
 						}
 						$cls->$k = $v;
-						$el = "element_{$k}";
+						$el = "{$element}-{$k}";
 						Controller::$scope->$el = $v;
 					}
 				}
+				// whether
+				if(!is_null($cls->whether)){
+					if(!eval("return {$cls->whether};"))return;
+				}
+				// neither
+				if(!is_null($cls->neither)){
+					if(eval("return {$cls->neither};"))return;
+				}
+
 				if(is_callable($cb)){
 					$call = call_user_func_array($cb, array($cls, &Controller::$scope));
 
@@ -292,6 +361,7 @@ class Directives{
 
 
 	}
+
 }
 
 /* End of file Query.php */
