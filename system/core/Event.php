@@ -44,9 +44,9 @@ class Event{
 	 *
 	 * @return	function
 	 */
-	public static function trigger($event){
+	public static function trigger($event, $args=false){
 		$r = "";
-		if(isset(self::$events[$event]))foreach(self::$events[$event] as $c)$r .= call_user_func($c);
+		if(isset(self::$events[$event]))foreach(self::$events[$event] as $c)$r .= call_user_func_array($c, array(&Controller::$scope,$args));
 		return $r;
 	}
 }
