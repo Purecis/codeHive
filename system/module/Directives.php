@@ -216,7 +216,10 @@ class Directives{
 			'code' 		=> 'event',
 			'pattern' 	=> '#\@event\((.+)\)#Usi',
 			'callback' 	=> function($match){
-				return Event::trigger($match[1]);
+				$ex = explode(",",$match[1]);
+				$event = $ex[0];
+				array_shift($ex);
+				return Event::trigger($event,$ex);
 			}
 		));
 
@@ -283,11 +286,16 @@ class Directives{
 		* Description : check data
 		*/
 		self::register("whether", function($args, &$scope) { 	//neither // repeat
-			//print_r($args);
-			if($args->match){
-				if($args->match == $args->equal)return Shortcode::trigger($args->content);
+
+			if($args->is){
+				if($args->eq)if($args->is == $args->eq)return Shortcode::trigger($args->content);
+				if($args->lt)if($args->is < $args->lt)return Shortcode::trigger($args->content);
+				if($args->gt)if($args->is > $args->gt)return Shortcode::trigger($args->content);
+				if($args->lte)if($args->is <= $args->lte)return Shortcode::trigger($args->content);
+				if($args->gte)if($args->is >= $args->gte)return Shortcode::trigger($args->content);
 			}
-			// TODO : lt, gt, gte, lte, eq, // extract variable by eval if needed
+			if($args->exist)return Shortcode::trigger($args->content);
+
 		});
 
 
