@@ -72,6 +72,7 @@ CREATE TABLE `objects` (
   `status` varchar(20) NOT NULL DEFAULT '',
   `parent` bigint(20) NOT NULL,
   `taxonomy` varchar(50) NOT NULL DEFAULT '',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `rel` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `author` (`author`),
