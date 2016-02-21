@@ -2,7 +2,7 @@
 /**
  * Purecis Query Module
  *
- * control URL Parameters 
+ * control URL Parameters
  *
  * @package		codeHive
  * @subpackage	Module
@@ -76,6 +76,7 @@ class Query{
 				"status" 	=> "varchar(20) NOT NULL DEFAULT ''",
 				"permalink" => "varchar(250) NOT NULL DEFAULT ''",
 				"parent" 	=> "bigint(20) NOT NULL DEFAULT 0",
+				"time" 		=> "timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP",
 				"taxonomy" 	=> "varchar(50) NOT NULL DEFAULT ''",
 				"rel" 		=> "varchar(50) NOT NULL DEFAULT ''",
 			],
@@ -98,7 +99,7 @@ class Query{
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	public static function inStructure($col,$table){
 		global $config;
 		if(isset($config['database']['essential'])){
@@ -113,13 +114,13 @@ class Query{
 	 * Query execute
 	 *
 	 * @access	public
-	 * @param	array 	sql array 
+	 * @param	array 	sql array
 	 * @return	void
 	 */
 	public static function execute($arr){
 		// todo
 		// terms and library with better join like
-		// (:term:termname, :library:libname => "data2get,As,Arr,internalMeta") 
+		// (:term:termname, :library:libname => "data2get,As,Arr,internalMeta")
 
 		global $config;
 
@@ -129,7 +130,7 @@ class Query{
 		}
 		//type, table, data, where, whereSeperator, order, limit
 		if(!isset($arr['type']))$arr['type'] = 'select';
-		
+
 		$table = $arr['table'];
 
 		if($arr['type'] == 'select'){
@@ -219,7 +220,7 @@ class Query{
 				if(!isset($arr['join']))$arr['join'] = array();
 				foreach($arr['where'] as $k => $v){
 					//fix value
-					// if array then put or between them 
+					// if array then put or between them
 					if(is_array($v))continue;
 					if(strpos($v, "~") === 0){
 
@@ -236,7 +237,7 @@ class Query{
 							$v = "`{$v}`";
 						}
 					}
-					
+
 					//fix key
 					if(!self::inStructure($k, $table)){
 						$k = trim($k);
@@ -254,7 +255,7 @@ class Query{
 				}
 			}
 		}
-		
+
 
 		switch ( $arr['type'] ) {
 			case 'sql':
@@ -309,18 +310,18 @@ class Query{
 				}
 				array_push($sql, implode(", ", $values));
 				break;
-			
+
 			default://select
 
 				# code...
 				array_push($sql, "select");
 				if(isset($arr['data'])){
 					if(is_array($arr['data']))$arr['data'] = implode(", ", $arr['data']);
-					array_push($sql, $arr['data']);	
+					array_push($sql, $arr['data']);
 				}else{
 					array_push($sql, '*');
 				}
-				
+
 				array_push($sql, "from");
 				array_push($sql, $arr['table']);
 				break;
@@ -371,7 +372,7 @@ class Query{
 					array_push($a,$key." ".$value);
 				}
 				array_push($sql,implode($a,", "));
-				
+
 			}else{
 				if(strpos($or, "(")){
 					array_push($sql, "{$or}");
@@ -389,7 +390,7 @@ class Query{
 				array_push($sql, $limit);
 			}
 		}
-		
+
 		$sql = implode($sql, ' ').";";
 
 		// Extra SQL
@@ -421,7 +422,7 @@ class Query{
 				}
 			}
 
-			if($meta_size > 0){// to get id's 
+			if($meta_size > 0){// to get id's
 				$sid_q = self::execute(array(
 					"table" => $arr['table'],
 					"data" => array('id'),
@@ -444,7 +445,7 @@ class Query{
 				$extra = "INSERT INTO meta (`oid`,`key`,`value`,`table`) VALUES ";
 				$extra .= implode(", ",$values);
 				$extra .= "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);";
-				
+
 				if($schema_size > 0)$sql .= $extra;
 				else $sql = $extra;
 			}
@@ -473,9 +474,9 @@ class Query{
 			}
 			// delete from meta where `oid` = OLD.id  and `table` = 'terms'; // as trigger
 		}
-		
+
 		//echo $sql;
-		
+
 		//return array();
 		return Database::query($sql);
 	}
@@ -546,7 +547,7 @@ class Query{
 				array_push($temp,"FIND_IN_SET ({$v},`{$key}`)");
 			}
 			return "(".implode(" {$separator} ", $temp).")";
-			
+
 		}else if(strpos($value, ":in:") !== false){
 			$value = stripslashes($value);
 			$value = str_replace(":in:", "", $value);
@@ -598,7 +599,7 @@ class Query{
 	 * Fetching Data from table
 	 *
 	 * @access	public
-	 * @param	array 	sql array 
+	 * @param	array 	sql array
 	 * @return	void
 	 */
 	public static function get($table,$arr=array()){
@@ -637,7 +638,7 @@ class Query{
 	 * Insert or Update Database table based on where is set
 	 *
 	 * @access	public
-	 * @param	array 	sql array 
+	 * @param	array 	sql array
 	 * @return	void
 	 */
 	public static function set($table,$arr=array()){
@@ -655,7 +656,7 @@ class Query{
 	 * Delete rows from Table
 	 *
 	 * @access	public
-	 * @param	array 	sql array 
+	 * @param	array 	sql array
 	 * @return	void
 	 */
 	public static function remove($table,$arr=array()){
@@ -670,7 +671,7 @@ class Query{
 	 * Query on
 	 *
 	 * @access	public
-	 * @param	array 	sql array 
+	 * @param	array 	sql array
 	 * @return	void
 	 */
 	public static function on($table){
