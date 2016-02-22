@@ -282,6 +282,14 @@ class Directives{
 		});
 
 		/**
+		* directive ontime
+		* Description : date to human readable date
+		*/
+		self::register("ontime", function($args, &$scope) {
+			return String::ontime($args->content);
+		});
+
+		/**
 		* directive whether
 		* Description : check data
 		*/
