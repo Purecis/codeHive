@@ -246,7 +246,7 @@ class String{
 			if($characters === false)$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 			$randomString = '';
 			for($i=0; $i<$len; $i++)$randomString .= $characters[rand(0, strlen($characters) - 1)];
-			return $randomString;			
+			return $randomString;
 		}
 	}
 
@@ -329,9 +329,63 @@ class String{
 		$x = new SimpleXMLElement("<element {$att} />");
 		$attr = array();
 		foreach($x->attributes() as $a => $b)$attr[$a] = trim($b);
-		
+
 		return $attr;
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * ontime
+	 *
+	 * diffrent between 2 times
+	 *
+	 * @access	public
+	 * @param	mixen datetime or unix time ex: (2016-02-22 22:25:43)
+	 * @return	array
+	 */
+	public static function ontime($bef, $aft=false){
+		if(!is_numeric($bef))$bef = strtotime($bef);
+		if($aft == false)$aft = time();
+		if(!is_numeric($aft))$aft = strtotime($aft);
+
+		$timing = $aft-$bef;
+
+		if(($timing/3600)<24){
+			$h = floor($timing/3600);
+			$i = floor(($timing-($h*3600))/60);
+
+			if($i == 0){
+				return __("Today")." ".__("A little while ago");
+			}else{
+				return __("Today")." ".__(":h Hour and :m Minute ago",['h'=>$h,'m'=>$i]);
+			}
+
+		}else if($timing <= 172800){
+			$h = date("h",$bef);
+			$i = date("i",$bef);
+			$a = date('a',$bef);
+
+			return __("Yesterday on :h::m :a",['h'=>$h,'m'=>$i,"a"=>$a]);
+
+		}else{
+			$days = array(
+				__('Sunday'),
+				__('Monday'),
+				__('Tuesday'),
+				__('Wednesday'),
+				__('Thursday'),
+				__('Friday'),
+				__('Saturday')
+			);
+			$day = $days[date('w',$bef)];
+			$date = date("d/m/Y");
+			$time = date("h:i:s");
+			$a = date('a',$bef);
+			return __(":day :date on :time :a",["day"=>$day,"date"=>$date,"time"=>$time,"a"=>$a]);
+		}
+	}
+
 }
 
 /* End of file String.php */
