@@ -301,6 +301,8 @@ class Directives{
 				if($args->gt)if($args->is > $args->gt)return Shortcode::trigger($args->content);
 				if($args->lte)if($args->is <= $args->lte)return Shortcode::trigger($args->content);
 				if($args->gte)if($args->is >= $args->gte)return Shortcode::trigger($args->content);
+				if($args->in)if(strpos($args->is, $args->in) !== false)return Shortcode::trigger($args->content);
+				// TODO : inset, 
 			}
 			if($args->exist)return Shortcode::trigger($args->content);
 
