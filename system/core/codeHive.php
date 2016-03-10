@@ -2,7 +2,7 @@
 /**
  * Purecis codeHive Class
  *
- * bootstrap class 
+ * bootstrap class
  *
  * @package		codeHive
  * @subpackage	Core
@@ -57,15 +57,15 @@ class codeHive{//composer, artisan, Hive , Arti, Zorba, codeHive, iBuilder
 		if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 		  throw new Exception('The codeHive Framework v2 requires PHP version 5.3 or higher, (5.4) is Recomonded.');
 		}
-		
+
 		define(VersionMajor,"2");
 		define(VersionMinor,"0");
 		define(VersionPatch,"00");
 		define(VersionCode,"Alpha");
 		define(VersionBuild,"2096");
-		
+
 		define(VERSION,"v.".VersionMajor.".".VersionMinor.".".VersionPatch." ".VersionCode.", Build ".VersionBuild);
-		
+
 		$config = array();
 		$config['app'] = $start['app']?:"app";
 		$config['assets'] = $start['assets']?:"assets";
@@ -79,6 +79,7 @@ class codeHive{//composer, artisan, Hive , Arti, Zorba, codeHive, iBuilder
 		define(INDEX_FILE, $config['index']?:'index.php');
 		define(SESSION_PERFIX, $config['session']?:'');
 		if($config['license'])define(SECURITY_HASH, $config['license']['hash']);
+		if($config['timezone'])date_default_timezone_set($config['timezone']);
 
 		// env
 		if ($config['ENVIRONMENT']){
