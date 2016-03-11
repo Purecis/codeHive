@@ -2,7 +2,7 @@
 /**
  * Purecis Database Class
  *
- * This class Manage Database Connections & Queries 
+ * This class Manage Database Connections & Queries
  *
  * @package		codeHive
  * @subpackage	Core
@@ -52,7 +52,7 @@ class Database{
 			$user = $config['database']['user'];
 			$pass = $config['database']['pass'];
 			$port = $config['database']['port'];
-			
+
 			try{
 				// Checking Database Type…
 				if($type == 'sqlite')	self::$db = new PDO("sqlite:{$name}");
@@ -63,12 +63,12 @@ class Database{
 				if($type == 'infomix')	self::$db = new PDO("informix:DSN={$name}", $user, $pass);
 				if($type == 'dblib') 	self::$db = new PDO ("dblib:host={$host}:{$port};dbname={$name}",$user,$pass);
 				if($type == 'odbc')		self::$db = new PDO("odbc:Driver={Microsoft Access Driver (*.mdb)};Dbq={$name}");
-				
+
 				self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);//set character set utf8
-				
+
 			}catch(PDOException $e){
 				//if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",$e->getMessage());
-				//else 
+				//else
 				die("Database Error :".$e->getMessage());
 			}
     	}
@@ -90,10 +90,10 @@ class Database{
 		self::connect();
 		$return = new stdClass();
 		try{
-			$query = self::$db->query($sql);			
+			$query = self::$db->query($sql);
 			//$query = $link->prepare('SELECT * FROM users WHERE username = :name LIMIT 1;');
 			//$query->execute([':name' => $username]); # No need to escape it!
-			
+
 			$temp_sql = strtolower($sql);
 			$s = strpos($temp_sql,'select');
 			$i = strpos($temp_sql,'insert');
@@ -104,21 +104,21 @@ class Database{
 			if($u < 10 && $u !== false)$type = 'update';
 			if($d < 10 && $d !== false)$type = 'delete';
 
-
+			$fetch = $config['database']['fetch']=="array"?PDO::FETCH_ASSOC:PDO::FETCH_CLASS;
 			if(in_array($type, array('select','update','delete')))$return->count = $query->rowCount();
-			if($type == 'select')$return->data = @$query->fetchAll(PDO::FETCH_ASSOC);
+			if($type == 'select')$return->data = @$query->fetchAll($fetch);
 			if($type == 'insert')$return->last = self::$db->lastInsertId();
 
 			$return->status = true;
 
 			if($config['ENVIRONMENT'] == 'debug')debug::count('Database Queries');
-			
+
 		}catch(PDOException $e){
 			if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",$e->getMessage());
 			$return->status = false;
 			$return->error = $e->getMessage();
     	}
-    	
+
     	if(in_array($config['ENVIRONMENT'], array('debug','development')))$return->sql = $sql;
     	return $return;
 	}
