@@ -23,16 +23,20 @@ class QueryBuilder
      * @access protected
      */
     private $table;
-    private $data  = array();
+    private $param  = array();
     public $where  = "";
     private $join  = "";
     private $group = "";
     private $order = "";
     private $limit = "";
     private $query;
+    private $records;
 
     // --------------------------------------------------------------------
-
+    public function __get($property) {
+        echo "Getting '$property'\n";
+        return 123;
+    }
     /**
      * ajax table
      *
@@ -45,13 +49,13 @@ class QueryBuilder
     }
 
     /**
-     * set data to query
+     * set params to query
      * @param  String $args Mix of data to get
      * @return Object QueryBuilder
      */
-    public function data()
+    public function param()
     {
-        $this->data = array_merge($this->data, func_get_args());
+        $this->param = array_merge($this->param, func_get_args());
         return $this;
     }
 
@@ -139,7 +143,7 @@ class QueryBuilder
         $args = func_get_args();
 
         $this->query = "SELECT ";
-        $this->query .= $this->_data();
+        $this->query .= $this->_param();
         $this->query .= " FROM ";
         $this->query .= $this->_table($this->table);
         $this->query .= $this->join;
@@ -154,8 +158,14 @@ class QueryBuilder
     public function get()
     {
         $this->_get();
-        // TODO : make query run here
-        return $this->query;
+        return $this->records = Database::query($this->query);
+    }
+
+    public function record()
+    {
+        $this->get();
+        Module::import("QueryRecord");
+        return new QueryRecord($this->records);
     }
 
     private function _table()
@@ -174,8 +184,15 @@ class QueryBuilder
             return "( {$q->_get(true)} )";
         }
 
+        $args[0] = trim($args[0]);
+
         if(strpos($args[0],'~') === 0){
             return $this->_col(substr($args[0],1));
+
+        }else if(substr_count($args[0],' as ') == 1 && !$args[1]){
+            $exp = explode(" as ",$args[0]);
+            print_r($exp);
+            return $this->_col($exp[0]). " AS `{$exp[1]}`";
 
         }else if(substr_count($args[0],'.') == 1 && !$args[1]){
             $exp = explode(".",$args[0]);
@@ -187,20 +204,19 @@ class QueryBuilder
 
         }else{
             return "`{$this->table}`.`{$args[0]}`";
-
         }
     }
 
-    private function _data()
+    private function _param()
     {
-        if (!sizeof($this->data)) {
+        if (!sizeof($this->param)) {
             return "*";
         }
 
         // else
         $arr = array();
-        foreach ($this->data as $data) {
-            array_push($arr, $this->_col($data));
+        foreach ($this->param as $param) {
+            array_push($arr, $this->_col($param));
         }
 
         return implode(", ", $arr);
