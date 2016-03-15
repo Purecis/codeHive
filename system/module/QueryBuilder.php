@@ -307,7 +307,7 @@ class QueryBuilder
     {
         $args = func_get_args();
 
-        if(is_array($args[0])){
+        if(is_array($args[0]) && $args[1] != "string"){
             $temp = array();
             foreach($args as $arg){
                 foreach($arg as $param){
@@ -323,7 +323,7 @@ class QueryBuilder
             return "( {$q->_get(true)} )";
         }
 
-        $args[0] = trim($args[0]);
+        if(!is_array($args[0]))$args[0] = trim($args[0]);
 
         if(strpos($args[0],'~') === 0){
             return $this->_col(substr($args[0],1));
@@ -478,23 +478,88 @@ class QueryBuilder
         $args = func_get_args();
 
         $str = "";
-        $str .= $this->_col($args[0]);
+
+        if(!in_array($args[1], array("set", "inset")))
+            $str .= $this->_col($args[0]);
 
         switch ($args[1]) {
             case '=':
                 $str .= " = ".$this->_col($args[2],"string");
                 break;
 
-            case '!=':
-                $str .= " <> ".$this->_col($args[2],"string");
+            case 'like':
+                $str .= " LIKE ".$this->_col($args[2],"string");
                 break;
+
+            case '!=':
+            $str .= " != ".$this->_col($args[2],"string");
+            break;
 
             case '<>':
                 $str .= " <> ".$this->_col($args[2],"string");
                 break;
 
+            case 'lt':
+            case '<':
+            case '!>':
+                $str .= " < ".$this->_col($args[2],"string");
+                break;
+
+            case 'lte':
+            case '<=':
+                $str .= " <= ".$this->_col($args[2],"string");
+                break;
+
+            case 'lg':
+            case '>':
+            case '!<':
+                $str .= " > ".$this->_col($args[2],"string");
+                break;
+
+            case 'lge':
+            case '>=':
+                $str .= " > ".$this->_col($args[2],"string");
+                break;
+
+            case 'is':
+                $str .= " IS ".strtoupper($args[2]);
+                break;
+
             case 'in':
                 $str .= " IN ".$this->_col($args[2],"string");
+                break;
+
+            case 'notin':
+                $str .= " NOT IN ".$this->_col($args[2],"string");
+                break;
+
+            case 'bet':
+            case 'between':
+            case '><':
+            case 'notbet':
+            case 'notbetween':
+            case '!><':
+
+                $b = in_array($args[1], array("between", "bet", "><")) ? "BETWEEN" : "NOT BETWEEN";
+
+                if(is_array($args[2])){
+                    $str .= " {$b} " . $this->_col($args[2][0],"string") . " AND " . $this->_col($args[2][1],"string");
+                }else{
+                    $str .= " {$b} " . $this->_col($args[2],"string") . " AND " . $this->_col($args[3],"string");
+                }
+                break;
+
+            case 'set':
+            case 'inset':
+                if(is_array($args[2])){
+                    $temp = array();
+                    foreach($args[2] as $v){
+                        array_push($temp, "FIND_IN_SET (".$this->_col($v,"string").",".$this->_col($args[0]).")");
+                    }
+                    $str .= "( " . implode(" AND ", $temp) . ")";
+                }else{
+                    $str .= "FIND_IN_SET (".$this->_col($args[2],"string").",".$this->_col($args[0]).")";
+                }
                 break;
 
             default:
