@@ -99,13 +99,15 @@ class Database{
 			$i = strpos($temp_sql,'insert');
 			$u = strpos($temp_sql,'update');
 			$d = strpos($temp_sql,'delete');
+			$t = strpos($temp_sql,'truncate');
 			if($s < 10 && $s !== false)$type = 'select';
 			if($i < 10 && $i !== false)$type = 'insert';
 			if($u < 10 && $u !== false)$type = 'update';
 			if($d < 10 && $d !== false)$type = 'delete';
+			if($d < 10 && $d !== false)$type = 'truncate';
 
 			$fetch = $config['database']['fetch']=="array"?PDO::FETCH_ASSOC:PDO::FETCH_CLASS;
-			if(in_array($type, array('select','update','delete')))$return->count = $query->rowCount();
+			if(in_array($type, array('select','update','delete','truncate')))$return->count = $query->rowCount();
 			if($type == 'select')$return->data = @$query->fetchAll($fetch);
 			if($type == 'insert')$return->last = self::$db->lastInsertId();
 
