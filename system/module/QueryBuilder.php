@@ -207,7 +207,7 @@ class QueryBuilder
 
     public function get()
     {
-        return $this->_get();
+        $this->_get();
         return $this->records = Database::query($this->query);
     }
 
@@ -447,7 +447,6 @@ class QueryBuilder
         $str = " JOIN ";
         $str .= $this->_table($args[0]);
         array_shift($args);
-        // $str .= call_user_func_array(array($this, "_parseOperators"), $args);
 
         if (is_callable($args[0])) {
             $q = new QueryBuilder();
@@ -455,7 +454,7 @@ class QueryBuilder
             call_user_func($args[0], $q);
             return $q->join_on;
         }else{
-            $this->on($args);
+            call_user_func_array(array($this, "on"), $args);
             $str .= $this->join_on;
         }
 
