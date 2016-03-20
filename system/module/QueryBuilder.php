@@ -482,7 +482,7 @@ class QueryBuilder
         if(!in_array($args[1], array("set", "inset")))
             $str .= $this->_col($args[0]);
 
-        switch ($args[1]) {
+        switch (strtolower($args[1])) {
             case '=':
                 $str .= " = ".$this->_col($args[2],"string");
                 break;
