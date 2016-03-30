@@ -116,7 +116,7 @@ class Database{
 			if($config['ENVIRONMENT'] == 'debug')debug::count('Database Queries');
 
 		}catch(PDOException $e){
-			if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",$e->getMessage());
+			if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",String::escape($e->getMessage()));
 			$return->status = false;
 			$return->error = $e->getMessage();
     	}
