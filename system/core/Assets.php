@@ -1,164 +1,186 @@
-<?php  if (!defined('VERSION'))exit('Direct access to this location is not permitted.');
+<?php
+
+defined('VERSION') or exit('Direct access to this location is not permitted');
+
 /**
- * Purecis Assets Module
+ * codeHive Assets.
  *
- * @package		codeHive
- * @subpackage	Module
- * @category	Libraries
- * @author		Tamer Zorba
- * @link		http://purecis.com/
+ * Assets class prepare resources, meta and elements to initiate in app
+ *
+ * @category    core
+ *
+ * @author      Tamer Zorba <abo.al.tot@gmail.com>
+ * @copyright   Copyright (c) 2013 - 2016, PureCore International Solutions (http://purecis.com/)
+ * @license     http://opensource.org/licenses/MIT	MIT License
+ *
+ * @link       http://codehive.purecis.com/package/Assets
+ * @since      File available since Release 2.0.0
+ *
+ * @version    V: 2.1.0
  */
+class Assets
+{
+    /**
+     * initialize js code.
+     */
+    protected static $code = array('var codeHive = codeHive || {};');
 
-class Assets{
+    /**
+     * code variables.
+     */
+    protected static $codev = array();
 
-	protected static $code = array("var codeHive = codeHive || {};");
-	protected static $codev = array();
+    /**
+     * codeHive Assets class constructor.
+     *
+     * define javascript default path values from codeHive
+     */
+    public static function __bootstrap()
+    {
+        // define globals (create function to globals .. call on listener & v get)
+        global $config;
+        self::define('path', '{}');
+        self::define('path.base', Request::base());
+        self::define('path.app', Request::base($config['app']));
+        self::define('path.view', Request::base("{$config['app']}/view"));
+        self::define('path.vendor', Request::base("{$config['app']}/vendor"));
+        self::define('path.library', Request::base("{$config['assets']}/library"));
+        self::define('path.domain', Request::domain());
 
-	public static function __bootstrap(){
-		// define globals (create function to globals .. call on listener & v get)
-		global $config;
-		self::define("path","{}");
-		self::define("path.base",Request::base());
-		self::define("path.app",Request::base($config['app']));
-		self::define("path.view",Request::base("{$config['app']}/view"));
-		self::define("path.vendor",Request::base("{$config['app']}/vendor"));
-		self::define("path.library",Request::base("{$config['assets']}/library"));
-		self::define("path.domain",Request::domain());
-		
-		Event::addListener('defaults',function(){
+        Hook::on('script', function () {
+            $code = implode("\n\t\t", self::$code);
 
-			// parse code
-			$code = implode("\n\t\t", self::$code);
-			return "\n\t<script type='text/javascript'>\n\t\t{$code}\n\t</script>";
-		});
-	}
+            return "\n\t<script type='text/javascript'>\n\t\t{$code}\n\t</script>";
+        });
+        Hook::on('defaults', "\n\t<meta charset='utf-8'>");
+        Hook::on('defaults', "\n\t<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
+        Hook::on('defaults', "\n\t<meta http-equiv='X-UA-Compatible' content='IE=edge' />");
+    }
 
-	/**
-	 * define javascript code
-	 *
-	 * @return	void
-	 */
-	public static function define($a,$b,$c=false){
-		self::$codev[$a] = $b;
-		
-		if($b != "{}" && $b != "[]"){
-			$b = "'{$b}'";
-		}else{
-			$b = "codeHive.{$a} || {$b}";
-		}
+    /**
+     * define javascript code.
+     *
+     * @param string $a path
+     * @param Mixen  $b equality
+     * @param string $c method
+     */
+    public static function define($a, $b, $c = false)
+    {
+        self::$codev[$a] = $b;
 
-		if(!$c){
-			$b = " = {$b}";
-		}else{
-			$b = ".{$c}({$b})";
-		}
+        if ($b != '{}' && $b != '[]') {
+            $b = "'{$b}'";
+        } else {
+            $b = "codeHive.{$a} || {$b}";
+        }
 
-		array_push(self::$code,"codeHive.{$a}{$b};");
-	}
+        if (!$c) {
+            $b = " = {$b}";
+        } else {
+            $b = ".{$c}({$b})";
+        }
 
-	/**
-	 * get defined all variables
-	 *
-	 * @return	void
-	 */
-	public static function variables(){
-		return self::$codev;
-	}
+        array_push(self::$code, "codeHive.{$a}{$b};");
+    }
 
-	// TODO : load folder ( scripts )
-	
-	/**
-	 * load script
-	 *
-	 * @return	void
-	 */
-	public static function script($src,$folder="vendor",$listener='script'){
-		global $config;
+    /**
+     * get defined all variables.
+     *
+     * @return array List of all defintions
+     */
+    public static function variables()
+    {
+        return self::$codev;
+    }
 
+    /**
+     * Parse Source string Load assets.
+     *
+     * @param string $src    Path of js file
+     * @param string $folder default load folder
+     * @param string $ext    extension to load inside folder
+     *
+     * @return string
+     */
+    private static function src_parser($src, $folder, $ext = false)
+    {
+        global $config;
+        if (strpos($src, '://') === false) { // check is external
+            $ex = explode('@', $src);
+            $path = (sizeof($ex) > 1) ? Module::path($ex[1]) : false;
+            if (!$path) {
+                $path = "{$config['app']}";
+            } else {
+                $src = $ex[0];
+            }
+            $path = Request::base($path);
+            if (!strpos($src, '.') && $ext) {
+                $src = "{$src}/{$src}.{$ext}";
+            }
+            $src = "{$path}/{$folder}/{$src}";
+        }
 
-		$external = explode("://", $src);// chk external
-		if(sizeof($external) <= 1){
+        return $src;
+    }
 
-			$ex = explode("@",$src);
-			$path = (sizeof($ex) > 1)?Module::path($ex[1]):false;
-			if(!$path)$path = "{$config['app']}";
-			else $src = $ex[0];
+    /**
+     * Register Hook to Load script.
+     *
+     * @param string $src      Path of js file
+     * @param string $folder   default load folder
+     * @param string $listener default listener name
+     */
+    public static function script($src, $folder = 'vendor', $listener = 'script')
+    {
+        $src = self::src_parser($src, $folder);
+        Hook::on($listener, "\n\t<script type='text/javascript' src='{$src}'></script>");
+    }
 
-			$path = Request::base($path);
-			$src = "{$path}/{$folder}/{$src}";
-		}
+    /**
+     * Register Hook to Load style.
+     *
+     * @param string $src      Path of js file
+     * @param string $folder   default load folder
+     * @param string $listener default listener name
+     */
+    public static function style($src, $folder = 'vendor', $listener = 'style')
+    {
+        $src = self::src_parser($src, $folder);
+        $extra = File::extension($src) == 'less' ? '/less' : '';
+        // TODO : make less and scss as plugins or hooks to fetch
 
-		Event::addListener($listener,function() use ($src){
-			return "\n\t<script type='text/javascript' src='{$src}'></script>";
-		});
-	}
+        Hook::on($listener, "\n\t<link rel='stylesheet{$extra}' type='text/css' href='{$src}' />");
+    }
 
-	/**
-	 * style load
-	 *
-	 * @return	void
-	 */
-	public static function style($src,$folder="vendor",$listener='style'){
-		global $config;
+    /**
+     * Register Hook to Load element.
+     *
+     * @param string $src      Path of js file
+     * @param string $folder   default load folder
+     * @param string $listener default listener name
+     */
+    public static function element($src, $folder = 'vendor', $listener = 'element')
+    {
+        $src = self::src_parser($src, $folder, 'html');
+        $extra = File::extension($src) == 'less' ? '/less' : '';
 
-		$external = explode("://", $src);// chk external
-		if(sizeof($external) <= 1){
+        Hook::addListener($listener, "\n\t<link rel='import' href='{$src}' />");
+    }
 
-			$ex = explode("@",$src);
-			$path = (sizeof($ex) > 1)?Module::path($ex[1]):false;
-			if(!$path)$path = "{$config['app']}";
-			else $src = $ex[0];
+    /**
+     * get file source in vendor.
+     *
+     * @param string $src Path of js file
+     *
+     * @return string path
+     */
+    public static function vendor($src = '')
+    {
+        global $config;
 
-			$path = Request::base($path);
-
-			$src = "{$path}/{$folder}/{$src}";
-		}
-
-		$extra = File::extension($src)=='less'?'/less':"";
-
-		Event::addListener($listener,function() use ($src, $extra){
-			return "\n\t<link rel='stylesheet{$extra}' type='text/css' href='{$src}' />";
-		});
-	}
-
-	/**
-	 * element load
-	 *
-	 * @return	void
-	 */
-	public static function element($src,$folder="vendor",$listener='element'){
-		global $config;
-
-		$external = explode("://", $src);// chk external
-		if(sizeof($external) <= 1){
-
-			$ex = explode("@",$src);
-			$path = (sizeof($ex) > 1)?Module::path($ex[1]):false;
-			if(!$path)$path = "{$config['app']}";
-			else $src = $ex[0];
-
-			$path = Request::base($path);
-
-			if(!strpos($src, "."))$src="{$src}/{$src}.html";
-
-			$src = "{$path}/{$folder}/{$src}";
-		}
-
-		$extra = File::extension($src)=='less'?'/less':"";
-
-		Event::addListener($listener,function() use ($src, $extra){
-			return "\n\t<link rel='import' href='{$src}' />";
-		});
-	}
-
-	/**
-	 * style load
-	 *
-	 * @return	void
-	 */
-	public static function vendor($src=''){
-		global $config;
-
-		return Request::base("{$config['app']}/vendor{$src}");
-	}
+        return Request::base("{$config['app']}/vendor{$src}");
+    }
 }
+
+/* End of file Assets.php */
+/* Location: ./system/core/Assets.php */
