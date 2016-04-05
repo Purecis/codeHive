@@ -40,7 +40,7 @@ class codeHive
 
         $config = array_merge($config, self::config($config['app']));
 
-        if (!$config['settings']) {
+        if (!isset($config['settings'])) {
             $config['settings'] = array();
         }
 
@@ -58,22 +58,20 @@ class codeHive
         }
 
         if (isset($config['ENVIRONMENT'])) {
-            switch ($config['ENVIRONMENT']) {
-                case 'development' :
+            switch (strtoupper($config['ENVIRONMENT'])) {
+                case 'DEVELOPMENT' :
                     error_reporting(E_ALL);
                 break;
 
-                case 'debug' :
+                case 'TRACE' :
                     error_reporting(E_ALL);
-                    Debug::__bootstrap();
+                    Trace::__bootstrap();
                 break;
 
-                case 'production' :
+                case 'PRODUCTION' :
+                default:
                     error_reporting(0);
                 break;
-
-                default:
-                    exit('The application environment is not set correctly.');
             }
         }
 
@@ -83,8 +81,8 @@ class codeHive
 
         echo Module::__shutdown();
 
-        if (isset($config['ENVIRONMENT']) && $config['ENVIRONMENT'] == 'debug') {
-            Debug::__shutdown();
+        if (isset($config['ENVIRONMENT']) && strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+            Trace::__shutdown();
         }
     }
 
@@ -110,14 +108,15 @@ spl_autoload_register(function ($class) {
         if (is_callable(array($class, '__bootstrap'))) {
             call_user_func(array($class, '__bootstrap'));
         }
-        if (isset($config['ENVIRONMENT']) && $config['ENVIRONMENT'] == 'debug') {
-            debug::message('Used System Cores', $class);
+        if (isset($config['ENVIRONMENT']) && strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+            Trace::message('Used System Cores', $class);
         }
     } else {
-        if ($config['ENVIRONMENT'] == 'debug') {
-            debug::error('System Cores Faild', $class);
+        if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+            Trace::error('System Cores Faild', $class);
         }
     }
 });
+
 /* End of file codeHive.php */
 /* Location: ./system/core/codeHive.php */

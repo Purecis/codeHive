@@ -3,7 +3,7 @@
      exit('Direct access to this location is not permitted.');
  }
 /**
- * Purecis Debug Class.
+ * Trace Class.
  *
  * This class Control Files on the server.
  *
@@ -13,7 +13,7 @@
  *
  * @link		http://purecis.com/
  */
-class Debug
+class Trace
 {
     private static $message = array();
     private static $error = array();
@@ -56,7 +56,7 @@ class Debug
         $comment = (in_array($ext, array('js', 'css'))) ? true : false;
 
         if ($comment) {
-            echo '/** Debug **';
+            echo '/** Trace **';
         }
 
         echo "\n\n\n\n\n\n<script>";
@@ -136,13 +136,14 @@ class Debug
         self::$disabled = true;
     }
 
+    // TODO : merge benchmark with trace start .. complete
     public static function start($name = 'default')
     {
         self::$custom['time'][$name] = microtime(true);
         self::$custom['memory'][$name] = memory_get_usage();
     }
 
-    public static function finish($name = 'default')
+    public static function complete($name = 'default')
     {
         $cls = new stdClass();
         $cls->time = round(microtime(true) - self::$custom['time'][$name], 4);
@@ -150,4 +151,5 @@ class Debug
 
         return $cls;
     }
+    // TODO : create tracer for queries and query display object if debugger not display well ..
 }

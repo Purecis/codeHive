@@ -156,8 +156,8 @@ class Internationalization
             }
         }
         if (!is_dir($path)) {
-            if ($config['ENVIRONMENT'] == 'debug') {
-                debug::error('Missing Locales', $space);
+            if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+                Trace::error('Missing Locales', $space);
             }
             //else die("Locales at <b>{$space}</b> not Found.");
 

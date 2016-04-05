@@ -3,9 +3,9 @@
 defined('VERSION') or exit('Direct access to this location is not permitted');
 
 /**
- * codeHive Assets.
+ * codeHive Asset.
  *
- * Assets class prepare resources, meta and elements to initiate in app
+ * Asset class prepare resources, meta and elements to initiate in app
  *
  * @category    core
  *
@@ -13,12 +13,12 @@ defined('VERSION') or exit('Direct access to this location is not permitted');
  * @copyright   Copyright (c) 2013 - 2016, PureCore International Solutions (http://purecis.com/)
  * @license     http://opensource.org/licenses/MIT	MIT License
  *
- * @link       http://codehive.purecis.com/package/Assets
+ * @link       http://codehive.purecis.com/package/Asset
  * @since      File available since Release 2.0.0
  *
  * @version    V: 2.1.0
  */
-class Assets
+class Asset
 {
     /**
      * initialize js code.
@@ -31,7 +31,7 @@ class Assets
     protected static $codev = array();
 
     /**
-     * codeHive Assets class constructor.
+     * codeHive Asset class constructor.
      *
      * define javascript default path values from codeHive
      */
@@ -147,7 +147,7 @@ class Assets
     {
         $src = self::src_parser($src, $folder);
         $extra = File::extension($src) == 'less' ? '/less' : '';
-        // TODO : make less and scss as plugins or hooks to fetch
+        // TODO:20 : make less and scss as plugins or hooks to fetch
 
         Hook::on($listener, "\n\t<link rel='stylesheet{$extra}' type='text/css' href='{$src}' />");
     }
@@ -182,5 +182,5 @@ class Assets
     }
 }
 
-/* End of file Assets.php */
-/* Location: ./system/core/Assets.php */
+/* End of file Asset.php */
+/* Location: ./system/core/Asset.php */

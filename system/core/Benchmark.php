@@ -34,7 +34,7 @@ class Benchmark
      *
      * @return array
      */
-    public static function start($name)
+    public static function start($name = 'default')
     {
         self::$benchmarks[$name] = new stdClass();
         self::$benchmarks[$name]->time = microtime(true);
@@ -52,7 +52,7 @@ class Benchmark
      *
      * @return array
      */
-    public static function complete($name)
+    public static function complete($name = 'default')
     {
         global $config;
 
@@ -60,15 +60,16 @@ class Benchmark
         $end->time = microtime(true);
         $end->memory = memory_get_usage();
 
-        if ($config['ENVIRONMENT'] == 'debug') {
-            $time = round($end->time - self::$benchmarks[$name]->time, 4);
-            $memory = $end->memory - self::$benchmarks[$name]->memory;
-            $memory = $memory.' - '.File::format($memory);
+        $result = new stdClass();
+        $result->time = round($end->time - self::$benchmarks[$name]->time, 4);
+        $result->memory = $end->memory - self::$benchmarks[$name]->memory;
+        $result->memory .= ' - '.File::format($result->memory);
 
-            Debug::error("Benchmark {$name}", "Time : {$time} | Memory : {$memory}");
+        if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+            Trace::error("Benchmark {$name}", "Time : {$result->time} | Memory : {$result->memory}");
         }
 
-        return $arr;
+        return $result;
     }
 }
 
