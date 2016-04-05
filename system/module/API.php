@@ -48,7 +48,7 @@ class API
             }
 
             // search in module controller
-            if (!isset(self::$apis[$router->fire])) {
+            if (!isset(self::$apis[$router->fire]) && !is_file($path)) {
                 $mod = Module::path($router->fire);
                 $a = explode('.', $router->fire);
                 $name = end($a);
