@@ -173,7 +173,9 @@ class QueryBuilder
     public function limit()
     {
         $args = func_get_args();
-        if(!is_numeric($args[0]) || (isset($args[1]) && !is_numeric($args[1])))return $this;
+        if (!is_numeric($args[0]) || (isset($args[1]) && !is_numeric($args[1]))) {
+            return $this;
+        }
 
         if (sizeof($args) == 2) {
             $this->limit = " LIMIT {$args[0]}, {$args[1]}";
@@ -187,9 +189,13 @@ class QueryBuilder
     public function offset()
     {
         $args = func_get_args();
-        if(!is_numeric($args[0]))return $this;
+        if (!is_numeric($args[0])) {
+            return $this;
+        }
 
-        if(empty($this->limit))$this->limit =  " LIMIT 10";
+        if (empty($this->limit)) {
+            $this->limit = ' LIMIT 10';
+        }
         $this->offset = " OFFSET {$args[0]}";
 
         return $this;
@@ -232,8 +238,8 @@ class QueryBuilder
 
         return $str;
     }
-    private function withParse(){
-
+    private function withParse()
+    {
     }
 
     /**
@@ -311,7 +317,7 @@ class QueryBuilder
      *
      * @return object SQL Query
      */
-    private function _delete()
+    private function _remove()
     {
         $this->query = 'DELETE FROM ';
         $this->query .= $this->_table($this->table);
@@ -323,11 +329,9 @@ class QueryBuilder
         return $this->query;
     }
 
-    public function delete()
+    public function remove()
     {
-        $this->_delete();
-
-        return $this->query;
+        $this->_remove();
 
         return $this->records = Database::query($this->query);
     }
@@ -389,13 +393,12 @@ class QueryBuilder
             $q = new self();
             call_user_func($args[0], $q);
 
-            return "( {$q->_get(true)} )";
+            return $q->_get(true);
         }
 
         if (!is_array($args[0])) {
             $args[0] = trim($args[0]);
         }
-
         if (strpos($args[0], '~') === 0) {
             return $this->_col(substr($args[0], 1));
         } elseif (substr_count($args[0], ' as ') == 1 && !isset($args[1])) {
@@ -405,7 +408,7 @@ class QueryBuilder
 
         // }else if(in_array($args[0],$this->ascol)){
         //     return $this->_col($args[0],"single");
-    } elseif (substr_count($args[0], '.') == 1 && !isset($args[1])) {
+        } elseif (substr_count($args[0], '.') == 1 && !isset($args[1])) {
             $exp = explode('.', $args[0]);
 
             return "`{$exp[0]}`.`{$exp[1]}`";
@@ -596,11 +599,17 @@ class QueryBuilder
                 break;
 
             case 'in':
-                $str .= ' IN '.$this->_col($args[2], 'string');
-                break;
-
             case 'notin':
-                $str .= ' NOT IN '.$this->_col($args[2], 'string');
+                $b = in_array($args[1], array('in')) ? 'IN' : 'NOT IN';
+                if (is_array($args[2])) {
+                    $temp = array();
+                    foreach ($args[2] as $v) {
+                        array_push($temp, $this->_col($v, 'string'));
+                    }
+                    $str .= " {$b} ( ".implode(', ', $temp).' )';
+                } else {
+                    $str .= " {$b} ( ".$this->_col($args[2], 'string').' )';
+                }
                 break;
 
             case 'bet':
@@ -609,8 +618,6 @@ class QueryBuilder
             case 'notbet':
             case 'notbetween':
             case '!><':
-
-                $b = in_array($args[1], array('between', 'bet', '><')) ? 'BETWEEN' : 'NOT BETWEEN';
 
                 if (is_array($args[2])) {
                     $str .= " {$b} ".$this->_col($args[2][0], 'string').' AND '.$this->_col($args[2][1], 'string');
