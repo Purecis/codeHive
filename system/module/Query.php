@@ -736,6 +736,9 @@ class Query
 
         return $bldr->table($table);
     }
+    public static function table($table){
+        return self::on($table);
+    }
 }
 
 /* End of file Query.php */

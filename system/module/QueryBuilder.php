@@ -32,10 +32,12 @@ class QueryBuilder
     private $group = array();
     private $order = array();
     private $limit = '';
+    private $offset = '';
     private $query;
     private $records;
     private $union = '';
     public $join_on = '';
+    private $with = array();
 
     // --------------------------------------------------------------------
     public function __get($property)
@@ -171,11 +173,24 @@ class QueryBuilder
     public function limit()
     {
         $args = func_get_args();
+        if(!is_numeric($args[0]) || (isset($args[1]) && !is_numeric($args[1])))return $this;
+
         if (sizeof($args) == 2) {
             $this->limit = " LIMIT {$args[0]}, {$args[1]}";
         } else {
             $this->limit = " LIMIT {$args[0]}";
         }
+
+        return $this;
+    }
+
+    public function offset()
+    {
+        $args = func_get_args();
+        if(!is_numeric($args[0]))return $this;
+
+        if(empty($this->limit))$this->limit =  " LIMIT 10";
+        $this->offset = " OFFSET {$args[0]}";
 
         return $this;
     }
@@ -196,6 +211,31 @@ class QueryBuilder
         return $this;
     }
 
+    public function with()
+    {
+        $args = func_get_args();
+        $this->join_on = '';
+        $str = ' JOIN ';
+        $str .= $this->_table($args[0]);
+        array_shift($args);
+
+        if (is_callable($args[0])) {
+            $q = new self();
+            $q->table($this->table);
+            call_user_func($args[0], $q);
+
+            return $q->join_on;
+        } else {
+            call_user_func_array(array($this, 'on'), $args);
+            $str .= $this->join_on;
+        }
+
+        return $str;
+    }
+    private function withParse(){
+
+    }
+
     /**
      * generate SELECT statement.
      *
@@ -214,8 +254,9 @@ class QueryBuilder
         $this->query .= $this->_group();
         $this->query .= $this->_order();
         $this->query .= $this->limit;
+        $this->query .= $this->offset;
         $this->query .= $this->union;
-        if (!$args[0]) {
+        if (!isset($args[0])) {
             $this->query .= ';';
         }
 
@@ -225,7 +266,7 @@ class QueryBuilder
     public function get()
     {
         $this->_get();
-
+        // TODO : append with steatment
         return $this->records = Database::query($this->query);
     }
 
@@ -357,20 +398,20 @@ class QueryBuilder
 
         if (strpos($args[0], '~') === 0) {
             return $this->_col(substr($args[0], 1));
-        } elseif (substr_count($args[0], ' as ') == 1 && !$args[1]) {
+        } elseif (substr_count($args[0], ' as ') == 1 && !isset($args[1])) {
             $exp = explode(' as ', $args[0]);
         //    array_push($this->ascol, $exp[1]);
             return $this->_col($exp[0])." AS `{$exp[1]}`";
 
         // }else if(in_array($args[0],$this->ascol)){
         //     return $this->_col($args[0],"single");
-        } elseif (substr_count($args[0], '.') == 1 && !$args[1]) {
+    } elseif (substr_count($args[0], '.') == 1 && !isset($args[1])) {
             $exp = explode('.', $args[0]);
 
             return "`{$exp[0]}`.`{$exp[1]}`";
-        } elseif ($args[1] == 'single') {
+        } elseif (isset($args[1]) && $args[1] == 'single') {
             return "`{$args[0]}`";
-        } elseif ($args[1] == 'string') {
+        } elseif (isset($args[1]) && $args[1] == 'string') {
             if (is_array($args[0])) {
                 return "('".implode("', '", $args[0])."')";
             } else {
@@ -424,11 +465,11 @@ class QueryBuilder
 
         //$this->param = $this->_col($this->param);
 
-        if ($args[0] == 'insert') {
+        if (isset($args[0]) && $args[0] == 'insert') {
             for ($i = $args[1] - 1; $i < sizeof($this->param); $i += 2) {
                 array_push($arr, $this->_col($this->param[$i], $args[1] == 1 ? 'single' : 'string'));
             }
-        } elseif ($args[0] == 'update') {
+        } elseif (isset($args[0]) && $args[0] == 'update') {
             for ($i = 0; $i < sizeof($this->param); $i += 2) {
                 array_push($arr, $this->_col($this->param[$i], 'single').' = '.$this->_col($this->param[$i + 1], 'string'));
             }
@@ -470,7 +511,7 @@ class QueryBuilder
     private function _joinParse($args)
     {
         $this->join_on = '';
-        $str = ' JOIN ';
+        $str = ' LEFT JOIN ';
         $str .= $this->_table($args[0]);
         array_shift($args);
 
