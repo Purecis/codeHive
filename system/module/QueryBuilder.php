@@ -273,14 +273,14 @@ class QueryBuilder
                 });
                 // TODO: remove the sec column from the child if not sended
             }
-        }
 
-        if (is_string($this->records->sql)) {
-            $temp = $this->records->sql;
-            $this->records->sql = [];
-            array_push($this->records->sql, $temp);
+            if (is_string($this->records->sql)) {
+                $temp = $this->records->sql;
+                $this->records->sql = [];
+                array_push($this->records->sql, $temp);
+            }
+            array_push($this->records->sql, $newQuery->sql);
         }
-        array_push($this->records->sql, $newQuery->sql);
 
         return $this;
     }
