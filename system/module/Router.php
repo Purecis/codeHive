@@ -128,7 +128,12 @@ class Router
                     $cls->$k = self::get($k);
                 }
             }
-            echo Controller::trigger(self::$callback[$mod], $cls);
+
+            $cb = Controller::trigger(self::$callback[$mod], $cls);
+            if (is_array($cb) || is_object($cb)) {
+                $cb = json_encode($cb);
+            }
+            echo $cb;
         } else {
             // 404, 403...
             //post parser
