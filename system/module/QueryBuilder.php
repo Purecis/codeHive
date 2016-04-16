@@ -253,7 +253,7 @@ class QueryBuilder
 
             if (is_callable($args[1])) {
                 call_user_func($args[1], $q);
-                if (array_search($q->withSecColumn, $q->param) === false) {
+                if (array_search($q->withSecColumn, $q->param) === false && sizeof($q->param)) {
                     array_push($q->param, $q->withSecColumn);
                 }
             } else {
