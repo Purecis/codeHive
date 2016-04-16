@@ -25,8 +25,7 @@ class QueryBuilder
      * @var mixen
      */
     private $table;
-    private $param = array();
-    // private $ascol  = array();
+    public $param = array();
     public $where = '';
     private $join = '';
     private $group = array();
@@ -42,9 +41,9 @@ class QueryBuilder
     // --------------------------------------------------------------------
     public function __get($property)
     {
-        echo "Getting '$property'\n";
+        // echo "Getting '$property'\n";
 
-        return 123;
+        // return 123;
     }
     /**
      * ajax table.
@@ -220,26 +219,70 @@ class QueryBuilder
     public function with()
     {
         $args = func_get_args();
-        $this->join_on = '';
-        $str = ' JOIN ';
-        $str .= $this->_table($args[0]);
-        array_shift($args);
 
-        if (is_callable($args[0])) {
-            $q = new self();
-            $q->table($this->table);
-            call_user_func($args[0], $q);
+        array_push($this->with, $args);
 
-            return $q->join_on;
-        } else {
-            call_user_func_array(array($this, 'on'), $args);
-            $str .= $this->join_on;
+        return $this;
+    }
+    public function relation()
+    {
+        $args = func_get_args();
+        $col = isset($args[2]) ? $args[2] : 'id';
+        $this->withFirstColumn = isset($this->withFirstColumn) ? $this->withFirstColumn : $col;
+        $this->withSecColumn = $args[0];
+
+        // TODO: Save Seperator `=`, `in`, `not in`, `!=`
+        if (!isset($args[1]) || (isset($args[1]) && $args[1] == '=')) {
+            $this->masterQuery->param = [];
+            array_push($this->masterQuery->param, $col);
+            $this->where($args[0], 'in', $this->masterQuery);
         }
 
-        return $str;
+        return $this;
     }
     private function withParse()
     {
+        foreach ($this->with as $args) {
+            $table = $args[0]; // if is string only
+            $as = $args[0];
+
+            $q = new self();
+            $q->table($table);
+
+            $q->masterQuery = clone $this;
+
+            if (is_callable($args[1])) {
+                call_user_func($args[1], $q);
+                if (array_search($q->withSecColumn, $q->param) === false) {
+                    array_push($q->param, $q->withSecColumn);
+                }
+            } else {
+                array_shift($args);
+                call_user_func_array(array($q, 'relation'), $args);
+            }
+
+            $newQuery = $q->get();
+
+            foreach ($this->records->record as $record) {
+                $record->{$as} = array_filter(
+                $newQuery->record,
+                function ($e) use ($q, $record) {
+                    // TODO : support `in` method
+                    // TODO : shift name if send with dot
+                    return $e->{$q->withSecColumn} == $record->{$q->withFirstColumn};
+                });
+                // TODO: remove the sec column from the child if not sended
+            }
+        }
+
+        if (is_string($this->records->sql)) {
+            $temp = $this->records->sql;
+            $this->records->sql = [];
+            array_push($this->records->sql, $temp);
+        }
+        array_push($this->records->sql, $newQuery->sql);
+
+        return $this;
     }
 
     /**
@@ -272,8 +315,10 @@ class QueryBuilder
     public function get()
     {
         $this->_get();
-        // TODO : append with steatment
-        return $this->records = Database::query($this->query);
+        $this->records = Database::query($this->query);
+        $this->withParse();
+
+        return $this->records;
     }
 
     /**
@@ -583,13 +628,13 @@ class QueryBuilder
                 $str .= ' <= '.$this->_col($args[2], 'string');
                 break;
 
-            case 'lg':
+            case 'gt':
             case '>':
             case '!<':
                 $str .= ' > '.$this->_col($args[2], 'string');
                 break;
 
-            case 'lge':
+            case 'gte':
             case '>=':
                 $str .= ' > '.$this->_col($args[2], 'string');
                 break;
@@ -601,7 +646,10 @@ class QueryBuilder
             case 'in':
             case 'notin':
                 $b = in_array($args[1], array('in')) ? 'IN' : 'NOT IN';
-                if (is_array($args[2])) {
+
+                if ($args[2] instanceof self) {
+                    $str .= " {$b} ( ".$args[2]->_get(true).' )';
+                } elseif (is_array($args[2])) {
                     $temp = array();
                     foreach ($args[2] as $v) {
                         array_push($temp, $this->_col($v, 'string'));
