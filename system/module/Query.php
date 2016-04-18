@@ -422,6 +422,7 @@ class Query
         $sql = implode($sql, ' ').';';
 
         // Extra SQL
+        if(!isset($config['database']['essential']) || !$config['database']['essential']){
         if ($arr['type'] == 'insert') {
             $values = array();
             foreach ($arr['data'] as $k => $v) {
@@ -516,7 +517,7 @@ class Query
             }
             // delete from meta where `oid` = OLD.id  and `table` = 'terms'; // as trigger
         }
-
+        } // end of extra sql
         //echo $sql;
 
         //return array();
