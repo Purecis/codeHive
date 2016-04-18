@@ -224,6 +224,11 @@ class QueryBuilder
 
         return $this;
     }
+    public function appearAs(){
+        $args = func_get_args();
+        $this->appear = $args[0];
+        return $this;
+    }
     public function relation()
     {
         $args = func_get_args();
@@ -244,10 +249,10 @@ class QueryBuilder
     {
         foreach ($this->with as $args) {
             $table = $args[0]; // if is string only
-            $as = $args[0];
 
             $q = new self();
             $q->table($table);
+            $q->appear = $args[0];
 
             $q->masterQuery = clone $this;
 
@@ -264,13 +269,13 @@ class QueryBuilder
             $newQuery = $q->get();
 
             foreach ($this->records->record as $record) {
-                $record->{$as} = array_filter(
+                $record->{$q->appear} = array_values(array_filter(
                 $newQuery->record,
                 function ($e) use ($q, $record) {
                     // TODO : support `in` method
                     // TODO : shift name if send with dot
                     return $e->{$q->withSecColumn} == $record->{$q->withFirstColumn};
-                });
+                }));
                 // TODO: remove the sec column from the child if not sended
             }
 
