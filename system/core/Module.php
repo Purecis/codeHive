@@ -136,9 +136,28 @@ class Module
             $file = $mod;
         }
 
-        $alias = array('module', 'hook', 'plugin', 'extension', 'component', 'element', 'service', 'helper', 'lib', 'kernel', 'space', 'package');
+        $alias = array(
+            'module',
+            'hook',
+            'plugin',
+            'extension',
+            'component',
+            'element',
+            'service',
+            'helper',
+            'lib',
+            'kernel',
+            'space',
+            'package',
+            'resource',
+        );
+        
         foreach ($alias as $als) {
             $path = "{$config['app']}/{$als}/{$mod}/{$file}.php";
+            if (is_file($path)) {
+                break;
+            }
+            $path = "{$config['app']}/devel/{$als}/{$mod}/{$file}.php";
             if (is_file($path)) {
                 break;
             }
@@ -155,59 +174,6 @@ class Module
                 break;
             }
         }
-
-        /*
-        $path = "{$config['app']}/module/{$mod}/{$file}.php";
-        if (!is_file($path)) {
-            $path = "{$config['app']}/hook/{$mod}/{$file}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['app']}/plugin/{$mod}/{$file}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['app']}/extension/{$mod}/{$file}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['app']}/component/{$mod}/{$file}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['app']}/element/{$mod}/{$file}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['app']}/service/{$mod}/{$file}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['app']}/helper/{$mod}/{$file}.php";
-        }
-
-        if (!is_file($path)) {
-            $path = "{$config['assets']}/extensions/{$mod}/{$file}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/module/{$mod}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/hook/{$mod}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/plugin/{$mod}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/extension/{$mod}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/component/{$mod}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/element/{$mod}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/service/{$mod}.php";
-        }
-        if (!is_file($path)) {
-            $path = "{$config['system']}/helper/{$mod}.php";
-        }
-        */
 
         if (is_file($path)) {
             if ($full) {
