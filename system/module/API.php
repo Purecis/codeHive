@@ -80,7 +80,6 @@ class API
             if (is_file($path)) {
                 require_once $path;
             }
-            var_dump(self::$apis);
             if (isset(self::$apis[$name])) {
                 //check is callable
                 return call_user_func_array(self::$apis[$name], array(&$scope, $router));
