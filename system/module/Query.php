@@ -461,8 +461,8 @@ class Query
                 ));
                 //all
                 $sid = array();
-                foreach ($sid_q->data as $d) {
-                    array_push($sid, $d['id']);
+                foreach ($sid_q->record as $d) {
+                    array_push($sid, $d->id);
                 }
             }
 
