@@ -2,7 +2,7 @@
 /**
  * Purecis Upload Class
  *
- * This class Manage Upload Connections & Queries 
+ * This class Manage Upload Connections & Queries
  *
  * @package		codeHive
  * @subpackage	Core
@@ -35,7 +35,7 @@ class Upload{
 		//ini_set( 'memory_limit', '200M' );
 		//ini_set('upload_max_filesize', UPLOAD_MAX_SIZE.'M');
 		//ini_set('post_max_size', UPLOAD_MAX_SIZE.'M');
-		//ini_set('max_input_time', 600);  
+		//ini_set('max_input_time', 600);
 		//ini_set('max_execution_time', 600);
 		/*
 		$arr = array(
@@ -43,13 +43,13 @@ class Upload{
 		//	'allowed' => 'JPG',
 		//	'folder' => 'images',
 		//	'tags' => 'image',
-			
+
 		//	'resize' => array(400),
 		//	'thumbs' => true,
 		//	'target' => 'filename',
 		//	'library' => 'library_path',
 		);*/
-	
+
 		global $config;
 
 		if(!isset($arr['name']))$arr['name'] = 'file';
@@ -90,7 +90,7 @@ class Upload{
 		}
 
 		$cls = new stdClass();
-		
+
 		Module::import("User");
 		if(User::hasRule('upload-private-ext')){
 			$allowed = explode(',',strtoupper($config['upload']['private']));
@@ -99,7 +99,7 @@ class Upload{
 			$allowed = explode(',',strtoupper($config['upload']['public']));
 			$type = 'UPLOAD_PUBLIC_EXT';
 		};
-		
+
 		if(isset($arr['allowed'])){
 			$al = true;
 			$al1 = explode(',', strtoupper($arr['allowed']));
@@ -125,7 +125,7 @@ class Upload{
 			$cls->status = false;
 			return $cls;
 		}
-		
+
 		$filename = $_FILES[$arr['name']]['name'];
 		$ext = strtoupper(pathinfo($filename, PATHINFO_EXTENSION));
 		if(!in_array($ext,$allowed) ) {
@@ -232,7 +232,7 @@ class Upload{
 		if(in_array($ext,explode(',',"MP4,MOV,AVI,FLV,ASF")) && VIDEO_FIT != false){
 			$dir = dirname(dirname(dirname(__FILE__)));
 			$file[test] = "{$dir}/{$target}.{$ext}";
-			
+
 			//thumb
 			if(in_array('THUMBS', explode(',', VIDEO_FIT))){
 				self::shell_execute("ffmpeg"," -y -i {$dir}/{$target}.{$ext} -ss 5 -vframes 1 -r 1 -vf scale=854x480 -f image2 {$target}_thumb1.jpg");
@@ -282,9 +282,9 @@ class Upload{
 
 		if(!isset($arr['author'])){
 			$user = User::info();
-			$arr['author'] = $user->status?$user->data[0]['id']:0;
+			$arr['author'] = $user->status?$user->record[0]->id:0;
 		}
-		
+
 		Module::import("Query");
 		$q = Query::set('library',array(
 			'data' 		=> array(
@@ -363,7 +363,7 @@ class Upload{
 	 * @return void
 	 */
 	public static function unlink($arr=array()){
-		/*		
+		/*
 		$arr = array(
 			"library" => [1,2,3],
 			"taxonomy" => "",// tax to remove
@@ -406,11 +406,11 @@ class Upload{
 			//"objects" => [4,5,6],
 			//"author" => ids
 		//);
-		
+
 		// todo
 		// meta , taxonomy alone .. or with library and author
 		//
-
+		$sql = array();
 		if(isset($arr['library']) || isset($arr['author'])){
 			$sql = array(
 				"where" => array()
@@ -423,7 +423,7 @@ class Upload{
 				if(is_array($arr['author']))$arr['author'] = implode(",",$arr['author']);
 				$sql['where']['author'] = ":in:".$arr['author'];
 			}
-			
+
 		}else if(isset($arr['objects'])){
 			if(is_array($arr['objects']))$arr['objects'] = implode(",",$arr['objects']);
 			$sql = array(
@@ -459,7 +459,7 @@ class Upload{
 			$cls->status = false;
 			$cls->error = "id not set";
 			$cls->code = 1;
-			return $cls;			
+			return $cls;
 		}
 		if(!is_array($ids))$ids = array($ids);
 		$ids = implode(",", $ids);
@@ -471,11 +471,11 @@ class Upload{
 			if(!$user->status)return $user;
 		}
 		$where = array("id"=>":in:{$ids}");
-		if(!$force)$where['author'] = $user->data[0]['id'];
+		if(!$force)$where['author'] = $user->record[0]->id;
 
 		$q = Query::get("library",array("where"=>$where));
-		foreach($q->data as $row){
-			$data = json_decode($row['path']);
+		foreach($q->record as $row){
+			$data = json_decode($row->path);
 			foreach($data as $img)if(is_file($img))unlink($img);
 		}
 
