@@ -101,6 +101,25 @@ class Router
         return self::$router;
     }
 
+    public static function trigger($mod){
+
+        $_exist = isset(self::$callback[$mod]) ? true : false;
+        if($_exist){
+            $cls = new stdClass();
+            if (isset(self::$router[$mod])) {
+                foreach (self::$router[$mod] as $k) {
+                    $cls->$k = self::get($k);
+                }
+            }
+
+            $cb = Controller::trigger(self::$callback[$mod], $cls);
+            if (is_array($cb) || is_object($cb)) {
+                $cb = json_encode($cb);
+            }
+            return $cb;
+        }
+    }
+
     public static function callback()
     {
         //$mod = Request::get('pagename');
@@ -121,19 +140,10 @@ class Router
             $_exist = isset(self::$callback[$mod]) ? true : false;
         }
 
+        echo self::trigger($mod);
+        /*
         if ($_exist) {
-            $cls = new stdClass();
-            if (isset(self::$router[$mod])) {
-                foreach (self::$router[$mod] as $k) {
-                    $cls->$k = self::get($k);
-                }
-            }
-
-            $cb = Controller::trigger(self::$callback[$mod], $cls);
-            if (is_array($cb) || is_object($cb)) {
-                $cb = json_encode($cb);
-            }
-            echo $cb;
+            echo self::trigger();
         } else {
             // 404, 403...
             //post parser
@@ -141,6 +151,18 @@ class Router
             if (Module::used('post')) {
                 post::parser();
             }
+        }
+        */
+    }
+
+    // call router emediatly if it the same, its good for directive check
+    // to work emediatly without check otherwise again
+    public static function is(){
+        $args = func_get_args();
+        $mod = Request::parser(0);
+        if($mod == $args[0]){
+            call_user_func_array(array('self','on'), $args);
+            return self::trigger($args[0]);
         }
     }
 
