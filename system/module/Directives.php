@@ -41,6 +41,26 @@ class Directives
         // router to route
 
         /*
+        * import module
+        */
+        self::register('module', function ($args, &$scope) {
+            Module::import($args->import);
+        });
+
+        /*
+        * set asset
+        */
+        self::register('asset', function ($args, &$scope) {
+            if(!isset($args->scope))$args->scope = "vendor";
+
+            if(isset($args->type) && $args->type == "script"){
+                Asset::script($args->src, $args->scope);
+            }else{
+                Asset::style($args->src, $args->scope);
+            }
+        });
+
+        /*
         * get request from header
         */
         self::register('request', function ($args, &$scope) {
