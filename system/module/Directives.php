@@ -95,9 +95,10 @@ class Directives
 			$route = explode("/", $args->route);
 			$route = $route[0];
 
-			return Router::is($route, $args->param, function(&$scope, $router) use ($args){
+			return Router::is($route, $args->param, function(&$scope, $router) use ($args, $route){
 				$name = isset($args->scope) ? $args->scope : 'router';
-	            $scope->{$name} = $router;
+                $router->route = $route;
+                $scope->{$name} = $router;
 				return Shortcode::trigger($args->content);
 			});
 
@@ -119,7 +120,9 @@ class Directives
         self::register('query-object', function ($args, &$scope) {
             $where = isset($args->where) ? (array) String::json(Shortcode::trigger($args->where)) : null;
             $limit = isset($args->limit) ? isset($args->offset) ? "{$args->offset},{$args->limit}" : $args->limit : null;
-            $query = Object::fetch($args->taxonomy, $args->param, $where, ['limit' => $limit]);
+            $order = isset($args->order) ? $args->order : null;
+            $query = Object::fetch($args->taxonomy, $args->param, $where, ['limit' => $limit,"order"=>$order]);
+            // d($query);
             $scope->{$args->as} = $query->status?$query->record:[];
         });
 
@@ -129,8 +132,11 @@ class Directives
         */
         self::register('repeat', function ($args, &$scope) { // TODO : filter by ( like whether)
             $str = '';
-
-            foreach (Directives::scope($args->items) as $k => $v) {
+            $arr = Directives::scope($args->items);
+            if(isset($args->explode)){
+                $arr = explode($args->explode, $arr);
+            }
+            foreach ($arr as $k => $v) {
                 Controller::$scope->{$args->as} = $v;
                 if (is_null($args->{'index'})) {
                     Controller::$scope->{"{$ex[0]}Index"} = $k;
@@ -165,7 +171,160 @@ class Directives
                 return $str;
             },
         ));
+        /*
+        * directive Short If
+        * Description : Looping array
+        * Usage : ${var = 'string'?'yes':'not'}
+        */
+        Shortcode::register(array(
+            'code' => 'shortif',
+            'pattern' => '#\${(.+)\?(.*)\:(.*)}#Usi',
+            'callback' => function ($match) {
+                $parse = function ($v) {
+                    $v = trim($v);
+                    if (strpos($v, '"') === 0) {
+                        $v = rtrim($v, '"');
+                        $v = ltrim($v, '"');
+                        return $v;
+                    } elseif (strpos($v, "'") === 0) {
+                        $v = rtrim($v, "'");
+                        $v = ltrim($v, "'");
 
+                        return $v;
+                    } elseif ($v == 'true') {
+                        return true;
+                    } elseif ($v == 'false') {
+                        return false;
+                    } elseif ($v == 'null') {
+                        return '';
+                    } else {
+                        return Directives::scope($v);
+                    }
+                };
+                $ok = true;
+
+                $match[2] = $parse($match[2]);
+                $match[3] = $parse($match[3]);
+
+                if (strpos($match[1], '=') !== false) {
+                    $ex = explode('=', trim($match[1]));
+
+                    if ($parse($ex[0]) == $parse($ex[1])) {
+                        return Shortcode::trigger($match[2]);
+                    }else{
+                        return Shortcode::trigger($match[3]);
+                    }
+                } elseif (strpos($match[1], '!=') !== false) {
+                    $ex = explode('!=', trim($match[1]));
+                    if ($parse($ex[0]) != $parse($ex[1])) {
+                        return Shortcode::trigger($match[2]);
+                    }else{
+                        return Shortcode::trigger($match[3]);
+                    }
+                } elseif (strpos($match[1], 'isset') !== false) {
+                    if (strpos(trim($match[1]), '!') === 0) {
+                        $not = 1;
+                    } else {
+                        $not = 0;
+                    }
+
+                    $ex = substr(trim($match[1]), 6 + $not, -1);//explode("isset",trim());
+
+                    if ($not) {
+                        if (is_null($parse($ex))) {
+                            return Shortcode::trigger($match[2]);
+                        }else{
+                            return Shortcode::trigger($match[3]);
+                        }
+                    } else {
+                        if (!is_null($parse($ex))) {
+                            return Shortcode::trigger($match[2]);
+                        }else{
+                            return Shortcode::trigger($match[3]);
+                        }
+                    }
+                }
+
+                return;
+            },
+        ));
+        /*
+        * directive Short If
+        * Description : Looping array
+        * Usage : ${router.taxo='safari'=>'active'}
+        */
+        Shortcode::register(array(
+            'code' => 'shortif_pointer',
+            'pattern' => '#\${(.+)\=\>(.*)}#Usi',
+            'callback' => function ($match) {
+                $parse = function ($v) {
+                    $v = trim($v);
+                    if (strpos($v, '"') === 0) {
+                        $v = rtrim($v, '"');
+                        $v = ltrim($v, '"');
+                        return $v;
+                    } elseif (strpos($v, "'") === 0) {
+                        $v = rtrim($v, "'");
+                        $v = ltrim($v, "'");
+
+                        return $v;
+                    } elseif ($v == 'true') {
+                        return true;
+                    } elseif ($v == 'false') {
+                        return false;
+                    } elseif ($v == 'null') {
+                        return '';
+                    } else {
+                        return Directives::scope($v);
+                    }
+                };
+                $ok = true;
+
+                $match[2] = $parse($match[2]);
+                $match[3] = isset($match[3])?$parse($match[3]):"";
+
+                if (strpos($match[1], '=') !== false) {
+                    $ex = explode('=', trim($match[1]));
+
+                    if ($parse($ex[0]) == $parse($ex[1])) {
+                        return Shortcode::trigger($match[2]);
+                    }else{
+                        return Shortcode::trigger($match[3]);
+                    }
+                } elseif (strpos($match[1], '!=') !== false) {
+                    $ex = explode('!=', trim($match[1]));
+                    if ($parse($ex[0]) != $parse($ex[1])) {
+                        return Shortcode::trigger($match[2]);
+                    }else{
+                        return Shortcode::trigger($match[3]);
+                    }
+                } elseif (strpos($match[1], 'isset') !== false) {
+                    if (strpos(trim($match[1]), '!') === 0) {
+                        $not = 1;
+                    } else {
+                        $not = 0;
+                    }
+
+                    $ex = substr(trim($match[1]), 6 + $not, -1);//explode("isset",trim());
+
+                    if ($not) {
+                        if (is_null($parse($ex))) {
+                            return Shortcode::trigger($match[2]);
+                        }else{
+                            return Shortcode::trigger($match[3]);
+                        }
+                    } else {
+                        if (!is_null($parse($ex))) {
+                            return Shortcode::trigger($match[2]);
+                        }else{
+                            return Shortcode::trigger($match[3]);
+                        }
+                    }
+                }
+
+                return;
+            },
+        ));
         /*
         * directive Scope
         * Description : Scoping variables
@@ -173,9 +332,34 @@ class Directives
 
         // support new method until remove support for old one
         Shortcode::register(array(
+            'code' => 'newScope$B',
+            'pattern' => '#\$\[(.+)\]#Usi',
+            // 'pattern' => '#\${(.+\${(.+)}.+|(.+))}#Usi',
+            'callback' => function ($match) {
+
+                $filter = explode('|', $match[1]);//check ex for plugins like lower
+                $match[1] = $filter[0];
+
+                $val = Directives::scope($match[1]);
+
+                if (isset($filter[1])) {
+                    $f = trim($filter[1]);
+                    if ($f == 'upper') {
+                        $val = strtoupper($val);
+                    } elseif ($f == 'escape') {
+                        $val = htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
+                    }
+                }
+
+                return $val;
+            },
+        ));
+        Shortcode::register(array(
             'code' => 'newScope$',
             'pattern' => '#\${(.+)}#Usi',
+            // 'pattern' => '#\${(.+\${(.+)}.+|(.+))}#Usi',
             'callback' => function ($match) {
+
                 $filter = explode('|', $match[1]);//check ex for plugins like lower
                 $match[1] = $filter[0];
 
@@ -246,7 +430,7 @@ class Directives
         ));
 
         /*
-        * directive Each
+        * directive If
         * Description : Looping array
         */
         Shortcode::register(array(
@@ -506,7 +690,8 @@ class Directives
 
     private static function scope($v)
     {
-        if (is_numeric(trim($v))) {
+        $v = trim($v);
+        if (is_numeric($v)) {
             return $v;
         }
         $val = Controller::$scope;
