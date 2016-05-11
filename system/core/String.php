@@ -336,6 +336,27 @@ class String{
 	// --------------------------------------------------------------------
 
 	/**
+	 * json
+	 *
+	 * Parse XML, Shortcode Attributes
+	 *
+	 * @access	public
+	 * @param	string attribute string ex (name='abc' value='def')
+	 * @return	array
+	 */
+	public static function json($s){
+        $s = str_replace(
+            array('"',  "'"),
+            array('\"', '"'),
+            $s
+        );
+        $s = preg_replace('/(\w+):/i', '"\1":', $s);
+		return json_decode($s);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * ontime
 	 *
 	 * diffrent between 2 times
