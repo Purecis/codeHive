@@ -2,7 +2,7 @@
 /**
  * Purecis Object Module
  *
- * control URL Parameters 
+ * control URL Parameters
  *
  * @package		codeHive
  * @subpackage	Module
@@ -19,16 +19,16 @@ class Object{
 	 * Fetching Data from Object table by Taxonomy
 	 *
 	 * @access	public
-	 * @param	taxonomy string 
-	 * @param	array 	sql array 
+	 * @param	taxonomy string
+	 * @param	array 	sql array
 	 * @return	void
 	 */
 	public static function get( $taxonomy, $arr=array() ){
 		Module::import("Query");
 
 		if(!is_array($arr["where"]))$arr['where'] = array();
-		$arr['where']['taxonomy'] = $taxonomy;
-
+		$taxonomy = explode(",", $taxonomy);
+		$arr['where']['taxonomy'] = ":in:'".implode("','",$taxonomy)."'";
 		return Query::get("objects",$arr);
 	}
 
@@ -38,8 +38,8 @@ class Object{
 	 * Fetching Data from Object table by Taxonomy
 	 *
 	 * @access	public
-	 * @param	taxonomy string 
-	 * @param	array 	data array 
+	 * @param	taxonomy string
+	 * @param	array 	data array
 	 * @return	void
 	 */
 	public static function fetch( $taxonomy, $data=array(), $where=array(), $additional=array() ){
