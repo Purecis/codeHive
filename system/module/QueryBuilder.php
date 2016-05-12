@@ -460,10 +460,18 @@ class QueryBuilder
         //     return $this->_col($args[0],"single");
         } elseif (substr_count($args[0], '.') == 1 && !isset($args[1])) {
             $exp = explode('.', $args[0]);
-
-            return "`{$exp[0]}`.`{$exp[1]}`";
+            if($exp[1] == "*"){
+                return "`{$exp[0]}`.{$exp[1]}";
+            }else{
+                return "`{$exp[0]}`.`{$exp[1]}`";
+            }
         } elseif (isset($args[1]) && $args[1] == 'single') {
-            return "`{$args[0]}`";
+            if($args[0] == "*"){
+                return $args[0];
+            }else{
+                return "`{$args[0]}`";
+            }
+
         } elseif (isset($args[1]) && $args[1] == 'string') {
             if (is_array($args[0])) {
                 return "('".implode("', '", $args[0])."')";
