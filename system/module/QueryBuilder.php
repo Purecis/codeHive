@@ -466,11 +466,7 @@ class QueryBuilder
                 return "`{$exp[0]}`.`{$exp[1]}`";
             }
         } elseif (isset($args[1]) && $args[1] == 'single') {
-            if($args[0] == "*"){
-                return $args[0];
-            }else{
-                return "`{$args[0]}`";
-            }
+            return "`{$args[0]}`";
 
         } elseif (isset($args[1]) && $args[1] == 'string') {
             if (is_array($args[0])) {
@@ -479,7 +475,12 @@ class QueryBuilder
                 return "'".String::escape($args[0])."'";
             }
         } else {
-            return "`{$this->table}`.`{$args[0]}`";
+            if($args[0] == "*"){
+                return "`{$this->table}`.{$args[0]}";
+            }else{
+                return "`{$this->table}`.`{$args[0]}`";
+            }
+
         }
     }
 
