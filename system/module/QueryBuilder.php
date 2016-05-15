@@ -268,15 +268,26 @@ class QueryBuilder
 
             $newQuery = $q->get();
 
-            foreach ($this->records->record as $record) {
-                $record->{$q->appear} = array_values(array_filter(
-                $newQuery->record,
-                function ($e) use ($q, $record) {
-                    // TODO : support `in` method
-                    // TODO : shift name if send with dot
-                    return $e->{$q->withSecColumn} == $record->{$q->withFirstColumn};
-                }));
-                // TODO: remove the sec column from the child if not sended
+            if($newQuery->status){
+                foreach ($this->records->record as $record) {
+                    $record->{$q->appear} = array_values(array_filter(
+                    $newQuery->record,
+                    function ($e) use ($q, $record) {
+                        // TODO : support `in` method
+                        // TODO : shift name if send with dot
+                        return $e->{$q->withSecColumn} == $record->{$q->withFirstColumn};
+                    }));
+                    // TODO: remove the sec column from the child if not sended
+                }
+            }else{
+                if (isset($this->records->error) && is_string($this->records->error)) {
+                    $temp = $this->records->error;
+                    $this->records->error = [];
+                    array_push($this->records->error, $temp);
+                }else{
+                    $this->records->error = [];
+                }
+                array_push($this->records->error, $newQuery->error);
             }
 
             if (is_string($this->records->sql)) {
@@ -582,7 +593,7 @@ class QueryBuilder
             $q->table($this->table);
             call_user_func($args[0], $q);
 
-            return $q->join_on;
+            return $str.$q->join_on;
         } else {
             call_user_func_array(array($this, 'on'), $args);
             $str .= $this->join_on;
