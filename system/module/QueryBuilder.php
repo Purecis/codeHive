@@ -105,6 +105,35 @@ class QueryBuilder
 
         return $this;
     }
+    public function leftJoin()
+    {
+        $args = func_get_args();
+        $this->join .= $this->_joinParse($args, "LEFT");
+
+        return $this;
+    }
+    public function rightJoin()
+    {
+        $args = func_get_args();
+        $this->join .= $this->_joinParse($args, "RIGHT");
+
+        return $this;
+    }
+    public function outerJoin()
+    {
+        // TODO : support right outer and left outer
+        $args = func_get_args();
+        $this->join .= $this->_joinParse($args, "FULL OUTER");
+
+        return $this;
+    }
+    public function innerJoin()
+    {
+        $args = func_get_args();
+        $this->join .= $this->_joinParse($args, "INNER");
+
+        return $this;
+    }
 
     public function on()
     {
@@ -581,10 +610,14 @@ class QueryBuilder
         return '';
     }
 
-    private function _joinParse($args)
+    private function _joinParse($args, $place = false)
     {
         $this->join_on = '';
-        $str = ' LEFT JOIN ';
+        $str = "";
+        if($place){
+            $str .= " {$place}";
+        }
+        $str .= ' JOIN ';
         $str .= $this->_table($args[0]);
         array_shift($args);
 
