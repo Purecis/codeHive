@@ -285,7 +285,7 @@ class QueryBuilder
 
             $q->masterQuery = clone $this;
 
-            if (is_callable($args[1])) {
+            if (is_callable($args[1]) && $args[1] instanceof Closure) {
                 call_user_func($args[1], $q);
                 if (array_search($q->withSecColumn, $q->param) === false && sizeof($q->param)) {
                     array_push($q->param, $q->withSecColumn);
@@ -479,7 +479,7 @@ class QueryBuilder
             return $temp;
         }
 
-        if (is_callable($args[0])) {
+        if (is_callable($args[0]) && $args[0] instanceof Closure) {
             $q = new self();
             call_user_func($args[0], $q);
 
@@ -600,7 +600,7 @@ class QueryBuilder
 
         if ($args[0] instanceof self) {
             return " UNION {$args[1]}".$args[0]->_get(true);
-        } elseif (is_callable($args[0])) {
+        } elseif (is_callable($args[0]) && $args[0] instanceof Closure) {
             $q = new self();
             call_user_func($args[0], $q);
 
@@ -621,7 +621,7 @@ class QueryBuilder
         $str .= $this->_table($args[0]);
         array_shift($args);
 
-        if (is_callable($args[0])) {
+        if (is_callable($args[0]) && $args[0] instanceof Closure) {
             $q = new self();
             $q->table($this->table);
             call_user_func($args[0], $q);
@@ -637,7 +637,7 @@ class QueryBuilder
 
     private function _whereParse($args)
     {
-        if (is_callable($args[0])) {
+        if (is_callable($args[0]) && $args[0] instanceof Closure) {
             $q = new self();
             $q->table($this->table);
             call_user_func($args[0], $q);
