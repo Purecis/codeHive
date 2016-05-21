@@ -38,10 +38,10 @@ class Controller
     public static function __bootstrap()
     {
         global $config;
-        foreach (glob("{$config['app']}/controller/*.bootstrap.php") as $filename) {
+        foreach (glob(APP_PATH."/controller/*.bootstrap.php") as $filename) {
             require_once $filename;
         }
-        foreach (glob("{$config['app']}/controller/*.init.php") as $filename) {
+        foreach (glob(APP_PATH."/controller/*.init.php") as $filename) {
             require_once $filename;
         }
     }
@@ -100,7 +100,7 @@ class Controller
             if (array_key_exists($name, self::$controllers)) {
                 $name = self::$controllers[$name];
             } else {
-                $path = "{$config['app']}/controller/{$name}.php";
+                $path = APP_PATH."/controller/{$name}.php";
                 if (is_file($path)) {
                     require_once $path;
                 }
@@ -110,7 +110,7 @@ class Controller
             }
         }
         if (is_array($name)) {
-            $path = "{$config['app']}/controller/{$name[0]}.php";
+            $path = APP_PATH."/controller/{$name[0]}.php";
             if (is_file($path)) {
                 require_once $path;
             }

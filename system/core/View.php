@@ -44,7 +44,7 @@ class View
             $path = (sizeof($ex) > 1) ? Module::path($ex[1]) : false;
             $path = "{$path}/view/{$ex[0]}.html";
         } else {
-            $path = "{$config['app']}/view/{$tpl}.html";
+            $path = APP_PATH."/view/{$tpl}.html";
             if (!file_exists($path)) {
                 $path = "{$config['system']}/view/{$tpl}.html";
             }

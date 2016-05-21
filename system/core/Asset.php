@@ -41,9 +41,9 @@ class Asset
         global $config;
         self::define('path', '{}');
         self::define('path.base', Request::base());
-        self::define('path.app', Request::base($config['app']));
-        self::define('path.view', Request::base("{$config['app']}/view"));
-        self::define('path.vendor', Request::base("{$config['app']}/vendor"));
+        self::define('path.app', Request::base(APP_PATH));
+        self::define('path.view', Request::base(APP_PATH."/view"));
+        self::define('path.vendor', Request::base(APP_PATH."/vendor"));
         self::define('path.library', Request::base("{$config['assets']}/library"));
         self::define('path.domain', Request::domain());
 
@@ -104,12 +104,11 @@ class Asset
      */
     private static function src_parser($src, $folder, $ext = false)
     {
-        global $config;
         if (strpos($src, '://') === false) { // check is external
             $ex = explode('@', $src);
             $path = (sizeof($ex) > 1) ? Module::path($ex[1]) : false;
             if (!$path) {
-                $path = "{$config['app']}";
+                $path = APP_PATH;
             } else {
                 $src = $ex[0];
             }
@@ -178,7 +177,7 @@ class Asset
     {
         global $config;
 
-        return Request::base("{$config['app']}/vendor{$src}");
+        return Request::base(APP_PATH."/vendor{$src}");
     }
 }
 

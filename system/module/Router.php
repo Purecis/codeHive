@@ -128,7 +128,7 @@ class Router
         $_exist = isset(self::$callback[$mod]) ? true : false;
         if (!$_exist) {
             global $config;
-            $path = "{$config['app']}/controller/{$mod}.php";
+            $path = APP_PATH."/controller/{$mod}.php";
             if (is_file($path)) {
                 require_once $path;
                 $_exist = isset(self::$callback[$mod]) ? true : false;

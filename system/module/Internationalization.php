@@ -147,9 +147,9 @@ class Internationalization
             }
             $path = Module::path($space)."/language/{$locale}";
         } else {
-            $path = "{$config['app']}/language/{$locale}";
+            $path = APP_PATH."/language/{$locale}";
             if (!file_exists($path)) {
-                $path = "{$config['app']}/locale/{$locale}";
+                $path = APP_PATH."/locale/{$locale}";
             }
             if (!file_exists($path)) {
                 $path = "{$config['system']}/language/{$locale}";

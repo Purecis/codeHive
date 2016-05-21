@@ -21,9 +21,13 @@ class File{
 	 * @param	integer File size in Bytes
 	 * @return	string
 	 */
-	public static function format($size){
+	public static function format($size, $float=2){
 	    $unit=array('Byte','KB','MB','GB','TB','PB');
-	    return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
+		$n = round($size/pow(1024,($i=floor(log($size,1024)))),$float);
+		if($float){
+			$n = sprintf("%.{$float}f", $n);
+		}
+	    return $n.' '.$unit[$i];
 	}
 
 	// --------------------------------------------------------------------

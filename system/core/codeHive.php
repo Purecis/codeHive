@@ -29,16 +29,29 @@ class codeHive
         define('VersionMinor', '1');
         define('VersionPatch', '00');
         define('VersionCode', 'Beta');
-        define('VersionBuild', '3000');
 
-        define('VERSION', 'v.'.VersionMajor.'.'.VersionMinor.'.'.VersionPatch.' '.VersionCode.', Build '.VersionBuild);
+        define('VERSION', 'v.'.VersionMajor.'.'.VersionMinor.'.'.VersionPatch.' '.VersionCode);
 
         $config = array();
         $config['app'] = $start['app'] ?: 'app';
+        $config['container'] = $start['container'] ?: 'apps';
         $config['assets'] = $start['assets'] ?: 'assets';
         $config['system'] = $start['system'] ?: 'system';
 
-        $config = array_merge($config, self::config($config['app']));
+        // check if cli
+        if (substr(php_sapi_name(), 0, 3) == 'cli') {
+            if($_SERVER['argv'][1] == "_cli"){
+                $config['app'] = "_cli";
+            }else if($_SERVER['argv'][1] == "install"){
+                CLI::install();
+            }
+            array_shift($_SERVER['argv']);
+            array_shift($_SERVER['argv']);
+        }
+
+        define('APP_PATH', "{$config['container']}/{$config['app']}");
+
+        $config = array_merge($config, self::config(APP_PATH));
 
         if (!isset($config['settings'])) {
             $config['settings'] = array();
@@ -77,7 +90,7 @@ class codeHive
 
         echo Module::__bootstrap();
 
-        require_once "{$start['app']}/app.php";
+        require_once APP_PATH."/app.php";
 
         echo Module::__shutdown();
 
@@ -88,10 +101,14 @@ class codeHive
 
     private static function config($app)
     {
+        global $config;
+        if($config['app'] == "_cli"){
+            return [];
+        }
         if (!file_exists("{$app}/config.php")) {
             Install::initialize();
             exit;
-        };
+        }
 
         return require_once "{$app}/config.php";
     }

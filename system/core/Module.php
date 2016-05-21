@@ -29,7 +29,7 @@ class Module
     public static function __bootstrap()
     {
         global $config;
-        self::import($config['modules']);
+        if(sizeof($config['modules']))self::import($config['modules']);
     }
 
     // --------------------------------------------------------------------
@@ -151,13 +151,13 @@ class Module
             'package',
             'resource',
         );
-        
+
         foreach ($alias as $als) {
-            $path = "{$config['app']}/{$als}/{$mod}/{$file}.php";
+            $path = APP_PATH."/{$als}/{$mod}/{$file}.php";
             if (is_file($path)) {
                 break;
             }
-            $path = "{$config['app']}/devel/{$als}/{$mod}/{$file}.php";
+            $path = APP_PATH."/devel/{$als}/{$mod}/{$file}.php";
             if (is_file($path)) {
                 break;
             }

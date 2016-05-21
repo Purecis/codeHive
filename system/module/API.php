@@ -39,12 +39,12 @@ class API
             }
 
             $name = $router->fire;
-            $path = "{$config['app']}/controller/api.{$name}.php";
+            $path = APP_PATH."/controller/api.{$name}.php";
             if (!is_file($path)) {
-                $path = "{$config['app']}/controller/{$name}.php";
+                $path = APP_PATH."/controller/{$name}.php";
             }
             if (!is_file($path)) {
-                $path = "{$config['app']}/controller/api.php";
+                $path = APP_PATH."/controller/api.php";
             }
 
             // search in module controller
