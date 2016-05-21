@@ -440,6 +440,8 @@ class Upload{
 			//if(isset($arr['taxonomy']))$sql['where']['taxonomy'] = $arr['taxonomy'];
 		}
 
+		$sql["order"] = "desc";
+
 		return Query::get("library",$sql);
 	}
 
