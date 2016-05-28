@@ -50,9 +50,17 @@ class API
             // search in module controller
             if (!isset(self::$apis[$router->fire]) && !is_file($path)) {
                 $mod = Module::path($router->fire);
-                $a = explode('.', $router->fire);
-                $name = end($a);
+
+                $name = $router->do;
                 $path = "{$mod}/controller/api.{$name}.php";
+                if (!is_file($path)) {
+                    $path = "{$mod}/controller/{$name}.php";
+                }
+                if (!is_file($path)) {
+                    $a = explode('.', $router->fire);
+                    $name = end($a);
+                    $path = "{$mod}/controller/api.{$name}.php";
+                }
                 if (!is_file($path)) {
                     $path = "{$mod}/controller/{$name}.php";
                 }
@@ -60,6 +68,7 @@ class API
                     $path = "{$mod}/controller/api.php";
                 }
             }
+
 
             // search in module controller
             if (!isset(self::$apis[$router->fire]) && !is_file($path)) {
