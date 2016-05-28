@@ -351,7 +351,7 @@ class String{
             $s
         );
         $s = preg_replace('/(\w+):/i', '"\1":', $s);
-		return json_decode($s);
+		return is_array($s) ? $s : json_decode($s);
 	}
 
 	// --------------------------------------------------------------------

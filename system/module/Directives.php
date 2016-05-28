@@ -61,6 +61,14 @@ class Directives
         });
 
         /*
+        * call controller
+        */
+       // TODO : need to support class call and module insider call
+        self::register('controller', function ($args, &$scope) {            
+            return Controller::trigger($args->name, $args);
+        });
+
+        /*
         * get request from header
         */
         self::register('request', function ($args, &$scope) {
@@ -178,7 +186,7 @@ class Directives
         */
         Shortcode::register(array(
             'code' => 'shortif',
-            'pattern' => '#\${(.+)\?(.*)\:(.*)}#Usi',
+            'pattern' => '#\${([^}]+)\?([^}]*)\:([^}]*)}#Usi',
             'callback' => function ($match) {
                 $parse = function ($v) {
                     $v = trim($v);
@@ -255,7 +263,7 @@ class Directives
         */
         Shortcode::register(array(
             'code' => 'shortif_pointer',
-            'pattern' => '#\${(.+)\=\>(.*)}#Usi',
+            'pattern' => '#\${([^}]+)\=\>([^}]*)}#Usi',
             'callback' => function ($match) {
                 $parse = function ($v) {
                     $v = trim($v);
@@ -333,7 +341,7 @@ class Directives
         // support new method until remove support for old one
         Shortcode::register(array(
             'code' => 'newScope$B',
-            'pattern' => '#\$\[(.+)\]#Usi',
+            'pattern' => '#\$\[([^}]+)\]#Usi',
             // 'pattern' => '#\${(.+\${(.+)}.+|(.+))}#Usi',
             'callback' => function ($match) {
 
@@ -356,7 +364,7 @@ class Directives
         ));
         Shortcode::register(array(
             'code' => 'newScope$',
-            'pattern' => '#\${(.+)}#Usi',
+            'pattern' => '#\${([^}]+)}#Usi',
             // 'pattern' => '#\${(.+\${(.+)}.+|(.+))}#Usi',
             'callback' => function ($match) {
 
@@ -379,7 +387,7 @@ class Directives
         ));
         Shortcode::register(array(
             'code' => 'newScope@',
-            'pattern' => '#\@{(.+)}#Usi',
+            'pattern' => '#\@{([^}]+)}#Usi',
             'callback' => function ($match) {
                 $filter = explode('|', $match[1]);//check ex for plugins like lower
                 $match[1] = $filter[0];
@@ -401,7 +409,7 @@ class Directives
 
         Shortcode::register(array(
             'code' => 'scope',
-            'pattern' => '#\{-(.+)\-}#Usi',
+            'pattern' => '#\{-([^}]+)\-}#Usi',
             'callback' => function ($match) {
                 $filter = explode('|', $match[1]);//check ex for plugins like lower
                 $match[1] = $filter[0];

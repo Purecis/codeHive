@@ -88,12 +88,21 @@ class Controller
      * @param string $name controller name
      * @param array  $arg  callback arguments
      */
+    // TODO : need to support controller call inside modules
+    // TODO : make all file paths search inside one module and call from all
     public static function trigger($name, $arg = null)
     {
         global $config;
 
         if (empty(self::$scope)) {
             self::$scope = new stdClass();
+        }
+
+        if (is_string($name)) {
+            $temp = String::json($name);
+            if($temp){
+                $name = $temp;
+            }
         }
 
         if (is_string($name)) {
