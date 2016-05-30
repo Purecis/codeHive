@@ -359,10 +359,15 @@ class QueryBuilder
 
     public function get()
     {
+        $args = func_get_args();
+
         $this->_get();
         $this->records = Database::query($this->query);
         $this->withParse();
 
+        if(isset($args[0])){
+            return (Object) $this->records->record[$args[0]];
+        }
         return $this->records;
     }
 
@@ -489,7 +494,17 @@ class QueryBuilder
         if (!is_array($args[0])) {
             $args[0] = trim($args[0]);
         }
-        if (strpos($args[0], '~') === 0) {
+
+
+
+        if (strpos($args[0], '(') !== FALSE) {
+            // TODO : fix 2 arguments sql functions
+            return preg_replace_callback("#\((.*)\)#six", function($match){
+                $match[1] = self::_col($match[1]);
+                return "(".$match[1].")";
+            }, $args[0]);
+
+        }else if (strpos($args[0], '~') === 0) {
             return $this->_col(substr($args[0], 1));
         } elseif (substr_count($args[0], ' as ') == 1 && !isset($args[1])) {
             $exp = explode(' as ', $args[0]);
