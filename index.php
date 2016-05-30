@@ -15,7 +15,7 @@ session_start();
 include 'system/core/codeHive.php';
 
 codeHive::start(array(
-    'app' => 'online-exam',
+    'app' => 'sample',
 
     // define folders
     'container' => "apps",
