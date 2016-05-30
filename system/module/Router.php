@@ -65,6 +65,7 @@ class Router
             //self::$router[$name] = array();
             $cb = $val;
         }
+        // TODO : parse pattern /url/:id (here and inside api)
 
         self::$callback[$name] = $cb;
 

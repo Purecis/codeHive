@@ -64,7 +64,7 @@ class Directives
         * call controller
         */
        // TODO : need to support class call and module insider call
-        self::register('controller', function ($args, &$scope) {            
+        self::register('controller', function ($args, &$scope) {
             return Controller::trigger($args->name, $args);
         });
 
@@ -572,12 +572,12 @@ class Directives
         ));
 
         /*
-        * directive Internationalization
+        * directive Localization
         * Description : trigger event
         * Usage : __(You have :count messages and :days days :> {count:1,days:2} @ module.name)
         */
         Shortcode::register(array(
-            'code' => 'internationalization',
+            'code' => 'Localization',
             'pattern' => '#\__\((.+)\)#Usi',
             'callback' => function ($match) {
                 $ar = array();
@@ -598,7 +598,7 @@ class Directives
                     }
                 }
 
-                return Internationalization::translate(trim($ex[0]), $ar, $at);
+                return Localization::translate(trim($ex[0]), $ar, $at);
             },
         ));
 

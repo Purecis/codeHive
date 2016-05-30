@@ -64,4 +64,6 @@ return array(
 
     // development, production, trace
     'ENVIRONMENT' => 'trace',
+
+    "locale" => "en-us"
 );

@@ -25,6 +25,8 @@ class codeHive
             throw new Exception('The codeHive Framework v2.1 requires PHP version 5.3 or higher, (5.4) is Recomonded.');
         }
 
+        require_once "_globals.php";
+
         define('VersionMajor', '2');
         define('VersionMinor', '1');
         define('VersionPatch', '00');
@@ -113,27 +115,6 @@ class codeHive
         return require_once "{$app}/config.php";
     }
 }
-
-/*
- * auto load class when it called (Core Classes Only).
- */
-spl_autoload_register(function ($class) {
-    global $config;
-    $class = str_replace('\\', '/', $class);
-    if (is_file("{$config['system']}/core/{$class}.php")) {
-        require_once "{$class}.php";
-        if (is_callable(array($class, '__bootstrap'))) {
-            call_user_func(array($class, '__bootstrap'));
-        }
-        if (isset($config['ENVIRONMENT']) && strtoupper($config['ENVIRONMENT']) == 'TRACE') {
-            Trace::message('Used System Cores', $class);
-        }
-    } else {
-        if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
-            Trace::error('System Cores Faild', $class);
-        }
-    }
-});
 
 /* End of file codeHive.php */
 /* Location: ./system/core/codeHive.php */

@@ -3,7 +3,7 @@
      exit('Direct access to this location is not permitted.');
  }
 /**
- * Purecis Internationalization Class.
+ * Purecis localization Class.
  *
  * control Sessions With Advance Tecnique
  *
@@ -13,7 +13,7 @@
  *
  * @link		http://purecis.com/
  */
-class Internationalization
+class Localization
 {
     /**
      * @var array
@@ -157,10 +157,8 @@ class Internationalization
         }
         if (!is_dir($path)) {
             if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
-                Trace::error('Missing Locales', $space);
+                Trace::error('Missing Locales', $path);
             }
-            //else die("Locales at <b>{$space}</b> not Found.");
-
             return;
         }
 
@@ -193,22 +191,22 @@ class Internationalization
 
     public static function requestLocale($locale = 'locale')
     {
-        if (Request::get($locale)) {
-            Session::set(array('locale' => Request::get($locale)));
+        global $config;
+        $locale = Request::get($locale);
+        if ($locale) {
+            Session::set(array('locale' => $locale));
+        }else{
+            $locale = $config['locale'];
+            if(!$locale){
+                $locale = "en-us";
+            }
         }
+        return $locale;
     }
-}
-
-/**
- * Locale Alias __.
- *
- * @param	mixen 	str or array keys only
- *
- * @return mixen
- */
-function __($e, $a = array(), $space = false)
-{
-    return Internationalization::translate($e, $a, $space);
+    
+    public static function request($locale = 'locale'){
+        self::requestLocale($locale);
+    }
 }
 
 /* End of file Locale.php */
