@@ -683,7 +683,8 @@ class Directives
                     }
                 }
                 if (isset($args->in)) {
-                    if (strpos($args->is, $args->in) !== false) {
+                    $in = explode(",", $args->in);
+                    if (in_array($args->is, $in)) {
                         return Shortcode::trigger($args->content);
                     }
                 }
