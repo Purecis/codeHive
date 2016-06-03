@@ -198,14 +198,14 @@ class Localization
         }else{
             $locale = $config['locale'];
             if(!$locale){
-                $locale = "en-us";
+                $locale = self::$locale;
             }
         }
         return $locale;
     }
-    
+
     public static function request($locale = 'locale'){
-        self::requestLocale($locale);
+        return self::requestLocale($locale);
     }
 }
 
