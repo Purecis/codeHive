@@ -159,7 +159,7 @@ class Localization
             if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
                 Trace::error('Missing Locales', $path);
             }
-            return;
+            return [];
         }
 
         foreach (glob("{$path}/*.php") as $filename) {
