@@ -190,7 +190,11 @@ class QueryBuilder
         if (sizeof($args) == 2) {
             array_push($this->order, array($args[0], strtoupper($args[1])));
         } elseif (sizeof($args) == 1) {
-            array_push($this->order, [$args[0], 'DESC']);
+            if (strpos($args[0], '(') !== FALSE) {
+                array_push($this->order, [$args[0]]);
+            }else{
+                array_push($this->order, [$args[0], 'DESC']);
+            }
         } else {
             array_push($this->order, ['id', 'DESC']);
         }
@@ -271,11 +275,16 @@ class QueryBuilder
             array_push($this->masterQuery->param, $col);
             $this->where($args[0], 'in', $this->masterQuery);
         }
+        if($args[1] == 'by'){
+            $this->masterQuery->param = [];
+            array_push($this->masterQuery->param, $col);
+        }
 
         return $this;
     }
     private function withParse()
     {
+        global $config;
         foreach ($this->with as $args) {
             $table = $args[0]; // if is string only
 
@@ -287,7 +296,13 @@ class QueryBuilder
 
             if (is_callable($args[1]) && $args[1] instanceof Closure) {
                 call_user_func($args[1], $q);
-                if (array_search($q->withSecColumn, $q->param) === false && sizeof($q->param)) {
+                if (
+                    !(
+                        array_search($q->withSecColumn, $q->param) !== false ||
+                        sizeof(preg_grep("#(.{$q->withSecColumn})#", $q->param)) != 0 
+                    ) && 
+                    sizeof($q->param)
+                ) {
                     array_push($q->param, $q->withSecColumn);
                 }
             } else {
@@ -298,15 +313,24 @@ class QueryBuilder
             $newQuery = $q->get();
 
             if($newQuery->status){
-                foreach ($this->records->record as $record) {
-                    $record->{$q->appear} = array_values(array_filter(
+                $q = (Object) $q;
+                foreach ($this->records->record as $key => $record) {
+                    //$record = (Object) $record;
+                    $filter = array_values(array_filter(
                     $newQuery->record,
                     function ($e) use ($q, $record) {
+                        $e = (Object) $e;
+                        $record = (Object) $record;
                         // TODO : support `in` method
                         // TODO : shift name if send with dot
                         return $e->{$q->withSecColumn} == $record->{$q->withFirstColumn};
                     }));
                     // TODO: remove the sec column from the child if not sended
+                    if(isset($config['database']['fetch']) && $config['database']['fetch'] == 'array'){
+                        $this->records->record[$key][$q->appear] = $filter;
+                    }else {
+                        $record->{$q->appear} = $filter;
+                    }
                 }
             }else{
                 if (isset($this->records->error) && is_string($this->records->error)) {
@@ -465,7 +489,9 @@ class QueryBuilder
     private function _table()
     {
         $args = func_get_args();
-
+        if(isset($args[1])){
+            return "`{$args[0]}` as `{$args[1]}`";    
+        }
         return "`{$args[0]}`";
     }
 
@@ -500,6 +526,7 @@ class QueryBuilder
         if (strpos($args[0], '(') !== FALSE) {
             // TODO : fix 2 arguments sql functions
             return preg_replace_callback("#\((.*)\)#six", function($match){
+                if(empty($match[1]))return "()";
                 $match[1] = self::_col($match[1]);
                 return "(".$match[1].")";
             }, $args[0]);
@@ -565,7 +592,7 @@ class QueryBuilder
         }
 
         foreach ($this->order as $col) {
-            array_push($arr, $this->_col($col[0])." {$col[1]}");
+            array_push($arr, $this->_col($col[0]).(isset($col[1])?" ".$col[1]:""));
         }
 
         return ' ORDER BY '.implode(', ', $arr);
@@ -633,8 +660,21 @@ class QueryBuilder
             $str .= " {$place}";
         }
         $str .= ' JOIN ';
-        $str .= $this->_table($args[0]);
+
+        $join_table = $args[0];
+        if (substr_count($join_table, ' as ') == 1) {
+            $exp = explode(' as ', $join_table);
+            $join_table = $exp[1];
+            $str .= $this->_table($exp[0], $exp[1]);
+        }else{
+            $str .= $this->_table($join_table);
+        }
+        
         array_shift($args);
+        
+        // TODO : support new way in config to setup type as (snakecase, camelcase)
+        if(!isset($args[0]))$args[0] = "{$join_table}.{$this->table}Id";
+        if(!isset($args[1]))$args[1] = "~id";
 
         if (is_callable($args[0]) && $args[0] instanceof Closure) {
             $q = new self();
