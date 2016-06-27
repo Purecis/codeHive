@@ -625,10 +625,10 @@ class Directives
         * Description : shorten the text
         */
         self::register('approxlen', function ($args, &$scope) {
-            if (!$args->length) {
+            if (!isset($args->length)) {
                 $args->length = 200;
             }
-            if (!$args->append) {
+            if (!isset($args->append)) {
                 $args->append = '...';
             }
 
