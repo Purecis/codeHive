@@ -497,7 +497,8 @@ class Query
             $idsQ = Database::query("select id from {$table} where {$where} {$limit};");// this to get ids for meta
             if ($idsQ->status) {
                 $ids = array();
-                foreach ($idsQ->data as $row) {
+                foreach ($idsQ->record as $row) {
+                    $row = (array) $row;
                     array_push($ids, $row['id']);
                 }// todo : need optimization
             } else {
