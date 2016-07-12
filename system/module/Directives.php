@@ -658,11 +658,15 @@ class Directives
         * directive whether
         * Description : check data
         */
-        self::register('whether', function ($args, &$scope) {    //neither // repeat
-
+        function whetherCheck($args){
             if (isset($args->is)) {
                 if (isset($args->eq)) {
                     if ($args->is == $args->eq) {
+                        return Shortcode::trigger($args->content);
+                    }
+                }
+                if (isset($args->neq)) {
+                    if ($args->is != $args->neq) {
                         return Shortcode::trigger($args->content);
                     }
                 }
@@ -697,9 +701,28 @@ class Directives
             if (isset($args->exist)) {
                 return Shortcode::trigger($args->content);
             }
+            if (isset($args->empty)) {
+                if(empty($args->empty)){
+                    return Shortcode::trigger($args->content);
+                }
+            }
 
+            return false;
+        }
+        
+        self::register('whether', function ($args, &$scope) {    //neither // repeat
+            if(whetherCheck($args)){
+                return Shortcode::trigger($args->content);
+            }
         });
-    }
+        
+        self::register('neither', function ($args, &$scope) {
+            if(!whetherCheck($args)){
+                return Shortcode::trigger($args->content);
+            }
+        });
+        
+    } // end of __bootstrap
 
     private static function scope($v)
     {
