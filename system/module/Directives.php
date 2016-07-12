@@ -548,7 +548,7 @@ class Directives
             },
         ));
 
-        self::register('view', function ($args, &$scope) {
+        self::register(['view', '/view'], function ($args, &$scope) {
             $name = isset($args->scope) ? $args->scope : 'view';
             $scope->{$name} = $args;
 
@@ -728,6 +728,15 @@ class Directives
 
     public static function register($element, $cb)
     {
+        // for multiple register
+        if(is_array($element)){
+            foreach ($element as $elm) {
+                self::register($elm, $cb);
+            }
+            return ;
+        }
+
+        // for single check
         if(strpos($element, "/") !== false){
             $element = substr($element, 1);
             $pattern = "%\<{$element} (\b[^<\>]*+)\>%six";
@@ -735,6 +744,8 @@ class Directives
         }else{
             $pattern = "%\<{$element} (\b[^<\>]*+)\>((?:(?:(?!\</?{$element}\b).)++| (?R))*+)(\</{$element}\s*+\>)%six";
         }
+
+        // register shortcode
         Shortcode::register(array(
             'code' => "element_{$element}",
             'pattern' => $pattern,
