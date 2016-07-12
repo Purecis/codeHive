@@ -571,6 +571,10 @@ class Directives
             },
         ));
 
+        self::register('/event', function ($args, &$scope) {
+            return Event::trigger($args->trigger, $args);
+        });
+
         /*
         * directive Localization
         * Description : trigger event
@@ -724,14 +728,21 @@ class Directives
 
     public static function register($element, $cb)
     {
+        if(strpos($element, "/") !== false){
+            $element = substr($element, 1);
+            $pattern = "%\<{$element} (\b[^<\>]*+)\>%six";
+            $element = $element."_single";
+        }else{
+            $pattern = "%\<{$element} (\b[^<\>]*+)\>((?:(?:(?!\</?{$element}\b).)++| (?R))*+)(\</{$element}\s*+\>)%six";
+        }
         Shortcode::register(array(
             'code' => "element_{$element}",
-            'pattern' => "%\<{$element} (\b[^<\>]*+)\>((?:(?:(?!\</?{$element}\b).)++| (?R))*+)(\</{$element}\s*+\>)%six",
+            'pattern' => $pattern,
             'callback' => function ($match) use ($cb, $element) {
                 $cls = new stdClass();
-                $cls->content = $match[2];
+                $cls->content = isset($match[2])?$match[2]:'';
                 $el = "{$element}-content";
-                Controller::$scope->$el = $match[2];
+                Controller::$scope->$el = $cls->content;
                 if (!empty($match[1])) {
                     $atts = String::parse_attr($match[1]);
                     foreach ($atts as $k => $v) {
