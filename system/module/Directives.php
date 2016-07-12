@@ -125,7 +125,7 @@ class Directives
         * directive object
         * Description : shorten the text
         */
-        self::register('query-object', function ($args, &$scope) {
+        self::register(['query-object','/query-object'], function ($args, &$scope) {
             $where = isset($args->where) ? (array) String::json(Shortcode::trigger($args->where)) : null;
             $limit = isset($args->limit) ? isset($args->offset) ? "{$args->offset},{$args->limit}" : $args->limit : null;
             $order = isset($args->order) ? $args->order : null;
