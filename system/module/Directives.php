@@ -126,7 +126,7 @@ class Directives
         * Description : shorten the text
         */
         self::register(['query-object','/query-object'], function ($args, &$scope) {
-            if(is_object($args->where)){
+            if(isset($args->where) && is_object($args->where)){
                 $args->where = (array) $args->where;
                 if(isset($args->where['scope']))unset($args->where['scope']);
                 if(empty($args->where['content']))unset($args->where['content']);
