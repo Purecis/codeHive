@@ -126,11 +126,20 @@ class Directives
         * Description : shorten the text
         */
         self::register(['query-object','/query-object'], function ($args, &$scope) {
-            $where = isset($args->where) ? (array) String::json(Shortcode::trigger($args->where)) : null;
+            if(is_object($args->where)){
+                $args->where = (array) $args->where;
+                if(isset($args->where['scope']))unset($args->where['scope']);
+                if(empty($args->where['content']))unset($args->where['content']);
+                $where = Shortcode::trigger($args->where);
+            }else{
+                $where = isset($args->where) ? (array) String::json(Shortcode::trigger($args->where)) : null;
+            }
+            
             $limit = isset($args->limit) ? isset($args->offset) ? "{$args->offset},{$args->limit}" : $args->limit : null;
             $order = isset($args->order) ? $args->order : null;
             $query = Object::fetch($args->taxonomy, $args->param, $where, ['limit' => $limit,"order"=>$order]);
             // d($query);
+            
             $scope->{$args->as} = $query->status?$query->record:[];
         });
 
