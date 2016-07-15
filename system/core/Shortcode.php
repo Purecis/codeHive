@@ -45,6 +45,15 @@ class Shortcode{
 	 * @return	void
 	 */
 	public static function trigger($output,$custom = false){
+		if(is_array($output) or is_object($output)){
+			$out = Array();
+			foreach($output as $k => $v){
+				$out[$k] = self::trigger($v, $custom);
+			}
+			if(is_array($output))return $out;
+			if(is_object($output))return (object) $out;
+		}
+
 		if($custom){
 			if(!self::$patterns[$custom])return $output;
 			return preg_replace_callback(self::$patterns[$custom], self::$callback[$custom] , $output);
