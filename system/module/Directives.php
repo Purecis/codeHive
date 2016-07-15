@@ -43,14 +43,14 @@ class Directives
         /*
         * import module
         */
-        self::register('module', function ($args, &$scope) {
+        self::register(['module', '/module'], function ($args, &$scope) {
             Module::import($args->import);
         });
 
         /*
         * set asset
         */
-        self::register('asset', function ($args, &$scope) {
+        self::register(['asset', '/asset'], function ($args, &$scope) {
             if(!isset($args->scope))$args->scope = "vendor";
 
             if(isset($args->type) && $args->type == "script"){
@@ -64,14 +64,14 @@ class Directives
         * call controller
         */
        // TODO : need to support class call and module insider call
-        self::register('controller', function ($args, &$scope) {
+        self::register(['controller', '/controller'], function ($args, &$scope) {
             return Controller::trigger($args->name, $args);
         });
 
         /*
         * get request from header
         */
-        self::register('request', function ($args, &$scope) {
+        self::register(['request', '/request'], function ($args, &$scope) {
             $param = explode(',', $args->get);
             $param = Request::get($param);
             $name = isset($args->scope) ? $args->scope : 'request';
@@ -81,7 +81,7 @@ class Directives
         /*
         * define scope variable directive
         */
-        self::register('var', function ($args, &$scope) {
+        self::register(['var', '/var'], function ($args, &$scope) {
             $name = isset($args->scope) ? $args->scope : 'var';
 			$scope->{$name} = isset($scope->{$name}) ? (object) array_merge((array) $scope->{$name}, (array) $args) : $args;
         });
