@@ -274,6 +274,7 @@ class String{
 			else $newlen = $newlen.$this_x;
 		}
 		if(trim($newlen) != trim($str))$newlen .= $append;
+		$newlen = str_replace("&nbsp;", " ", $newlen); // fix wrap problem in some css
 		return $newlen;
 	}
 
