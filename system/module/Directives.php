@@ -671,48 +671,48 @@ class Directives
             if (isset($args->is)) {
                 if (isset($args->eq)) {
                     if ($args->is == $args->eq) {
-                        return Shortcode::trigger($args->content);
+                        return true;
                     }
                 }
                 if (isset($args->neq)) {
                     if ($args->is != $args->neq) {
-                        return Shortcode::trigger($args->content);
+                        return true;
                     }
                 }
                 if (isset($args->lt)) {
                     if ($args->is < $args->lt) {
-                        return Shortcode::trigger($args->content);
+                        return true;
                     }
                 }
                 if (isset($args->gt)) {
                     if ($args->is > $args->gt) {
-                        return Shortcode::trigger($args->content);
+                        return true;
                     }
                 }
                 if (isset($args->lte)) {
                     if ($args->is <= $args->lte) {
-                        return Shortcode::trigger($args->content);
+                        return true;
                     }
                 }
                 if (isset($args->gte)) {
                     if ($args->is >= $args->gte) {
-                        return Shortcode::trigger($args->content);
+                        return true;
                     }
                 }
                 if (isset($args->in)) {
                     $in = explode(",", $args->in);
                     if (in_array($args->is, $in)) {
-                        return Shortcode::trigger($args->content);
+                        return true;
                     }
                 }
                 // TODO : inset,
             }
             if (isset($args->exist)) {
-                return Shortcode::trigger($args->content);
+                return true;
             }
             if (isset($args->empty)) {
                 if(empty($args->empty)){
-                    return Shortcode::trigger($args->content);
+                    return true;
                 }
             }
 
