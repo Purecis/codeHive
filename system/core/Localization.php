@@ -196,9 +196,12 @@ class Localization
         if ($locale) {
             Session::set(array('locale' => $locale));
         }else{
-            $locale = $config['locale'];
+            $locale = Session::get('locale');
             if(!$locale){
-                $locale = self::$locale;
+                $locale = $config['locale'];
+                if(!$locale){
+                    $locale = self::$locale;
+                }
             }
         }
         return $locale;
