@@ -3,7 +3,7 @@
 /*
  * set current working directory to the main index path
  */
-define(__CWD__, getcwd());
+define('__CWD__', getcwd());
 chdir(dirname($_SERVER["SCRIPT_FILENAME"]));
 
 /*
