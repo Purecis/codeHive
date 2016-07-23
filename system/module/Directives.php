@@ -585,7 +585,7 @@ class Directives
         });
 
         self::register(['hook', '/hook'], function ($args, &$scope) {
-            return Event::trigger($args->trigger, $args);
+            return Hook::trigger($args->trigger, $args);
         });
 
         /*
