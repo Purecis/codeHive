@@ -580,7 +580,11 @@ class Directives
             },
         ));
 
-        self::register('/event', function ($args, &$scope) {
+        self::register(['event', '/event'], function ($args, &$scope) {
+            return Event::trigger($args->trigger, $args);
+        });
+
+        self::register(['hook', '/hook'], function ($args, &$scope) {
             return Event::trigger($args->trigger, $args);
         });
 
@@ -668,6 +672,10 @@ class Directives
         * Description : check data
         */
         function whetherCheck($args){
+            if(isset($args->sizeof)){
+                $args->is = sizeof($args->sizeof);
+            }
+
             if (isset($args->is)) {
                 if (isset($args->eq)) {
                     if ($args->is == $args->eq) {
