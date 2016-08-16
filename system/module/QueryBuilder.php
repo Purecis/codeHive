@@ -523,7 +523,7 @@ class QueryBuilder
 
 
 
-        if (strpos($args[0], '(') !== FALSE) {
+        if (strpos($args[0], '(') !== FALSE && ((isset($args[1]) && $args[1] != "string") || !isset($args[1]))) {
             // TODO : fix 2 arguments sql functions
             return preg_replace_callback("#\((.*)\)#six", function($match){
                 if(empty($match[1]))return "()";
@@ -590,6 +590,7 @@ class QueryBuilder
         if (!sizeof($this->order)) {
             return '';
         }
+        // TODO : fix if sended one argument in order
 
         foreach ($this->order as $col) {
             array_push($arr, $this->_col($col[0]).(isset($col[1])?" ".$col[1]:""));
