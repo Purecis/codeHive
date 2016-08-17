@@ -58,7 +58,7 @@ class Event
         $r = '';
         if (isset(self::$events[$event])) {
             foreach (self::$events[$event] as $c) {
-                $r .= call_user_func_array($c, array(&Controller::$scope, $args));
+                $r .= call_user_func_array($c, array(&Controller::$scope, &$args));
             }
         }
 
