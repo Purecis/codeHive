@@ -167,7 +167,19 @@ class API
             $callback = $a;
             $args = array();
             $text = false;
+        }else{
+            // TODO : fix pattern /url/:id pattern
+            // if ( preg_match_all("(:\w+)", $text, $matches) ) {
+            //     $temp = [];
+            //     foreach($matches[0] as $match){
+            //         array_push($temp, ltrim($match, ':'));
+            //     }
+            // }
+            // array_merge($temp, $args);
+            // $text = explode("/", $text);
+            // $text = $text[0];
         }
+
         if ($text == false) {
             --self::$current;
         }
@@ -181,7 +193,7 @@ class API
             ++self::$current;
             $cb = call_user_func_array($callback, array(&Controller::$scope, $router));
             if (is_array($cb) || is_object($cb)) {
-                $cb = json_encode($cb);
+                $cb = json_encode($cb, JSON_NUMERIC_CHECK);
             }
             echo $cb;
             exit;

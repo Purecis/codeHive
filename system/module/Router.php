@@ -115,7 +115,7 @@ class Router
 
             $cb = Controller::trigger(self::$callback[$mod], $cls);
             if (is_array($cb) || is_object($cb)) {
-                $cb = json_encode($cb);
+                $cb = json_encode($cb, JSON_NUMERIC_CHECK);
             }
             return $cb;
         }
