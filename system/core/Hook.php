@@ -35,7 +35,7 @@ class Hook
      *
      * @return function
      */
-    public static function trigger($event, $args = false)
+    public static function trigger($event, &$args = false)
     {
         return Event::trigger($event, $args);
     }
