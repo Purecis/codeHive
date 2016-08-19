@@ -396,7 +396,9 @@ class Query
                 $a = array();
                 foreach ($or as $key => $value) {
                     if (!isset($config['database']['essential'])) {
-                        $key = 'CAST('.$key.' AS SIGNED)';
+                        if (strpos($key, '(') === false) {
+                            $key = 'CAST('.$key.' AS SIGNED)';
+                        }
                     }
                     array_push($a, $key.' '.$value);
                 }
