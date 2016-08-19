@@ -136,7 +136,15 @@ class Directives
             }
             
             $limit = isset($args->limit) ? isset($args->offset) ? "{$args->offset},{$args->limit}" : $args->limit : null;
-            $order = isset($args->order) ? $args->order : null;
+
+            $order = $args->order;
+            if(isset($order)){
+                if(strpos($order, '{') !== false){
+                    $order = (array) String::json(Shortcode::trigger($order));
+                }else{
+                    $order = $order;
+                } 
+            } 
             $query = Object::fetch($args->taxonomy, $args->param, $where, ['limit' => $limit,"order"=>$order]);
             // d($query);
             
