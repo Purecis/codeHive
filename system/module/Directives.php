@@ -137,8 +137,8 @@ class Directives
             
             $limit = isset($args->limit) ? isset($args->offset) ? "{$args->offset},{$args->limit}" : $args->limit : null;
 
-            $order = $args->order;
-            if(isset($order)){
+            $order = isset($args->order)?$args->order:null;
+            if($order){
                 if(strpos($order, '{') !== false){
                     $order = (array) String::json(Shortcode::trigger($order));
                 }else{
