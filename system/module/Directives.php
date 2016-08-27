@@ -396,6 +396,8 @@ class Directives
                         $val = strtoupper($val);
                     } elseif ($f == 'escape') {
                         $val = htmlspecialchars($val, ENT_QUOTES, 'UTF-8');
+                    } elseif ($f == 'json') {
+                        $val = json_encode($val);
                     }
                 }
 
