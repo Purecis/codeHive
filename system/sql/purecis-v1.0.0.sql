@@ -139,7 +139,7 @@ LOCK TABLES `users` WRITE;
 INSERT INTO `users` (`id`, `oauth`, `name`, `email`, `pass`, `rules`, `group`, `status`, `rel`)
 VALUES
 	(1,'0','Anonymous','---','---','new',0,'new',NULL),
-	(2,'0','Master Admin','abo.al.tot@gmail.com','7bbb77da01df3defcd33ea207f8cd3935bd9d4893550d5bc63a85b72b47ce91d6121dd02','manage-contact,manage-yousef,admin-zone,manage-home,manage-menu,manage-place,manage-products,manage-callus',0,'new',NULL);
+	(2,'0','Master Admin','abo.al.tot@gmail.com','7bbb77da01df3defcd33ea207f8cd3935bd9d4893550d5bc63a85b72b47ce91d6121dd02','admin-zone,master-admin,manage-users',0,'new',NULL);
 
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
