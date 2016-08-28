@@ -41,6 +41,12 @@ class Directives
         // router to route
 
         /*
+        * title hook
+        */
+		Hook::on("title", function(&$scope, $args) { $scope->title = $args->title; });
+        Event::addListener("head", function(&$scope, $args) { return "<title>{$scope->title}</title>"; });
+
+        /*
         * import module
         */
         self::register(['module', '/module'], function ($args, &$scope) {
@@ -147,6 +153,7 @@ class Directives
             } 
             $query = Object::fetch($args->taxonomy, $args->param, $where, ['limit' => $limit,"order"=>$order]);
             // d($query);
+            // print_r($query);
             
             $scope->{$args->as} = $query->status?$query->record:[];
         });
@@ -590,12 +597,12 @@ class Directives
             },
         ));
 
-        self::register(['event', '/event'], function ($args, &$scope) {
-            return Event::trigger($args->trigger, $args);
-        });
-
         self::register(['hook', '/hook'], function ($args, &$scope) {
             return Hook::trigger($args->trigger, $args);
+        });
+
+        self::register(['event', '/event'], function ($args, &$scope) {
+            return Event::trigger($args->trigger, $args);
         });
 
         /*
