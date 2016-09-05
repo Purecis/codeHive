@@ -2,7 +2,7 @@
 /**
  * Purecis Module Class
  *
- * This class has image parsing controle 
+ * This class has image parsing controle
  *
  * @package		codeHive
  * @subpackage	Core
@@ -91,7 +91,22 @@ class Image{
 		imagedestroy($im);
 	}
 
+	// --------------------------------------------------------------------
 
+	/**
+	 * src2base
+	 *
+	 * fix images inside text add base to src
+	 *
+	 * @access	public
+	 * @param	string 	contents
+	 * @return	string
+	 */
+	public static function src2base($html) {
+		global $config;
+		$base = Request::base();
+		return str_replace("{$config['assets']}/", "{$base}{$config['assets']}/",$html);
+	}
 }
 
 ?>

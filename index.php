@@ -1,31 +1,28 @@
 <?php
 /**
- * Purecis codeHive Class
+ * codeHive Excute File.
  *
- * bootstrap class 
- *
- * @package		codeHive
- * @subpackage	Core
- * @category	Libraries
  * @author		Purecis Dev Team
- * @copyright	Copyright (c) 2004 - 2015, Purecis, Inc.
+ * @copyright	Copyright (c) 2013 - 2016, Purecis, Inc.
  * @license		http://purecis.com/license
+ *
  * @link		http://purecis.com
  * @since		Version 2.0
  * @filesource
  */
-
 session_start();
 
-include "system/core/codeHive.php";
+include 'system/core/codeHive.php';
 
-$start = array(
-	"app" 		=> "apps/sample",
-	"assets" 	=> "assets",
-	"system" 	=> "system"
-); 
+codeHive::start(array(
+    'app' => 'sample',
 
-codeHive::start($start);
+    // define folders
+    'container' => "apps",
+    'assets' => 'assets',
+    'system' => 'system',
+));
+
 
 /* End of file index.php */
 /* Location: ./index.php */

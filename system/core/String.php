@@ -246,7 +246,7 @@ class String{
 			if($characters === false)$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 			$randomString = '';
 			for($i=0; $i<$len; $i++)$randomString .= $characters[rand(0, strlen($characters) - 1)];
-			return $randomString;			
+			return $randomString;
 		}
 	}
 
@@ -274,6 +274,7 @@ class String{
 			else $newlen = $newlen.$this_x;
 		}
 		if(trim($newlen) != trim($str))$newlen .= $append;
+		$newlen = str_replace("&nbsp;", " ", $newlen); // fix wrap problem in some css
 		return $newlen;
 	}
 
@@ -288,14 +289,125 @@ class String{
 	 * @param	string attribute string ex (name='abc' value='def')
 	 * @return	array
 	 */
-	public static function parse_attr($att){
+	public static function parse_attr($att,$removeQ=false){
+		$pattern = '/(\\w+)\s*=\\s*("[^"]*"|\'[^\']*\'|[^"\'\\s>]*)/';
+		preg_match_all($pattern, $att, $matches, PREG_SET_ORDER);
+		$attrs = array();
+		foreach ($matches as $match) {
+			if (($match[2][0] == '"' || $match[2][0] == "'") && $match[2][0] == $match[2][strlen($match[2])-1] && $removeQ) {
+				$match[2] = substr($match[2], 1, -1);
+			}
+			$name = strtolower($match[1]);
+			$value = html_entity_decode($match[2]);
+			switch ($name) {
+			case 'class':
+				$attrs[$name] = preg_split('/\s+/', trim($value));
+				break;
+			case 'style':
+				// parse CSS property declarations
+				$attrs[$name] = $value;
+				break;
+			default:
+				$attrs[$name] = $value;
+			}
+		}
+		return $attrs;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Parse Attr
+	 *
+	 * Parse XML, Shortcode Attributes
+	 *
+	 * @access	public
+	 * @param	string attribute string ex (name='abc' value='def')
+	 * @return	array
+	 */
+	public static function xml_parse_attr($att){
 		$att = self::decode($att,true);
 		$x = new SimpleXMLElement("<element {$att} />");
 		$attr = array();
 		foreach($x->attributes() as $a => $b)$attr[$a] = trim($b);
-		
+
 		return $attr;
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * json
+	 *
+	 * Parse XML, Shortcode Attributes
+	 *
+	 * @access	public
+	 * @param	string attribute string ex (name='abc' value='def')
+	 * @return	array
+	 */
+	public static function json($s){
+        $s = str_replace(
+            array('"',  "'"),
+            array('\"', '"'),
+            $s
+        );
+        $s = preg_replace('/(\w+):/i', '"\1":', $s);
+		return is_array($s) ? $s : json_decode($s);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * ontime
+	 *
+	 * diffrent between 2 times
+	 *
+	 * @access	public
+	 * @param	mixen datetime or unix time ex: (2016-02-22 22:25:43)
+	 * @return	array
+	 */
+	public static function ontime($bef, $aft=false){
+		if(!is_numeric($bef))$bef = strtotime($bef);
+		if($aft == false)$aft = time();
+		if(!is_numeric($aft))$aft = strtotime($aft);
+
+		$timing = $aft-$bef;
+
+		if(($timing/3600)<24){
+			$h = floor($timing/3600);
+			$i = floor(($timing-($h*3600))/60);
+
+			if($i == 0){
+				return __("Today")." ".__("A little while ago");
+			}else{
+				return __("Today")." ".__(":h Hour and :m Minute ago",['h'=>$h,'m'=>$i]);
+			}
+
+		}else if($timing <= 172800){
+			$h = date("h",$bef);
+			$i = date("i",$bef);
+			$a = date('a',$bef);
+
+			return __("Yesterday on :h::m :a",['h'=>$h,'m'=>$i,"a"=>$a]);
+
+		}else{
+			$days = array(
+				__('Sunday'),
+				__('Monday'),
+				__('Tuesday'),
+				__('Wednesday'),
+				__('Thursday'),
+				__('Friday'),
+				__('Saturday')
+			);
+			$day = $days[date('w',$bef)];
+			$date = date("d/m/Y");
+			$time = date("h:i:s");
+			$a = date('a',$bef);
+			return __(":day :date on :time :a",["day"=>$day,"date"=>$date,"time"=>$time,"a"=>$a]);
+		}
+	}
+
 }
 
 /* End of file String.php */

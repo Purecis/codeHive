@@ -54,10 +54,10 @@ class User{
 			return $cls;
 		}
 		$arr['pass'] = self::encpass($arr['pass']);
-		
+
 		$arr['registered'] = isset($arr['registered'])?$arr['registered']:time();
 		$arr['ip'] = isset($arr['ip'])?$arr['ip']:Request::ip();
-		
+
 		$nex = self::notexist($arr['email'],'email');
 		if(!$nex->status)return $nex;
 
@@ -99,10 +99,10 @@ class User{
 
 		if(!empty($arr['pass']))$arr['pass'] = self::encpass($arr['pass']);
 		if(empty($arr['pass']))unset($arr['pass']);
-		
+
 		$arr['lastupdate'] = isset($arr['lastupdate'])?$arr['lastupdate']:time();
 		$arr['lastip'] = isset($arr['lastip'])?$arr['lastip']:Request::ip();
-		
+
 		/* update if this email not related to another user
 		$nex = self::notexist($arr['email'],'email');
 		if(!$nex->status)return $nex;
@@ -153,8 +153,8 @@ class User{
 	 * check if user data in database
 	 *
 	 * @access	public
-	 * @param 	string field value , ex: name@mail.com 
-	 * @param 	string field key, ex: email 
+	 * @param 	string field value , ex: name@mail.com
+	 * @param 	string field key, ex: email
 	 * @return	object
 	 */
 	public static function notexist($field,$key='email'){
@@ -165,7 +165,7 @@ class User{
 			$cls->error = "{$key} already exist";
 			$cls->code = 2;
 			$cls->status = false;
-			$cls->id = $sql->data[0]['id'];
+			$cls->id = $sql->record[0]->id;
 		}else{
 			$cls->status = true;
 			$cls->id = 0;
@@ -183,7 +183,7 @@ class User{
 	 * @return	string
 	 */
 	public static function defaultRules(){
-		return Query::get("users",['data'=>'rules','where'=>['id'=>0]])->data[0]['rules'];	
+		return Query::get("users",['data'=>'rules','where'=>['id'=>0]])->record[0]['rules'];
 	}
 
 	// --------------------------------------------------------------------
@@ -212,7 +212,7 @@ class User{
 				}
 			}
 		}
-		$rules = Query::get("users",['data'=>'rules','where'=>$where])->data[0]['rules'];
+		$rules = Query::get("users",['data'=>'rules','where'=>$where])->record[0]->rules;
 		if(!empty($rules))$rules = explode(",", $rules);
 		else $rules = array();
 
@@ -250,14 +250,14 @@ class User{
 	public static function login($arr){
 		$arr = (Array)$arr;
 		if(!isset($arr['token']))$arr['pass'] = self::encpass($arr['pass']);
-		
+
 		$q = Query::get("users",array(
 			"data" => array("id","rules"),
 			"where" => $arr
 		));
 		if($q->count > 0){
 			Session::set(array(
-				static::$sessId => $q->data[0]['id']
+				static::$sessId => $q->record[0]->id
 			));
 		}else{
 			$q = new stdClass();
@@ -299,7 +299,7 @@ class User{
 		// login
 		if($q->count > 0){
 			Session::set(array(
-				static::$sessId => $q->data[0]['id']
+				static::$sessId => $q->record[0]->id
 			));
 			$ret = $q;
 			//$ret->status = true;
@@ -320,11 +320,11 @@ class User{
 						"oauth_{$provider}" => $oauth
 					),
 					"where" => array(
-						"id" => $q->data[0]['id']
+						"id" => $q->record[0]->id
 					)
 				));
 				Session::set(array(
-					static::$sessId => $q->data[0]['id']
+					static::$sessId => $q->record[0]->id
 				));
 				$ret = $q;
 				$ret->status = true;
@@ -450,33 +450,30 @@ class User{
 	 * @access	public
 	 * @return	boolean
 	 */
-	public static function hasRule($rules = array(),$defRules=false){
-		// TODO: no has rule .. 
-		self::$lastRule = $rules;
+	public static function hasRule($check = array(),$rules=false){
+		// TODO: no has rule ..
+		self::$lastRule = $check;
 
-		if(!is_array($rules))$arr = explode(",", $rules);
-		else $arr = $rules;
+		if(!is_array($check))$check = explode(",", $check);
 
-		if($defRules != false){
-			if(!is_array($defRules))$rules = explode(",",$defRules);
-			else $rules = $defRules;
-		}else{
+		if($rules != false && !is_array($rules))$rules = explode(",",$rules);
+
+		if(!$rules){
 			$user = self::info();
 			if(!$user->status)return false;
-			$rules = explode(",",$user->data[0]['rules']);
+			$rules = explode(",",$user->record[0]->rules);
 		}
-		$ret = true;
-		
-		foreach($arr as $rule){
 
+		$final = true;
+		foreach($check as $rule){
 			if(strpos($rule, "!") === 0){
-				if(in_array(ltrim($rule, '!'), $rules))$ret = false;
+				if(in_array(ltrim($rule, '!'), $rules))$final = false;
 			}else{
-				if(!in_array($rule, $rules))$ret = false;
+				if(!in_array($rule, $rules))$final = false;
 			}
 		}
 
-		return $ret;
+		return $final;
 	}
 
 
@@ -492,7 +489,7 @@ class User{
 	 * @return	string
 	 */
 	public static function encpass($pass){
-		return md5(String::encrypt($pass)).sha1(String::encrypt($pass)); 
+		return md5(String::encrypt($pass)).sha1(String::encrypt($pass));
 	}
 
 

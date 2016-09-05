@@ -1,127 +1,185 @@
-<?php  if (!defined('VERSION'))exit('Direct access to this location is not permitted.');
-/**
- * Purecis Database Class
+<?php
+
+defined('VERSION') or exit('Direct access to this location is not permitted');
+
+/*
+ * codeHive Database.
  *
- * This class Manage Database Connections & Queries 
+ * Database class provide the framework module based infrastructure
  *
- * @package		codeHive
- * @subpackage	Core
- * @category	Libraries
- * @author		Tamer Zorba
- * @link		http://purecis.com/
+ * @category    core
+ *
+ * @author      Tamer Zorba <abo.al.tot@gmail.com>
+ * @copyright   Copyright (c) 2013 - 2016, PureCore International Solutions (http://purecis.com/)
+ * @license     http://opensource.org/licenses/MIT	MIT License
+ *
+ * @link       http://codehive.purecis.com/package/Database
+ * @since      File available since Release 2.0.0
+ *
+ * @version    V: 2.1.0
  */
+class Database
+{
+    /**
+     * Database Connection.
+     */
+    private static $current = null;
+    protected static $connection = null;
 
-class Database{
+    // --------------------------------------------------------------------
 
-	/**
-	 * Database Live Connection
-	 *
-	 * @var mixen
-	 * @access protected
-	 */
-	protected static $db = null;
+    /**
+     * Database Connect.
+     *
+     * @param	string 	Database name
+     * @param	string 	Database host
+     * @param	string 	Database user
+     * @param	string 	Database pass
+     * @param	string 	Database port
+     *
+     * @return mixen
+     */
+    public static function connect($con = array())
+    {
+        global $config;
 
-	// --------------------------------------------------------------------
+        if (!$config['database']) {
+            $config['database'] = array();
+        }
 
-	/**
-	 * Database Connect
-	 *
-	 * @access	public
-	 * @param	string 	Database name
-	 * @param	string 	Database host
-	 * @param	string 	Database user
-	 * @param	string 	Database pass
-	 * @param	string 	Database port
-	 * @return	mixen
-	 */
-	public static function connect($db_name=null,$db_host=null,$db_user=null,$db_pass=null,$db_port=null){
-		global $config;
+        if (self::$connection && (!isset($con['name']) or $con['name'] == self::$current)) {
+            return self::$connection;
+        }
+        if (self::$connection && $con['name'] == $config['database']['name']) {
+            return self::$connection;
+        }
 
-		if(!$config['database'])$config['database'] = array();
+        $crd = new stdClass();
+        $crd->type = isset($con['type']) ? $con['type'] : $config['database']['type'];
+        $crd->host = isset($con['host']) ? $con['host'] : $config['database']['host'];
+        $crd->name = isset($con['name']) ? $con['name'] : $config['database']['name'];
+        $crd->user = isset($con['user']) ? $con['user'] : $config['database']['user'];
+        $crd->pass = isset($con['pass']) ? $con['pass'] : $config['database']['pass'];
+        $crd->port = isset($con['port']) ? $con['port'] : $config['database']['port'];
 
-		if (!self::$db or ($db_name && $db_name != $config['database']['name'])){
-			if($db_name)$config['database']['name'] = $db_name;
-			if($db_host)$config['database']['host'] = $db_host;
-			if($db_user)$config['database']['user'] = $db_user;
-			if($db_pass)$config['database']['pass'] = $db_pass;
-			if($db_port)$config['database']['port'] = $db_port;
+        try {
+            switch ($crd->type) {
+                case 'sqlite':
+                    $dsn = "sqlite:{$crd->name}";
+                    break;
 
-			$type = $config['database']['type'];
-			$host = $config['database']['host'];
-			$name = $config['database']['name'];
-			$user = $config['database']['user'];
-			$pass = $config['database']['pass'];
-			$port = $config['database']['port'];
-			
-			try{
-				// Checking Database Type…
-				if($type == 'sqlite')	self::$db = new PDO("sqlite:{$name}");
-				if($type == 'mysql')	self::$db = new PDO("mysql:host={$host};dbname={$name};charset=utf8;Allow User Variables=True", $user, $pass);
-				if($type == 'pgsql')	self::$db = new PDO("pgsql:dbname={$name};host={$host}", $user, $pass );
-				if($type == 'oracle')	self::$db = new PDO("OCI:dbname={$name};charset=UTF-8", $user, $pass);
-				if($type == 'firebird')	self::$db = new PDO("firebird:dbname={$host}:{$name}", "SYSDBA", $pass);
-				if($type == 'infomix')	self::$db = new PDO("informix:DSN={$name}", $user, $pass);
-				if($type == 'dblib') 	self::$db = new PDO ("dblib:host={$host}:{$port};dbname={$name}",$user,$pass);
-				if($type == 'odbc')		self::$db = new PDO("odbc:Driver={Microsoft Access Driver (*.mdb)};Dbq={$name}");
-				
-				self::$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);//set character set utf8
-				
-			}catch(PDOException $e){
-				//if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",$e->getMessage());
-				//else 
-				die("Database Error :".$e->getMessage());
-			}
-    	}
-		return self::$db;
-	}
+                case 'pgsql':
+                    $dsn = "pgsql:dbname={$crd->name};host={$crd->host}";
+                    break;
 
-	// --------------------------------------------------------------------
+                case 'oracle':
+                    $dsn = "OCI:dbname={$crd->name};charset=UTF-8";
+                    break;
 
-	/**
-	 * Database Query
-	 *
-	 * @access	public
-	 * @param	string 	sql
-	 * @return	array
-	 */
-	public static function query($sql){
-		global $config;
+                case 'firebird':
+                    $dsn = "firebird:dbname={$crd->host}:{$crd->name}";
+                    $crd->user = 'SYSDBA';
+                    break;
 
-		self::connect();
-		$return = new stdClass();
-		try{
-			$query = self::$db->query($sql);			
-			//$query = $link->prepare('SELECT * FROM users WHERE username = :name LIMIT 1;');
-			//$query->execute([':name' => $username]); # No need to escape it!
-			
-			$temp_sql = strtolower($sql);
-			$s = strpos($temp_sql,'select');
-			$i = strpos($temp_sql,'insert');
-			$u = strpos($temp_sql,'update');
-			$d = strpos($temp_sql,'delete');
-			if($s < 10 && $s !== false)$type = 'select';
-			if($i < 10 && $i !== false)$type = 'insert';
-			if($u < 10 && $u !== false)$type = 'update';
-			if($d < 10 && $d !== false)$type = 'delete';
+                case 'infomix':
+                    $dsn = "informix:DSN={$crd->name}";
+                    break;
 
+                case 'dblib':
+                    $dsn = "dblib:host={$crd->host}:{$crd->port};dbname={$crd->name}";
+                    break;
 
-			if(in_array($type, array('select','update','delete')))$return->count = $query->rowCount();
-			if($type == 'select')$return->data = @$query->fetchAll(PDO::FETCH_ASSOC);
-			if($type == 'insert')$return->last = self::$db->lastInsertId();
+                case 'odbc':
+                    $dsn = "odbc:Driver={Microsoft Access Driver (*.mdb)};Dbq={$crd->name}";
+                    break;
 
-			$return->status = true;
+                case 'mysql':
+                default:
+                    $crd->port = $crd->port ?: 3306;
+                    $dsn = "mysql:host={$crd->host};dbname={$crd->name};port={$crd->port};charset=utf8";
+                    break;
+            }
 
-			if($config['ENVIRONMENT'] == 'debug')debug::count('Database Queries');
-			
-		}catch(PDOException $e){
-			if($config['ENVIRONMENT'] == 'debug')debug::error("Database Error",$e->getMessage());
-			$return->status = false;
-			$return->error = $e->getMessage();
-    	}
-    	
-    	if(in_array($config['ENVIRONMENT'], array('debug','development')))$return->sql = $sql;
-    	return $return;
-	}
+            self::$connection = self::$current = new PDO($dsn, $crd->user, $crd->pass);
+            self::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+                Trace::error('Database Error', String::escape($e->getMessage()));
+            } else {
+                die('Database Error :'.$e->getMessage());
+            }
+        }
+
+        return self::$connection;
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+     * Database Query.
+     *
+     * @param	string 	sql
+     *
+     * @return array
+     */
+    public static function query($sql, $args = array())
+    {
+        global $config;
+
+        self::connect();
+        $return = new stdClass();
+        try {
+            if (!sizeof($args)) {
+                $query = self::$connection->query($sql);
+            } else {
+                $query = self::$connection->prepare($sql);
+                $query->execute($args);
+            }
+
+            $type = strtoupper(substr($sql, 0, 10));
+            if (strpos($type, 'INSERT') !== false) {
+                $type = 'insert';
+            } elseif (strpos($type, 'UPDATE') !== false) {
+                $type = 'update';
+            } elseif (strpos($type, 'DELETE') !== false) {
+                $type = 'delete';
+            } elseif (strpos($type, 'TRUNCATE') !== false) {
+                $type = 'truncate';
+            } else {
+                $type = 'select'; // show
+            }
+
+            $fetch = isset($config['database']['fetch']) && $config['database']['fetch'] == 'array' ? PDO::FETCH_ASSOC : PDO::FETCH_CLASS;
+            if (in_array($type, array('select', 'update', 'delete', 'truncate'))) {
+                $return->count = $query->rowCount();
+            }
+            if ($type == 'select') {
+                $return->record = $query->fetchAll($fetch);
+            }
+            if ($type == 'insert') {
+                $return->last = self::$connection->lastInsertId();
+            }
+
+            $return->status = true;
+
+            if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+                Trace::count('Database Queries');
+            }
+        } catch (PDOException $e) {
+            if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+                Trace::error('Database Error', String::escape($e->getMessage()));
+            }
+            $return->status = false;
+            $return->error = $e->getMessage();
+        }
+
+        if (in_array(strtoupper($config['ENVIRONMENT']), array('TRACE', 'DEVELOPMENT'))) {
+            $return->sql = $sql;
+            // TODO : append sql to tracer ..
+        }
+
+        return $return;
+    }
 }
 
 /* End of file Database.php */

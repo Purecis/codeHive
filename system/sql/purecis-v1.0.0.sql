@@ -54,7 +54,8 @@ CREATE TABLE `meta` (
   `autoload` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `oid` (`oid`,`key`,`table`),
-  KEY `key` (`key`)
+  KEY `key` (`key`),
+  KEY `value` (`value`(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
@@ -71,6 +72,7 @@ CREATE TABLE `objects` (
   `status` varchar(20) NOT NULL DEFAULT '',
   `parent` bigint(20) NOT NULL,
   `taxonomy` varchar(50) NOT NULL DEFAULT '',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `rel` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `author` (`author`),
@@ -137,7 +139,7 @@ LOCK TABLES `users` WRITE;
 INSERT INTO `users` (`id`, `oauth`, `name`, `email`, `pass`, `rules`, `group`, `status`, `rel`)
 VALUES
 	(1,'0','Anonymous','---','---','new',0,'new',NULL),
-	(2,'0','Master Admin','abo.al.tot@gmail.com','7bbb77da01df3defcd33ea207f8cd3935bd9d4893550d5bc63a85b72b47ce91d6121dd02','manage-contact,manage-yousef,admin-zone,manage-home,manage-menu,manage-place,manage-products,manage-callus',0,'new',NULL);
+	(2,'0','Master Admin','abo.al.tot@gmail.com','7bbb77da01df3defcd33ea207f8cd3935bd9d4893550d5bc63a85b72b47ce91d6121dd02','admin-zone,master-admin,manage-users',0,'new',NULL);
 
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;

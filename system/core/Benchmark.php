@@ -1,68 +1,76 @@
-<?php  if (!defined('VERSION'))exit('Direct access to this location is not permitted.');
+<?php
+
+defined('VERSION') or exit('Direct access to this location is not permitted');
+
 /**
- * Purecis Benchmark Class
+ * codeHive Benchmark.
  *
- * This class Manage Benchmarks 
+ * Benchmark class create time and resource listener to monitor code
  *
- * @package		codeHive
- * @subpackage	Core
- * @category	Libraries
- * @author		Tamer Zorba
- * @link		http://purecis.com/
+ * @category    core
+ *
+ * @author      Tamer Zorba <abo.al.tot@gmail.com>
+ * @copyright   Copyright (c) 2013 - 2016, PureCore International Solutions (http://purecis.com/)
+ * @license     http://opensource.org/licenses/MIT	MIT License
+ *
+ * @link       http://codehive.purecis.com/package/Benchmark
+ * @since      File available since Release 2.0.0
+ *
+ * @version    V: 2.1.0
  */
+class Benchmark
+{
+    /**
+     * List of benchmarks.
+     */
+    protected static $benchmarks = array();
 
-class Benchmark{
+    // --------------------------------------------------------------------
 
-	/**
-	 * List of benchmarks
-	 *
-	 * @var array
-	 * @access protected
-	 */
-	protected static $Benchmarks = array();
+    /**
+     * Benchmark Start.
+     *
+     * @param	string 	Benchmark name
+     *
+     * @return array
+     */
+    public static function start($name = 'default')
+    {
+        self::$benchmarks[$name] = new stdClass();
+        self::$benchmarks[$name]->time = microtime(true);
+        self::$benchmarks[$name]->memory = memory_get_usage();
 
-	// --------------------------------------------------------------------
+        return self::$benchmarks[$name];
+    }
 
-	/**
-	 * Benchmark Start
-	 *
-	 * @access	public
-	 * @param	string 	Benchmark name
-	 * @return	array
-	 */
-	public static function start($name){
-		self::$Benchmarks[$name] = array();
-		self::$Benchmarks[$name]['time'] = microtime(true);
-		self::$Benchmarks[$name]['memory'] = memory_get_usage();
-		return self::$Benchmarks[$name];
-	}
+    // --------------------------------------------------------------------
 
-	// --------------------------------------------------------------------
+    /**
+     * Benchmark Complete.
+     *
+     * @param	string 	Benchmark name
+     *
+     * @return array
+     */
+    public static function complete($name = 'default')
+    {
+        global $config;
 
-	/**
-	 * Benchmark Complete
-	 *
-	 * @access	public
-	 * @param	string 	Benchmark name
-	 * @return	array
-	 */
-	public static function complete($name){
-		global $config;
-		
-		$arr = array(
-			"time" 		=> microtime(true),
-			"memory" 	=> memory_get_usage()
-		);
-		if($config['ENVIRONMENT'] == 'debug'){
-			$time = round($arr['time']-self::$Benchmarks[$name]['time'],4);
-			$memory = $arr['memory'] - self::$Benchmarks[$name]['memory'];
-			$memory = $memory." - ".File::format($memory);
+        $end = new stdClass();
+        $end->time = microtime(true);
+        $end->memory = memory_get_usage();
 
-			debug::error("Benchmark {$name}","Time : {$time} | Memory : {$memory}");
-		}
-		return $arr;
-	}
+        $result = new stdClass();
+        $result->time = round($end->time - self::$benchmarks[$name]->time, 4);
+        $result->memory = $end->memory - self::$benchmarks[$name]->memory;
+        $result->memory .= ' - '.File::format($result->memory);
 
+        if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+            Trace::error("Benchmark {$name}", "Time : {$result->time} | Memory : {$result->memory}");
+        }
+
+        return $result;
+    }
 }
 
 /* End of file Benchmark.php */

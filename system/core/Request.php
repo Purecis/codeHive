@@ -2,7 +2,7 @@
 /**
  * Purecis Request Class
  *
- * This class control all the request attrbutes and protect 
+ * This class control all the request attrbutes and protect
  * them from known attac and injection
  *
  * @package		codeHive
@@ -71,7 +71,7 @@ class Request{
 	}
 
 	// --------------------------------------------------------------------
-	
+
 	public static function method(){
 		$method = $_SERVER['REQUEST_METHOD'];
         if ($method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
@@ -251,9 +251,9 @@ class Request{
 	 * @param	boolean if the request is array or not
 	 * @return	mixen
 	 */
-	public static function get($name=0){
-		//check array type
-		//if($getArray)return $_REQUEST[$name];// return array without parsing
+	public static function get($name=null){
+        $name = func_get_args();
+		if(sizeof($name) == 1)$name = $name[0];
 
 		if(is_array($name)){
 			$cls = new stdClass();
@@ -273,7 +273,7 @@ class Request{
 		}
 
 		$url = self::parser();
-		$ret = false;
+		$ret = null;
 		if($name == 'pagename')return $url[0];
 
 		// check Router
@@ -305,13 +305,13 @@ class Request{
 		//	if(is_array($ret))echo "$name is array";
 		//		$ret = implode(",",$ret);
 		//	}else{
-				$ret = String::escape($ret);				
+				$ret = String::escape($ret);
 		//	}
 		}
 
 		return $ret;
 	}
-	
+
 	// $_SERVER['REQUEST_METHOD'] for restfull api GET, POST, PUT or DELETE)
 }
 
