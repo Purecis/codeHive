@@ -33,6 +33,6 @@ check the requirements then upload and have fun
 
 
 ### PHP.ini Customization
-1. short_open_tag = off
+1. short_open_tag = on
 2. error_reporting = E_ALL ~ E_NOTICE
 
