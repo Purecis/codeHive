@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Controller;
+
+use App\System\Injectable;
+use App\System\Response;
+use App\System\Request;
+
+class Home extends Injectable
+{
+    public function __bootstrap()
+    {
+        // echo "Home injected";
+    }
+
+    private static $counter = 0;
+    
+    public function tamer(Request $request, \App\Model\User $user)
+    {
+        echo $request->domain;
+        echo $user->test();
+        // echo $this->request->domain;
+
+
+        // echo $this->request->http->referer;
+        // return;
+
+        // $this->ControllerHome->test(); // do it
+        // $this->ModelUser->test();
+
+        // $this->ResourceJQuery;
+        // $this->ResourceJQueryModelUser;
+        // $this->ResourceJQueryControllerUser->test();
+
+
+
+        
+
+        echo "<hr>";
+         self::$counter ++;
+        $name = "called num " . self::$counter;
+
+        
+        return $this->response->body($name)->spread();
+
+        // return (new Response)->body($name)->spread();
+        // return (new Response)->json()->body(["name" => "tamer"])->spread();
+    }
+
+    public function test(){
+        echo "test called from home";
+    }
+}

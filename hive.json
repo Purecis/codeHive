@@ -1,0 +1,55 @@
+/*
+    codehive json file
+*/
+{
+    "module": {
+        "Develop.Console": "1.0.*@beta"
+    },
+    "module-dev": {
+        "Develop.Console": "1.0.*@beta",
+        "Develop.Debug": "1.0",
+        "Develop.Faker": "1.0",
+        "Develop.Exceptions": "1.0"
+    },
+    "config": {
+        "someDefaultConfig": "hello"
+    },
+    
+    "autoload": {
+        "psr-4": { "Monolog\\": ["src/", "lib/"] }
+    },
+
+    "license": "MIT",
+
+    "install":{
+        "git": [
+            {"source": "http://somewhere.git", "branch": "master", "target":"vendor"}
+        ],
+        "files":[
+            {"source": "file", "target": "vendor/src2"}
+        ],
+        "zip": [
+            {"source":"path.zip", "target": "vendor/somewhere"}
+        ],
+        "excute": [
+            {"file": "file.php", "inject":"class.install"}
+        ],
+        "composer": [
+            // use composer way here
+        ]
+    },
+    "uninstall": [
+        // excute
+        {"file": "file.php", "inject":"class.install"}
+    ],
+
+    "require" : {
+        "php" : "^5.5 || ^7.0",
+        "ext-mbstring": "*"
+    },
+    "require-dev" : {
+        "php" : "^5.5 || ^7.0",
+        "ext-mbstring": "*"
+    }
+
+}

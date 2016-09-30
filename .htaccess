@@ -1,0 +1,9 @@
+# codeHive Apache Rewriter
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /codeHive-v3.0/
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /codeHive-v3.0/index.php [L]
+</IfModule>
