@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\System\Injectable;
 use App\System\Response;
 use App\System\Request;
+use App\System\Route;
 
 class Home extends Injectable
 {
@@ -15,10 +16,13 @@ class Home extends Injectable
 
     private static $counter = 0;
     
-    public function tamer(Request $request, \App\Model\User $user)
+    public function tamer(Request $request, \App\Model\User $user, Route $router)
     {
-        echo $request->domain;
-        echo $user->test();
+        print_r($router->params());
+        echo "tamer called";
+        return;
+        // echo $request->domain;
+        // echo $user->test();
         // echo $this->request->domain;
 
 
@@ -49,5 +53,8 @@ class Home extends Injectable
 
     public function test(){
         echo "test called from home";
+    }
+    public function index(){
+        echo "i am index";
     }
 }

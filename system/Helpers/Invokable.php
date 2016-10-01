@@ -43,6 +43,8 @@ abstract class Invokable
     // Explicit Binding here
     public static function invoke()
     {
+        // TODO : fix clusure callback
+
         $args = func_get_args();
         $cls = new \stdClass;
 

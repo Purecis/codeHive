@@ -1,1 +1,73 @@
-dev
+# exclude everything except directory foo/bar
+/*
+!/system
+!/docs
+
+!/assets
+!/assets/library
+/assets/library/*
+!/assets/extensions
+/assets/extensions/*
+/assets/extras
+!/assets/cache
+/assets/cache/*
+
+!/apps
+/apps/*
+!/apps/sample
+!/apps/_cli
+!/apps/_global
+
+!LICENSE.md
+!README.md
+!robots.txt
+
+# remove ! if you want to use your own path and project
+!index.php
+!.htaccess
+
+
+# global files to ignore from https://github.com/github/gitignore/tree/master/Global
+
+# OSX Git Agnore
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+#
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk

@@ -74,6 +74,8 @@ class codeHive
         if (!Loader::CLI()) {
             AutoLoader::boot();
             require_once $hive->app_path. '/bootstrap.php';
+
+            Route::trigger();
         }
     }
 }

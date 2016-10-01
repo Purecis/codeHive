@@ -3,82 +3,89 @@
 
 namespace App\System;
 
-class Request extends dynClusure
+class Request extends Dynable
 {
     private static $request = null;
+    public static $__dynable = null;
+    
     public function __construct()
     {
-        $request                      = new dynClass();
+        if(self::$__dynable)return self::$__dynable;
+        
+        self::$__dynable                      = new dynClass();
         
         // define get, post, request, cookie
-        $request->get                 = new dynClass($_GET,     ["App\\System\\Str", "escape"]);
-        $request->post                = new dynClass($_POST,    ["App\\System\\Str", "escape"]);
-        $request->all                 = new dynClass($_REQUEST, ["App\\System\\Str", "escape"]);
+        self::$__dynable->get                 = new dynClass($_GET,     ["App\\System\\Str", "escape"]);
+        self::$__dynable->post                = new dynClass($_POST,    ["App\\System\\Str", "escape"]);
+        self::$__dynable->all                 = new dynClass($_REQUEST, ["App\\System\\Str", "escape"]);
 
         // define cookie
-        $request->cookie              = new dynClass($_COOKIE,  ["App\\System\\Str", "escape"]);
-        $request->cookie->onSet(function ($key, $value) {
+        self::$__dynable->cookie              = new dynClass($_COOKIE,  ["App\\System\\Str", "escape"]);
+        self::$__dynable->cookie->onSet(function ($key, $value) {
             $value = json_encode($value);
             setcookie($key, $value);
         });
-        $request->cookie->onDelete(function ($key) {
+        self::$__dynable->cookie->onDelete(function ($key) {
             $value = json_decode($value);
             setcookie($key, "", time() - 3600);
         });
 
         // define http header
-        $request->http                = new dynClass();
-        $request->http->host          = isset($_SERVER['HTTP_HOST'])            ? $_SERVER['HTTP_HOST']                     : null;
-        $request->http->agent         = isset($_SERVER['HTTP_USER_AGENT'])      ? $_SERVER['HTTP_USER_AGENT']               : null;
-        $request->http->accept        = isset($_SERVER['HTTP_ACCEPT'])          ? $_SERVER['HTTP_ACCEPT']                   : null;
-        $request->http->encoding      = isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? $_SERVER['HTTP_ACCEPT_ENCODING']          : null;
-        $request->http->language      = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE']          : null;
-        $request->http->referer       = isset($_SERVER['HTTP_REFERER'])         ? $_SERVER['HTTP_REFERER']                  : null;
+        self::$__dynable->http                = new dynClass();
+        self::$__dynable->http->host          = isset($_SERVER['HTTP_HOST'])            ? $_SERVER['HTTP_HOST']                     : null;
+        self::$__dynable->http->agent         = isset($_SERVER['HTTP_USER_AGENT'])      ? $_SERVER['HTTP_USER_AGENT']               : null;
+        self::$__dynable->http->accept        = isset($_SERVER['HTTP_ACCEPT'])          ? $_SERVER['HTTP_ACCEPT']                   : null;
+        self::$__dynable->http->encoding      = isset($_SERVER['HTTP_ACCEPT_ENCODING']) ? $_SERVER['HTTP_ACCEPT_ENCODING']          : null;
+        self::$__dynable->http->language      = isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) ? $_SERVER['HTTP_ACCEPT_LANGUAGE']          : null;
+        self::$__dynable->http->referer       = isset($_SERVER['HTTP_REFERER'])         ? $_SERVER['HTTP_REFERER']                  : null;
 
         // define server
-        $request->server              = new dynClass();
-        $request->server->name        = isset($_SERVER['SERVER_NAME'])          ? $_SERVER['SERVER_NAME']                   : null;
-        $request->server->ip          = isset($_SERVER['SERVER_ADDR'])          ? $_SERVER['SERVER_ADDR']                   : null;
-        $request->server->port        = isset($_SERVER['SERVER_PORT'])          ? $_SERVER['SERVER_PORT']                   : null;
-        $request->server->protocol    = isset($_SERVER['SERVER_PROTOCOL'])      ?
+        self::$__dynable->server              = new dynClass();
+        self::$__dynable->server->name        = isset($_SERVER['SERVER_NAME'])          ? $_SERVER['SERVER_NAME']                   : null;
+        self::$__dynable->server->ip          = isset($_SERVER['SERVER_ADDR'])          ? $_SERVER['SERVER_ADDR']                   : null;
+        self::$__dynable->server->port        = isset($_SERVER['SERVER_PORT'])          ? $_SERVER['SERVER_PORT']                   : null;
+        self::$__dynable->server->protocol    = isset($_SERVER['SERVER_PROTOCOL'])      ?
             strtolower(substr($_SERVER["SERVER_PROTOCOL"], 0, strpos($_SERVER["SERVER_PROTOCOL"], '/')))                      : null;
             
-        $request->server->gateway     = isset($_SERVER['GATEWAY_INTERFACE'])    ? $_SERVER['GATEWAY_INTERFACE']             : null;
-        $request->server->handler     = php_sapi_name();
+        self::$__dynable->server->gateway     = isset($_SERVER['GATEWAY_INTERFACE'])    ? $_SERVER['GATEWAY_INTERFACE']             : null;
+        self::$__dynable->server->handler     = php_sapi_name();
 
         // define remote
-        $request->remote              = new dynClass();
-        $request->remote->name        = isset($_SERVER['REMOTE_ADDR'])          ? gethostbyaddr($_SERVER['REMOTE_ADDR'])    : null;
-        $request->remote->ip          = isset($_SERVER['REMOTE_ADDR'])          ? $_SERVER['REMOTE_ADDR']                   : null;
-        $request->remote->port        = isset($_SERVER['REMOTE_PORT'])          ? $_SERVER['REMOTE_PORT']                   : null;
+        self::$__dynable->remote              = new dynClass();
+        self::$__dynable->remote->name        = isset($_SERVER['REMOTE_ADDR'])          ? gethostbyaddr($_SERVER['REMOTE_ADDR'])    : null;
+        self::$__dynable->remote->ip          = isset($_SERVER['REMOTE_ADDR'])          ? $_SERVER['REMOTE_ADDR']                   : null;
+        self::$__dynable->remote->port        = isset($_SERVER['REMOTE_PORT'])          ? $_SERVER['REMOTE_PORT']                   : null;
 
         // defaults
-        $request->method              = isset($_SERVER['REQUEST_METHOD'])       ? $_SERVER['REQUEST_METHOD']                : null;
-        $request->time                = isset($_SERVER['REQUEST_TIME'])         ? $_SERVER['REQUEST_TIME']                  : null;
-        $request->self                = isset($_SERVER['PHP_SELF'])             ? $_SERVER['PHP_SELF']                      : null;
-        $request->uri                 = isset($_SERVER['REQUEST_URI'])          ? $_SERVER['REQUEST_URI']                   : null;
-        $request->script              = isset($_SERVER['SCRIPT_NAME'])          ? $_SERVER['SCRIPT_NAME']                   : null;
-        $request->index               = $request->script                        ? basename($request->script)                : null;
-        $request->base                = $request->script                        ? rtrim($request->script, $request->index)  : null;
-        $request->query               = isset($_SERVER['QUERY_STRING'])         ? $_SERVER['QUERY_STRING']                  : null;
-        $request->domain              = $request->http->host                    ?
-            $request->server->protocol . "://" . $request->http->host .
-            ($request->server->port == 80 ? "" : ":" . $request->server->port)                                            : null;
+        self::$__dynable->method              = isset($_SERVER['REQUEST_METHOD'])       ? $_SERVER['REQUEST_METHOD']                : null;
+        self::$__dynable->time                = isset($_SERVER['REQUEST_TIME'])         ? $_SERVER['REQUEST_TIME']                  : null;
+        self::$__dynable->self                = isset($_SERVER['PHP_SELF'])             ? $_SERVER['PHP_SELF']                      : null;
+        self::$__dynable->uri                 = isset($_SERVER['REQUEST_URI'])          ? $_SERVER['REQUEST_URI']                   : null;
+        self::$__dynable->script              = isset($_SERVER['SCRIPT_NAME'])          ? $_SERVER['SCRIPT_NAME']                   : null;
+        self::$__dynable->index               = self::$__dynable->script                        ? basename(self::$__dynable->script)                : null;
+        self::$__dynable->base                = self::$__dynable->script                        ? rtrim(self::$__dynable->script, self::$__dynable->index)  : null;
+        self::$__dynable->query               = isset($_SERVER['QUERY_STRING'])         ? $_SERVER['QUERY_STRING']                  : null;
+        self::$__dynable->domain              = self::$__dynable->http->host                    ?
+            self::$__dynable->server->protocol . "://" . self::$__dynable->http->host .
+            (self::$__dynable->server->port == 80 ? "" : ":" . self::$__dynable->server->port)                                              : null;
  
-        list($bareURI) = explode("?", $request->uri);
-        $request->alias               = $request->uri                           ? ltrim($bareURI, $request->base)          : null;
-        $request->segments            = $request->alias                         ? explode("/", $request->alias)          : null;
-        $request->is                  = function () {
-            echo 123;
+        list($bareURI) = explode("?", self::$__dynable->uri);
+        $alias = substr($bareURI, strlen(self::$__dynable->base));
+        self::$__dynable->alias               = self::$__dynable->uri                           ? ( $alias ? $alias : 'index' )             : null;
+        self::$__dynable->segments            = self::$__dynable->alias                         ? explode("/", self::$__dynable->alias)             : null;
+        self::$__dynable->is                  = function () {
+            echo 123; // TODO: check method type
         };
         
+        // self::self::$__dynable = self::$__dynable;
         // add session managment
-        parent::__apply($request);
+        // parent::__apply(self::$__dynable);
 
-        return $request;
+        return self::$__dynable;
     }
 
 
+    // TODO : use observable to callback
     public static function fetch($link, $target = null, callable $progress = null, $error = false)
     {
         $handle = curl_init();
