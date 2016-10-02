@@ -8,10 +8,16 @@ class Response
     public $type = "html";
     public $headerSended = false;
 
+    public function __invoke(){
+        $args = func_get_args();
+        $this->body($args[0]);
+        return $this;
+    }
+
     public function header($type = false)
     {
         if($type){
-            $this->type = $set;
+            $this->type = $type;
         }
 
         // parse header by type

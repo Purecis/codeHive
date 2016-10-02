@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\System\Injectable;
+use App\System\Controller;
 use App\System\Response;
 use App\System\Request;
 use App\System\Route;
 
-class Home extends Injectable
+class Home extends Controller
 {
     public function __bootstrap()
     {
@@ -16,11 +16,14 @@ class Home extends Injectable
 
     private static $counter = 0;
     
-    public function tamer(Request $request, \App\Model\User $user, Route $router)
+    public function tamer(Request $request, \App\Model\User $user, Route $router, Response $response)
     {
-        print_r($router->params());
-        echo "tamer called";
-        return;
+        return $response(123);
+        // return $this->response("tamer");
+
+        // print_r($router->params());
+        // echo "tamer called";
+        // return;
         // echo $request->domain;
         // echo $user->test();
         // echo $this->request->domain;

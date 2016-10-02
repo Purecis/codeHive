@@ -63,6 +63,7 @@ class codeHive
         // Register Model & Controller AutoLoaders
         AutoLoader::register('App\\Model\\', ':app_path/model/:class.php');
         AutoLoader::register('App\\Controller\\', ':app_path/controller/:class.php');
+        AutoLoader::register('App\\Middleware\\', ':app_path/middleware/:class.php');
 
         // Register Modules autoloader
         AutoLoader::register('App\\', [

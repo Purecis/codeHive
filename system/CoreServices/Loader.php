@@ -40,7 +40,7 @@ class Loader
                 echo "Already Exists. if you want to update try \033[32mhive update " . $package . "\033[0m or \033[32mhive reinstall " . $package . "\033[0m\n";
                 return;
             }
-            File::rmdirRecursive($module_path);
+            FileSystem::rmdirRecursive($module_path);
         }
 
         // create folder if not exists
@@ -59,7 +59,7 @@ class Loader
 
                 Request::fetch($zip, $saveTo, function ($current, $total) {
                     $percent = $total == 0 ? 0 : round($current / $total * 100);
-                    echo "\rReceiving objects: {$percent}% (". File::format($current). "/" . File::format($total) . ") done ...";
+                    echo "\rReceiving objects: {$percent}% (". FileSystem::format($current). "/" . FileSystem::format($total) . ") done ...";
                 }, function ($e) use (&$errors, $zip) {
                     echo "HTTP Error $e on $zip.";
                     array_push($errors, "HTTP Error {$e} on {$zip}.");

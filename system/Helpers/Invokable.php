@@ -1,7 +1,7 @@
 <?php
 namespace App\System;
 
-abstract class Invokable
+abstract class Invokable extends Injectable
 {
     public static $__namespace = "Invokable";
 

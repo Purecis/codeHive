@@ -46,4 +46,10 @@ abstract class Injectable{
         
         return new $class;
     }
+
+    function __call($callable, $arguments){
+        $class = self::__get($callable);
+        if($class)return call_user_func_array($class, $arguments);
+        else return null;
+    }
 }
