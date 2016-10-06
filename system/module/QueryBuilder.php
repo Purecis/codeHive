@@ -527,16 +527,16 @@ class QueryBuilder
             // TODO : fix 2 arguments sql functions
             return preg_replace_callback("#\((.*)\)#six", function($match){
                 if(empty($match[1]))return "()";
-                $match[1] = self::_col($match[1]);
+                $match[1] = self::_col($match[1], "InBrackets");
                 return "(".$match[1].")";
             }, $args[0]);
 
         }else if (strpos($args[0], '~') === 0) {
             return $this->_col(substr($args[0], 1));
-        } elseif (substr_count($args[0], ' as ') == 1 && !isset($args[1])) {
+        } elseif (substr_count($args[0], ' as ') == 1 && (!isset($args[1]) || $args[1] == "InBrackets") ) {
             $exp = explode(' as ', $args[0]);
-        //    array_push($this->ascol, $exp[1]);
-            return $this->_col($exp[0])." AS `{$exp[1]}`";
+            
+            return $this->_col($exp[0]) . " AS " . (isset($args[1]) && $args[1] == "InBrackets" ? $exp[1] : "`{$exp[1]}`");
 
         // }else if(in_array($args[0],$this->ascol)){
         //     return $this->_col($args[0],"single");
