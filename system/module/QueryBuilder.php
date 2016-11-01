@@ -19,6 +19,8 @@ if (!defined('VERSION')) {
  */
 class QueryBuilder
 {
+
+    // TODO: support (exist)
     /**
      * Variables.
      *
@@ -709,12 +711,13 @@ class QueryBuilder
         $args = func_get_args();
 
         $str = '';
+        $type = strtolower($args[1]);
 
-        if (!in_array($args[1], array('set', 'inset'))) {
+        if (!in_array($type, array('set', 'inset', 'oneofset', 'inset-or'))) {
             $str .= $this->_col($args[0]);
         }
 
-        switch (strtolower($args[1])) {
+        switch ($type) {
             case '=':
                 $str .= ' = '.$this->_col($args[2], 'string');
                 break;
@@ -759,7 +762,7 @@ class QueryBuilder
 
             case 'in':
             case 'notin':
-                $b = in_array($args[1], array('in')) ? 'IN' : 'NOT IN';
+                $b = in_array($type, array('in')) ? 'IN' : 'NOT IN';
 
                 if ($args[2] instanceof self) {
                     $str .= " {$b} ( ".$args[2]->_get(true).' )';
@@ -790,12 +793,18 @@ class QueryBuilder
 
             case 'set':
             case 'inset':
+            case 'oneofset': 
+            case 'inset-or': 
                 if (is_array($args[2])) {
                     $temp = array();
                     foreach ($args[2] as $v) {
                         array_push($temp, 'FIND_IN_SET ('.$this->_col($v, 'string').','.$this->_col($args[0]).')');
                     }
-                    $str .= '( '.implode(' AND ', $temp).')';
+                    
+                    if($type == 'oneofset' || $type == 'inset-or')$operator = ' OR ';
+                    else $operator = ' AND ';
+
+                    $str .= '( '.implode($operator, $temp).')';
                 } else {
                     $str .= 'FIND_IN_SET ('.$this->_col($args[2], 'string').','.$this->_col($args[0]).')';
                 }
