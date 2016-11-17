@@ -783,9 +783,9 @@ class QueryBuilder
             case 'notbet':
             case 'notbetween':
             case '!><':
-                $b = in_array($type, array('not')) ? 'NOT BETWEEN' : 'BETWEEN';
+                $b = in_array($type, array('bet', 'between', '><')) ? 'BETWEEN' : 'NOT BETWEEN';
                 
-                if (is_array($args[2])) {
+               if (is_array($args[2])) {
                     $str .= " {$b} ".$this->_col($args[2][0], 'string').' AND '.$this->_col($args[2][1], 'string');
                 } else {
                     $str .= " {$b} ".$this->_col($args[2], 'string').' AND '.$this->_col($args[3], 'string');
