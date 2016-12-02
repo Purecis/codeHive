@@ -103,9 +103,21 @@ class Route
                 }
             }
         }
+        if(isset($invoke)){
+            if($invoke instanceof Response){
+                $invoke->spread();
 
-        if(isset($invoke) && $invoke instanceof Response){
-            $invoke->spread();
+            }else if(is_string($invoke) || is_numeric($invoke)){
+                $response = new Response();
+                $response->body($invoke);
+                $response->spread();
+
+            }else if(is_array($invoke) || is_object($invoke)){
+                $response = new Response();
+                $response->json();
+                $response->body($invoke);
+                $response->spread();
+            }
         }
     }
 }
