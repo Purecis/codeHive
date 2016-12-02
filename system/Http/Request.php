@@ -13,7 +13,18 @@ class Request extends Dynable
         if(self::$__dynable)return self::$__dynable;
         
         self::$__dynable                      = new dynClass();
-        
+
+        // define input
+        $_INPUT = [];
+        try{
+            $formData = json_decode(file_get_contents('php://input'));
+            if($formData)foreach ($formData as $key => $value) {
+                $_INPUT[$key]   = $value;
+                $_REQUEST[$key] = $value;
+            }
+        }catch(Exception $e){}
+        self::$__dynable->input               = new dynClass($_INPUT, ["App\\System\\Str", "escape"]);
+
         // define get, post, request, cookie
         self::$__dynable->get                 = new dynClass($_GET,     ["App\\System\\Str", "escape"]);
         self::$__dynable->post                = new dynClass($_POST,    ["App\\System\\Str", "escape"]);
@@ -62,8 +73,8 @@ class Request extends Dynable
         self::$__dynable->self                = isset($_SERVER['PHP_SELF'])             ? $_SERVER['PHP_SELF']                      : null;
         self::$__dynable->uri                 = isset($_SERVER['REQUEST_URI'])          ? $_SERVER['REQUEST_URI']                   : null;
         self::$__dynable->script              = isset($_SERVER['SCRIPT_NAME'])          ? $_SERVER['SCRIPT_NAME']                   : null;
-        self::$__dynable->index               = self::$__dynable->script                        ? basename(self::$__dynable->script)                : null;
-        self::$__dynable->base                = self::$__dynable->script                        ? rtrim(self::$__dynable->script, self::$__dynable->index)  : null;
+        self::$__dynable->index               = self::$__dynable->script                ? basename(self::$__dynable->script)        : null;
+        self::$__dynable->base                = self::$__dynable->script                ? rtrim(self::$__dynable->script, self::$__dynable->index)  : null;
         self::$__dynable->query               = isset($_SERVER['QUERY_STRING'])         ? $_SERVER['QUERY_STRING']                  : null;
         self::$__dynable->domain              = self::$__dynable->http->host                    ?
             self::$__dynable->server->protocol . "://" . self::$__dynable->http->host .
