@@ -64,6 +64,7 @@ class codeHive
         AutoLoader::register('App\\Model\\', ':app_path/model/:class.php');
         AutoLoader::register('App\\Controller\\', ':app_path/controller/:class.php');
         AutoLoader::register('App\\Middleware\\', ':app_path/middleware/:class.php');
+        AutoLoader::register('App\\Directive\\', ':app_path/directive/:class.php');
 
         // Register Modules autoloader
         AutoLoader::register('App\\', [
@@ -74,6 +75,7 @@ class codeHive
         // check if cli and bootstrap app
         if (!Loader::CLI()) {
             AutoLoader::boot();
+            Directive::boot();
             require_once $hive->app_path. '/bootstrap.php';
 
             Route::trigger();

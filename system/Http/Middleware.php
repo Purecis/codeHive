@@ -23,9 +23,10 @@ class Middleware extends Invokable
     }
     private function queue($a = null)
     {
-        // echo $this->index . " : ";
+        // TODO : pass argument to middleware (split by : )
         if (isset($this->stack[$this->index])) {
-            $response = self::invoke($this->stack[$this->index] . "::handle");
+            $callable = explode("@", $this->stack[$this->index]);
+            $response = self::invoke($callable[0] . "::handle" . (isset($callable[1]) ? "@" . $callable[1] : ""));
             
             if ($response instanceof Middleware) {
                 $this->index += 1;

@@ -71,8 +71,8 @@ class AutoLoader
                 ]);
 
                 $pattern = str_replace(
-                    ["Model", "Controller", "Interface", "Middleware"],
-                    ['model', "controller", "interface", "middleware"],
+                    ["Model", "Controller", "Interface", "Middleware", "Directive"],
+                    ['model', "controller", "interface", "middleware", "directive"],
                      $pattern);
                 
                 $classes = glob($pattern);

@@ -17,8 +17,19 @@ class Home extends Controller
     private static $counter = 0;
     
     public function tamer(Request $request, \App\Model\User $user, Route $router, Response $response)
-    {
-        return $response(123);
+    {   
+        // return 1;
+
+        // $s = new \stdClass;
+        // $s->name = "tamer";
+        // return $s;
+
+        // return ['status'=>true];
+        // return "string here";
+        
+        return $this->response->view('index')->plain();
+
+        // return $response(123);
         // return $this->response("tamer");
 
         // print_r($router->params());

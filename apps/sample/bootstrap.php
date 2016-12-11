@@ -4,13 +4,15 @@
  */
 namespace App;
 
-// $request = new System\Request;
-
 use App\System\Route;
 
 Route::get("index", "Home::index");
 
-Route::get("user/:id/:name", "Home::tamer")->middleware("Auth", "Ruler");
+Route::get("user/:id/:name", "Home::tamer")->middleware("Auth", "Ruler", "Tot@Resource.jQuery");
+
+
+
+
 
 
 // System\Middleware::invoke("Auth::handle");

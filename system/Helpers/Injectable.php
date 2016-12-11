@@ -20,6 +20,7 @@ abstract class Injectable{
     // use magic return as DI Implicit Binding
     function __get($name)
     {
+        if($name == '__bootstrap')return; // this added to remove ERROR .. need more test to figerout what the real error was.
         $class = "App\\";
 
         $case = Str::extractCase($name);

@@ -8,7 +8,7 @@ class Response
     public $type = "html";
     public $headerSended = false;
 
-    public function __invoke(){
+    public function __invoke(){ // called when the class name invoked
         $args = func_get_args();
         $this->body($args[0]);
         return $this;
@@ -70,6 +70,10 @@ class Response
         return $this;
     }
 
+    public function view($view){
+        $this->content = View::inject($view);
+        return $this;
+    }
     
     public function spread()
     {
