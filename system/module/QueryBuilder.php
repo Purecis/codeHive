@@ -524,8 +524,9 @@ class QueryBuilder
         }
 
 
-
-        if (strpos($args[0], '(') !== FALSE && ((isset($args[1]) && $args[1] != "string") || !isset($args[1]))) {
+        if (strpos($args[0], '~~') === 0) { // as is
+            return substr($args[0], 2);
+        }else if (strpos($args[0], '(') !== FALSE && ((isset($args[1]) && $args[1] != "string") || !isset($args[1]))) {
             // TODO : fix 2 arguments sql functions
             return preg_replace_callback("#\((.*)\)#six", function($match){
                 if(empty($match[1]))return "()";
