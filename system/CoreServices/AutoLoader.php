@@ -59,7 +59,7 @@ class AutoLoader
             
             // loop and load patterns
             foreach ($patterns as $pattern) {
-                $pattern = Str::parseColon($pattern, [
+                $pattern = Str::bindSyntax($pattern, [
                     "path"      => $relative_path,
                     "all"       => $relative_class,
                     "class"     => $class_name,
@@ -68,7 +68,7 @@ class AutoLoader
                     "assets"    => $hive->assets,
                     "app"       => $hive->app,
                     "app_path"  => $hive->app_path
-                ]);
+                ], 'colon');
 
                 $pattern = str_replace(
                     ["Model", "Controller", "Interface", "Middleware", "Directive"],

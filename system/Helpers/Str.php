@@ -15,19 +15,51 @@ class Str
         return $sHTML;
     }
     /**
-     * parse string with colon variables
+     * parse string with special char to variable
      * Example "my name is :name and i am :age years old." 
      *
      * @access	public
-     * @param	integer  $text
-     * @param	array    $args
+     * @param	integer         $text
+     * @param	array|callable  $args
      * @return	string
      */
-    public static function parseColon($text, $args)
+    public static function bindSyntax($text, $args, $regex = ':')
     {
-        return preg_replace_callback('/:(\\w+)/', function ($matches) use($args) {
-            return isset($args[$matches[1]]) ? $args[$matches[1]] : $matches[0];
-        }, $text);
+        switch ($regex) {
+            case ':':
+            case 'colon':
+                $regex = '/:(\w+)/'; // hello :name
+                break;
+
+            case '__()':
+            case 'translation':
+                $regex = '/__\((.+)\)/'; // hello __(name)
+                break;
+
+            case '{{}}':
+            case 'mustache':
+                $regex = '/{{(.+)}}/'; // hello {{name}}
+                break;
+            
+            case '$':
+            case 'variable':
+                $regex = '/\${(\w+)}/'; // hello ${name}
+                break;
+            
+            default:
+                $regex = '/\\' . $regex . '{(\w+)}/'; // hello _{name} regex is any char instad $
+                break;
+        }
+
+        if(is_callable($args)){
+            $callable = call_user_func_array($args, $matches);
+        }else{
+            $callable = function ($matches) use($args) {
+                return isset($args[$matches[1]]) ? $args[$matches[1]] : $matches[0];
+            };
+        }
+
+        return preg_replace_callback($regex, $callable, $text);
     }
     public static function contains($haystack, $needles)
     {
