@@ -20,6 +20,10 @@ class Response
             $this->type = $type;
         }
 
+        if($this->headerSended){
+            return $this;
+        }
+        
         // parse header by type
         if ($this->type == "json") {
             header('Content-Type: application/json');
@@ -42,24 +46,17 @@ class Response
     public function body($data)
     {
         $this->content = $data;
-
-        if ($this->type == "json") {
-            $this->content = json_encode($data, JSON_NUMERIC_CHECK);
-        }
-        
         return $this;
     }
     
     public function json()
     {
         $this->type = "json";
-        $this->header();
         return $this;
     }
     public function plain()
     {
         $this->type = "plain";
-        $this->header();
         return $this;
     }
 
@@ -77,6 +74,16 @@ class Response
     
     public function spread()
     {
+        if(is_array($this->content) || is_object($this->content)){
+            $this->json();
+        }
+        
+        $this->header();
+
+        if ($this->type == "json") {
+            $this->content = json_encode($this->content, JSON_NUMERIC_CHECK);
+        }
+
         return print $this->content;
     }
     // download

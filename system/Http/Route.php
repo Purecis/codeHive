@@ -104,19 +104,14 @@ class Route
             }
         }
         if(isset($invoke)){
-            if($invoke instanceof Response){
+            if($invoke instanceof Response) {
                 $invoke->spread();
 
-            }else if(is_string($invoke) || is_numeric($invoke)){
+            } else {
                 $response = new Response();
                 $response->body($invoke);
                 $response->spread();
-
-            }else if(is_array($invoke) || is_object($invoke)){
-                $response = new Response();
-                $response->json();
-                $response->body($invoke);
-                $response->spread();
+                
             }
         }
     }
