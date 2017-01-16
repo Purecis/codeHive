@@ -19,6 +19,8 @@ if (!defined('VERSION')) {
  */
 class QueryBuilder
 {
+
+    // TODO: support (exist)
     /**
      * Variables.
      *
@@ -522,21 +524,22 @@ class QueryBuilder
         }
 
 
-
-        if (strpos($args[0], '(') !== FALSE && ((isset($args[1]) && $args[1] != "string") || !isset($args[1]))) {
+        if (strpos($args[0], '~~') === 0) { // as is
+            return substr($args[0], 2);
+        }else if (strpos($args[0], '(') !== FALSE && ((isset($args[1]) && $args[1] != "string") || !isset($args[1]))) {
             // TODO : fix 2 arguments sql functions
             return preg_replace_callback("#\((.*)\)#six", function($match){
                 if(empty($match[1]))return "()";
-                $match[1] = self::_col($match[1]);
+                $match[1] = self::_col($match[1], "InBrackets");
                 return "(".$match[1].")";
             }, $args[0]);
 
         }else if (strpos($args[0], '~') === 0) {
             return $this->_col(substr($args[0], 1));
-        } elseif (substr_count($args[0], ' as ') == 1 && !isset($args[1])) {
+        } elseif (substr_count($args[0], ' as ') == 1 && (!isset($args[1]) || $args[1] == "InBrackets") ) {
             $exp = explode(' as ', $args[0]);
-        //    array_push($this->ascol, $exp[1]);
-            return $this->_col($exp[0])." AS `{$exp[1]}`";
+            
+            return $this->_col($exp[0]) . " AS " . (isset($args[1]) && $args[1] == "InBrackets" ? $exp[1] : "`{$exp[1]}`");
 
         // }else if(in_array($args[0],$this->ascol)){
         //     return $this->_col($args[0],"single");
@@ -709,12 +712,13 @@ class QueryBuilder
         $args = func_get_args();
 
         $str = '';
+        $type = strtolower($args[1]);
 
-        if (!in_array($args[1], array('set', 'inset'))) {
+        if (!in_array($type, array('set', 'inset', 'oneofset', 'inset-or'))) {
             $str .= $this->_col($args[0]);
         }
 
-        switch (strtolower($args[1])) {
+        switch ($type) {
             case '=':
                 $str .= ' = '.$this->_col($args[2], 'string');
                 break;
@@ -759,7 +763,7 @@ class QueryBuilder
 
             case 'in':
             case 'notin':
-                $b = in_array($args[1], array('in')) ? 'IN' : 'NOT IN';
+                $b = in_array($type, array('in')) ? 'IN' : 'NOT IN';
 
                 if ($args[2] instanceof self) {
                     $str .= " {$b} ( ".$args[2]->_get(true).' )';
@@ -780,8 +784,9 @@ class QueryBuilder
             case 'notbet':
             case 'notbetween':
             case '!><':
-
-                if (is_array($args[2])) {
+                $b = in_array($type, array('bet', 'between', '><')) ? 'BETWEEN' : 'NOT BETWEEN';
+                
+               if (is_array($args[2])) {
                     $str .= " {$b} ".$this->_col($args[2][0], 'string').' AND '.$this->_col($args[2][1], 'string');
                 } else {
                     $str .= " {$b} ".$this->_col($args[2], 'string').' AND '.$this->_col($args[3], 'string');
@@ -790,12 +795,18 @@ class QueryBuilder
 
             case 'set':
             case 'inset':
+            case 'oneofset': 
+            case 'inset-or': 
                 if (is_array($args[2])) {
                     $temp = array();
                     foreach ($args[2] as $v) {
                         array_push($temp, 'FIND_IN_SET ('.$this->_col($v, 'string').','.$this->_col($args[0]).')');
                     }
-                    $str .= '( '.implode(' AND ', $temp).')';
+                    
+                    if($type == 'oneofset' || $type == 'inset-or')$operator = ' OR ';
+                    else $operator = ' AND ';
+
+                    $str .= '( '.implode($operator, $temp).')';
                 } else {
                     $str .= 'FIND_IN_SET ('.$this->_col($args[2], 'string').','.$this->_col($args[0]).')';
                 }

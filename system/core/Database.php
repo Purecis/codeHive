@@ -180,6 +180,35 @@ class Database
 
         return $return;
     }
+
+    public static function exec($sql)
+    {
+        global $config;
+        self::connect();
+        $object = new stdClass();
+        
+        try {
+            self::$connection->exec($sql);
+            $object->status = true;
+            
+            if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+                Trace::count('Database Queries');
+            }
+        } catch(PDOException $e) {
+            if (strtoupper($config['ENVIRONMENT']) == 'TRACE') {
+                Trace::error('Database Error', String::escape($e->getMessage()));
+            }
+            $object->status = false;
+            $object->error = $e->getMessage();
+        }
+
+        if (in_array(strtoupper($config['ENVIRONMENT']), array('TRACE', 'DEVELOPMENT'))) {
+            $object->sql = $sql;
+            // TODO : append sql to tracer ..
+        }
+
+        return $object;
+    }
 }
 
 /* End of file Database.php */

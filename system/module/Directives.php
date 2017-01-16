@@ -44,7 +44,10 @@ class Directives
         * title hook
         */
 		Hook::on("title", function(&$scope, $args) { $scope->title = $args->title; });
-        Event::addListener("head", function(&$scope, $args) { return "<title>{$scope->title}</title>"; });
+        Event::addListener("head", function(&$scope, $args) {
+            $title = isset($scope->title)?$scope->title:"";
+             return "<title>{$title}</title>";
+        });
 
         /*
         * import module
