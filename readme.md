@@ -1,4 +1,4 @@
-CodeHive PHP Framework v3.0
+CodeHive PHP Framework v3.0 (In Development)
 ====================
 
 codeHive is a lightweight web Application Development Framework with expressive elegant syntax. codeHive gives you an MVC structure allowing you to concentrate on the fun stuff while building web applications.
