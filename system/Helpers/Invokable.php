@@ -72,7 +72,7 @@ abstract class Invokable extends Injectable
             $injectable = self::inject($argument);
             $method = $injectable->__invokable_method;
 
-            $params = self::extractParams($injectable, $method);
+            $params = self::extractFuncParams($injectable, $method);
             $params = array_map(function ($e) {
                 return $e->type ? new $e->type : $e->value;
             }, $params);
@@ -89,7 +89,7 @@ abstract class Invokable extends Injectable
 
 
     // extract function arguments
-    public static function extractParams($class, $method)
+    public static function extractFuncParams($class, $method)
     {
         $arr = [];
         $parameters = (new \ReflectionMethod($class, $method))->getParameters();
