@@ -13,9 +13,10 @@ class Directive extends Invokable
     // default priority value
     public $priority = 100;
 
+    // TODO : need to allow directive handler to access DI
     public function __get($name){
-        if($name == 'directive')return $this;
-        return isset(self::$__arguments[$name]) ? self::$__arguments[$name] : null;
+        if($name == 'directive')return (object) self::$__arguments;
+        return parent::__get($name); // inherited to DI
     }
 
     public static function boot()
@@ -86,7 +87,6 @@ class Directive extends Invokable
                 $index++;
             }
         }
-        return $temp;
 
         $temp_priority = array_filter($temp_priority, function($e){
             return $e[0] != -1;
@@ -101,11 +101,35 @@ class Directive extends Invokable
             $item = $temp[$idx[1]];
             if(is_object($item)){
                 $callable = explode("@", self::$__elements[$item->element]);
-                // parse all
+                
+                self::$__arguments = [
+                    "content" => $item->content,
+                    "attr" => self::extractParams($item->arguments, $item->scope)
+                ];
+
                 $temp[$idx[1]] = self::invoke($callable[0] . "::handle" . (isset($callable[1]) ? "@" . $callable[1] : ""));
             }
         }
         
         return implode("",$temp);
+    }
+
+
+    public static function extractParams($str, $scope) {
+        $re = '/(\S+)\]?=[\"|\']([^\"|\']+)/xsi';
+        preg_match_all($re, $str, $matches);
+        
+        $cls = new dynClass();
+        foreach($matches[1] as $key => $text) {
+            if(Str::contains($text, '[')) {
+                $text = ltrim($text, '[');
+                $text = rtrim($text, ']');
+                $currentScope = new Scope($scope);
+                $cls->{$text} = $currentScope->{$matches[2][$key]};
+            }else{
+                $cls->{$text} = $matches[2][$key];
+            }
+        }
+        return $cls;
     }
 }
