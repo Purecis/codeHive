@@ -46,6 +46,11 @@ class Route
     }
     public function middlewareAfter()
     {
+        $args = func_get_args();
+        foreach($args as $middleware){
+            array_push(self::$routes[self::$currentRoute][self::$currentMethod]['middleware']['after'], $middleware);
+        }
+
         return $this;
     }
 
@@ -55,7 +60,13 @@ class Route
         $request = new Request;        
         $method = strtolower($request->method);
 
-        // TODO : rearrange routes before looping
+        // rearrange routes before looping to call tallest path first if in same url
+        uksort(self::$routes, function($a, $b) {
+            $a = strlen($a);
+            $b = strlen($b);
+            if ($a == $b) return 0;
+            else return ($a < $b) ? 1: -1;
+        });
 
         foreach(self::$routes as $url => $calback){
             // $url = key(self::$routes);
@@ -89,7 +100,8 @@ class Route
                             break;
                         }
                     }
-                    
+
+                    // TODO : send invoked value to pipe .. 
                     $invoke = Controller::invoke($callable['invoke']);
                     
                     if(sizeof($callable['middleware']['after'])){
