@@ -51,7 +51,7 @@ class Directive extends Invokable
         self::$__elements[$elm] = $element;
     }
 
-    public static function trigger($content, $scope = "original")
+    public static function trigger($content, $scope = "")
     {
         // TODO : make fake register dirctive and module first and what about assets and things like that 
         // and how to parse them
@@ -72,15 +72,15 @@ class Directive extends Invokable
         $temp_priority = [];
         $index = 0;
         foreach($keywords as $k => $word) {
-            array_push($temp, $word[0]); // parse the ${{codes}}
+            array_push($temp, Str::bindSyntax($word[0], $scope, '$'));
             array_push($temp_priority, [-1, $index]);
             $index++;
             if($k < sizeof($matches)){
                 $cls = new \stdClass();
                 $cls->element   = strtolower($matches[$k][1]);
-                $cls->scope     = $matches[$k][2]; // TODO : scope parsing #scopeName
-                $cls->arguments = $matches[$k][3]; // TODO : extract params
-                $cls->content   = $matches[$k][4]; // TODO : we should parse content, arguments
+                $cls->scope     = $matches[$k][2];
+                $cls->arguments = $matches[$k][3];
+                $cls->content   = $matches[$k][4];
                 $cls->priority  = self::inject(self::$__elements[$cls->element])->priority;
                 array_push($temp, $cls);
                 array_push($temp_priority, [$cls->priority, $index]);
@@ -108,6 +108,7 @@ class Directive extends Invokable
                 ];
 
                 $temp[$idx[1]] = self::invoke($callable[0] . "::handle" . (isset($callable[1]) ? "@" . $callable[1] : ""));
+                $temp[$idx[1]] = Str::bindSyntax($word[0], empty($item->scope)?$scope:$item->scope, '$');
             }
         }
         

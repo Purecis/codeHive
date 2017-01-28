@@ -4,7 +4,7 @@ namespace App\System;
 class View
 {
     
-    public static function inject($view){
+    public static function inject($view, $scope=''){
 
         // TODO : get view.name@model.name
 
@@ -12,6 +12,6 @@ class View
         $path = $hive->app_path . "/view/" . $view . ".html";
         $view = file_get_contents($path);
         
-        return (new Directive)->trigger($view);
+        return (new Directive)->trigger($view, $scope);
     }
 }
