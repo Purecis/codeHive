@@ -68,12 +68,12 @@ class AutoLoader
                     "assets"    => $hive->assets,
                     "app"       => $hive->app,
                     "app_path"  => $hive->app_path
-                ], 'colon');
+                ], 'colon', 'same');
 
                 $pattern = str_replace(
                     ["Model", "Controller", "Interface", "Middleware", "Directive"],
                     ['model', "controller", "interface", "middleware", "directive"],
-                     $pattern);
+                    $pattern);
                 
                 $classes = glob($pattern);
                 if (sizeof($classes)) {

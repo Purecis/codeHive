@@ -23,7 +23,7 @@ class Str
      * @param	array|callable  $args
      * @return	string
      */
-    public static function bindSyntax($text, $args, $regex = ':')
+    public static function bindSyntax($text, $args, $regex = ':', $onEmpty='empty')
     {
         switch ($regex) {
             case ':':
@@ -51,11 +51,19 @@ class Str
                 break;
         }
 
+        // check if the args is string, then its a scope name
+        if(is_string($args)){
+            $args = new Scope($args);
+        }
+        
         if(is_callable($args)){
             $callable = call_user_func_array($args, $matches);
         }else{
-            $callable = function ($matches) use($args) {
-                return isset($args[$matches[1]]) ? $args[$matches[1]] : $matches[0];
+            $callable = function ($matches) use($args, $onEmpty) {
+                if(is_array($args)){
+                    $args = (object) $args;
+                }
+                return $args->{$matches[1]} ? $args->{$matches[1]} : ($onEmpty=='same'?$matches[0]:'');
             };
         }
 
