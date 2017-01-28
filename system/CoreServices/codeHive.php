@@ -50,12 +50,13 @@ class codeHive
         $hive->container    = "apps";
         $hive->assets       = "assets";
         $hive->system       = "system";
-        $hive->app_path     = $hive->container . "/" . $hive->app;
-        $hive->version      = 'v.' . $version->major . '.' . $version->minor . '.' . $version->patch . ' ' . $version->code;
-        $hive->packager     = 'http://framework.local/package/';
         
         // overwrite hive defaults by sended arguments
         $hive->set(func_get_arg(0));
+        
+        $hive->app_path     = $hive->container . "/" . $hive->app;
+        $hive->version      = 'v.' . $version->major . '.' . $version->minor . '.' . $version->patch . ' ' . $version->code;
+        $hive->packager     = 'http://codehive.purecis.com/package/';
 
         // Register System AutoLoaders
         AutoLoader::register('App\\System\\', ':system/*/:class.php');
@@ -74,6 +75,11 @@ class codeHive
 
         // check if cli and bootstrap app
         if (!Loader::CLI()) {
+            if(!file_exists($hive->app_path. '/bootstrap.php')){
+                // TODO : error triggers from codehive it self
+                echo "<b>Error:</b> Application file (<b>" . $hive->app_path . "/bootstrap.php</b>) not exists.";
+                exit;
+            }
             AutoLoader::boot();
             Directive::boot();
             require_once $hive->app_path. '/bootstrap.php';
