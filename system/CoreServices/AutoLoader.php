@@ -96,6 +96,25 @@ class AutoLoader
 
     /**
      * load app config
+     *
+     * @access public
+     * @since release 3.0
+     *
+     * @return void
+     */
+    public static function config()
+    {
+        $hive = new Scope('config.hive');
+        $scope = new Scope('config');
+
+        $config = glob($hive->app_path . "/config/*.php");
+        foreach ($config as $class) {
+            $scope->set("_" . basename($class, ".php"), require_once $class);
+        }
+    }
+
+    /**
+     * load app config
      * load all files extensions .boot.php and .router.php
      *
      * @access public
@@ -106,13 +125,7 @@ class AutoLoader
     public static function boot()
     {
         $hive = new Scope('config.hive');
-        $scope = new Scope('config');
-
-        $config = glob($hive->app_path . "/config/*.php");
-        foreach ($config as $class) {
-            $scope->set("_" . basename($class, ".php"), require_once $class);
-        }
-
+        
         // boot files
         $boot = array_merge(
             glob($hive->app_path . "/controller/*.boot.php"),

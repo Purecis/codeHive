@@ -73,6 +73,8 @@ class codeHive
             ':app_path/module/:path/:class.php'
         ]);
 
+        AutoLoader::config();
+
         // check if cli and bootstrap app
         if (!Loader::CLI()) {
             if(!file_exists($hive->app_path. '/bootstrap.php')){
