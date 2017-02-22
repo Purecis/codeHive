@@ -15,40 +15,66 @@ namespace App\System;
 
 class Loader
 {
+
     /**
-     * install
+     * check cli commands and inputs
+     *
+     * @return boolean
+     */
+     public static function CLI()
+     {
+         // check is php running from command line
+         $is_cli = (substr(php_sapi_name(), 0, 3) == 'cli');
+         if ($is_cli) {
+
+            // check is php arguments
+            if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "_cli") {
+                
+                // remove first 2 arguments
+                $_SERVER['argv'] = array_slice($_SERVER['argv'], 2);
+
+                // run console
+                if (class_exists("\App\Develop\Console")) {
+                    new \App\Develop\Console;
+                    echo "\n";
+                } else {
+                    echo "\033[32m You should Install CLI first by run (php index.php install) on codeHive root directory. \033[0m \n";
+                }
+
+            // install console
+            } elseif (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "install") {
+                self::consoleInstall();
+                echo "\n";
+                
+            // keep app runing if not console or install
+            } else {
+                $is_cli = false;
+            }
+         }
+         return $is_cli;
+     }
+
+     /**
+     * console install
      *
      * @access public
      * @since release 3.0
      *
      * @param  string    $module
      */
-    public static function packageInstall($package, $force = false)
+    public static function consoleInstall()
     {
         $errors = [];
         $hive = new Scope('config.hive');
-
-        $json = Request::fetch($hive->packager . $package);
+        
+        $json = Request::fetch($hive->packager . "Develop.Console");
         $json = json_decode($json);
+        $json = $json->latest;
         
-        list($container, $module) = explode(".", $package);
-
-        $module_path = $hive->app_path . "/module/" . $container . "/" . $module;
+        $module_path = $hive->app_path . "/module/Develop/Console";
         
-        if (file_exists($module_path)) {
-            if (!$force) {
-                echo "Already Exists. if you want to update try \033[32mhive update " . $package . "\033[0m or \033[32mhive reinstall " . $package . "\033[0m\n";
-                return;
-            }
-            FileSystem::rmdirRecursive($module_path);
-        }
-
         // create folder if not exists
-        if (!file_exists($module_path)) {
-            mkdir($module_path, 0755, true);
-        }
-
-        // check for git ..
+        FileSystem::mkdirRecursive($module_path);
 
         // check for zip ..
         if (isset($json->source->zip) && sizeof($json->source->zip) > 0) {
@@ -65,95 +91,34 @@ class Loader
                     array_push($errors, "HTTP Error {$e} on {$zip}.");
                 });
                 echo "\n\n";
-                // return;
 
                 if (file_exists($saveTo)) {
                     $extractTo = $module_path . ($folder == "_empty_" ? "" : "/" . $folder);
 
-                    if (!file_exists($extractTo)) {
-                        mkdir($extractTo, 0755, true);
-                    }
+                    FileSystem::mkdirRecursive($extractTo);
 
-                    // unzip the file
-                    $zip = new \ZipArchive;
-                    if ($zip->open($saveTo) === true) {
-                        $zip->extractTo($extractTo);
-                        $zip->close();
+                    if(FileSystem::unzip($saveTo, $extractTo)){
                         unlink($saveTo);
-                    } else {
+                    }else{
                         array_push($errors, "Can't open zip file, try to extract it manually on {$saveTo}.");
                     }
                 }
             }
         }
 
-        echo "\033[32m Module Located at : " . $module_path . "\033[0m";
         if (sizeof($errors)) {
             echo "\n\ncomplete with errors:\n";
             foreach ($errors as $err) {
                 echo "\033[31m\t" . $err . "\n\033[0m";
             }
+            return false;
         } else {
-            echo "\n\ncomplete .. \n";
-            // now loader hive install
-            // run package installer
-        }
-    }
-
-    /**
-     * check for dependencies and install them
-     *
-     * @param  string   $package
-     * @return boolean
-     */
-    public static function packageDependencies($package = NULL) {
-
-        // install dependancies and check if installed before
-        // 
-        
-        if(!is_null($package)) {
-            echo "hello dependency";
-        }
-    }
-
-    // packageConfigure
-
-    /**
-     * check cli commands and inputs
-     *
-     * @return boolean
-     */
-     public static function CLI()
-     {
-         
-         // check is php running from command line
-         $is_cli = (substr(php_sapi_name(), 0, 3) == 'cli');
-         if ($is_cli) {
-
-            // check is php arguments
-            if (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "_cli") {
-                
-                // remove first 2 arguments
-                $_SERVER['argv'] = array_slice($_SERVER['argv'], 2);
-
-                // run console
-                if (class_exists("\App\Develop\Console")) {
-                    new \App\Develop\Console;
-                    echo "\n";
-                } else {
-                    echo "\033[32m you should install CLI first by run (php index.php install) on codeHive root \033[0m \n";
-                }
-
-            // install console
-            } elseif (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "install") {
-                self::packageInstall("Develop.Console", true);
-                echo "\n";
-                
-            // keep app runing if not console or install
+            if (class_exists("\App\Develop\Console")) {
+                \App\Develop\Console::installCLI();
             } else {
-                $is_cli = false;
+                echo "\033[31mUnknown Error while installing Console\n\033[0m";
             }
-         }
-         return $is_cli;
-     }
+            return true;
+        }
+    }
 }

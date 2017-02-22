@@ -39,4 +39,21 @@ class FileSystem
         }
         rmdir($dir);
     }
+
+    public static function mkdirRecursive($dir){
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
+    }
+
+    public static function unzip($file, $to){
+        $zip = new \ZipArchive;
+        if ($zip->open($file) === true) {
+            $zip->extractTo($to);
+            $zip->close();
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
