@@ -17,6 +17,12 @@ require_once "system/Helpers/Str.php";
 
 class AutoLoader
 {
+
+    /**
+     * private var to handle used classes file name
+     */
+    private static $class_files = [];
+
     /**
      * register new PSR-4 Autoloader
      *
@@ -67,7 +73,8 @@ class AutoLoader
                     "container" => $hive->container,
                     "assets"    => $hive->assets,
                     "app"       => $hive->app,
-                    "app_path"  => $hive->app_path
+                    "app_path"  => $hive->app_path,
+                    "glob_path" => $hive->glob_path
                 ], 'colon', 'same');
 
                 $pattern = str_replace(
@@ -78,6 +85,11 @@ class AutoLoader
                 $classes = glob($pattern);
                 if (sizeof($classes)) {
                     foreach ($classes as $class) {
+                        // check if class loaded b4
+                        if(in_array(basename($class), self::$class_files)){
+                            continue;
+                        }
+                        array_push(self::$class_files, basename($class));
 
                         // checking for interface
                         $interface = str_replace('.class.php', ".interface.php", $class);
@@ -87,7 +99,6 @@ class AutoLoader
 
                         require_once $class;
                         // TODO: register class to shutdown it later
-                        // search in __global folder 
                     }
                 }
             }
@@ -107,7 +118,10 @@ class AutoLoader
         $hive = new Scope('config.hive');
         $scope = new Scope('config');
 
-        $config = glob($hive->app_path . "/config/*.php");
+        $config = array_merge(
+            glob($hive->glob_path . "/config/*.php"),
+            glob($hive->app_path . "/config/*.php")
+        );
         foreach ($config as $class) {
             $scope->set("_" . basename($class, ".php"), require_once $class);
         }
@@ -128,12 +142,22 @@ class AutoLoader
         
         // boot files
         $boot = array_merge(
+            // globals
+            glob($hive->glob_path . "/controller/*.boot.php"),
+            glob($hive->glob_path . "/module/*/*/*.boot.php"),
+            glob($hive->glob_path . "/module/*/*/*.router.php"),
+
+            // app
             glob($hive->app_path . "/controller/*.boot.php"),
             glob($hive->app_path . "/module/*/*/*.boot.php"),
             glob($hive->app_path . "/module/*/*/*.router.php")
-            // adding __global check here too
         );
+        $classes = [];
         foreach ($boot as $class) {
+            if(in_array(basename($class), $classes)){
+                continue;
+            }
+            array_push($classes, basename($class));
             require_once $class;
         }
     }

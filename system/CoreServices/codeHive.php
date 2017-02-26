@@ -47,6 +47,7 @@ class codeHive
         // defining config.app scope
         $hive = new Scope('config.hive');
         $hive->app          = "sample";
+        $hive->glob          = "__global";
         $hive->container    = "apps";
         $hive->assets       = "assets";
         $hive->system       = "system";
@@ -55,6 +56,7 @@ class codeHive
         $hive->set(func_get_arg(0));
         
         $hive->app_path     = $hive->container . "/" . $hive->app;
+        $hive->glob_path    = $hive->container . "/" . $hive->glob;
         $hive->version      = 'v.' . $version->major . '.' . $version->minor . '.' . $version->patch . ' ' . $version->code;
         $hive->packager     = 'http://codehive.purecis.com/package/';
 
@@ -62,13 +64,27 @@ class codeHive
         AutoLoader::register('App\\System\\', ':system/*/:class.php');
 
         // Register Model & Controller AutoLoaders
-        AutoLoader::register('App\\Model\\', ':app_path/model/:class.php');
-        AutoLoader::register('App\\Controller\\', ':app_path/controller/:class.php');
-        AutoLoader::register('App\\Middleware\\', ':app_path/middleware/:class.php');
-        AutoLoader::register('App\\Directive\\', ':app_path/directive/:class.php');
+        AutoLoader::register('App\\Model\\', [
+            ':glob_path/model/:class.php',
+            ':app_path/model/:class.php'
+        ]);
+        AutoLoader::register('App\\Controller\\', [
+            ':glob_path/controller/:class.php',
+            ':app_path/controller/:class.php'
+        ]);
+        AutoLoader::register('App\\Middleware\\', [
+            ':glob_path/middleware/:class.php',
+            ':app_path/middleware/:class.php',
+        ]);
+        AutoLoader::register('App\\Directive\\', [
+            ':glob_path/directive/:class.php',
+            ':app_path/directive/:class.php',
+        ]);
 
         // Register Modules autoloader
         AutoLoader::register('App\\', [
+            ':glob_path/module/:path/:class/:class.class.php',
+            ':glob_path/module/:path/:class.php',
             ':app_path/module/:path/:class/:class.class.php',
             ':app_path/module/:path/:class.php'
         ]);
