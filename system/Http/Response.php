@@ -81,7 +81,7 @@ class Response
         $this->header();
 
         if ($this->type == "json") {
-            $this->content = json_encode($this->content, JSON_NUMERIC_CHECK);
+            $this->content = json_encode($this->content, JSON_NUMERIC_CHECK + JSON_PRETTY_PRINT);
         }
 
         return print $this->content;
