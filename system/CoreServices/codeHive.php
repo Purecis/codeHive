@@ -51,6 +51,7 @@ class codeHive
         $hive->container    = "apps";
         $hive->assets       = "assets";
         $hive->system       = "system";
+        $hive->bootstrap    = "bootstrap.php";
         
         // overwrite hive defaults by sended arguments
         $hive->set(func_get_arg(0));
@@ -93,14 +94,14 @@ class codeHive
 
         // check if cli and bootstrap app
         if (!Loader::CLI()) {
-            if(!file_exists($hive->app_path. '/bootstrap.php')){
+            if(!file_exists($hive->app_path. '/' . $hive->bootstrap)){
                 // TODO : error triggers from codehive it self
-                echo "<b>Error:</b> Application file (<b>" . $hive->app_path . "/bootstrap.php</b>) not exists.";
+                echo "<b>Error:</b> Application file (<b>" . $hive->app_path . "/" . $hive->bootstrap . "</b>) not exists.";
                 exit;
             }
             AutoLoader::boot();
             Directive::boot();
-            require_once $hive->app_path. '/bootstrap.php';
+            require_once $hive->app_path. '/' . $hive->bootstrap;
 
             Route::trigger();
         }
