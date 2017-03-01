@@ -142,15 +142,15 @@ class AutoLoader
         
         // boot files
         $boot = array_merge(
-            // globals
-            glob($hive->glob_path . "/controller/*.boot.php"),
-            glob($hive->glob_path . "/module/*/*/*.boot.php"),
-            glob($hive->glob_path . "/module/*/*/*.router.php"),
-
             // app
             glob($hive->app_path . "/controller/*.boot.php"),
             glob($hive->app_path . "/module/*/*/*.boot.php"),
-            glob($hive->app_path . "/module/*/*/*.router.php")
+            glob($hive->app_path . "/module/*/*/*.router.php"),
+
+            // globals
+            glob($hive->glob_path . "/controller/*.boot.php"),
+            glob($hive->glob_path . "/module/*/*/*.boot.php"),
+            glob($hive->glob_path . "/module/*/*/*.router.php")
         );
         $classes = [];
         foreach ($boot as $class) {
