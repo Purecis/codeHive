@@ -25,7 +25,11 @@ class Directive extends Invokable
         $hive = new Scope('config.hive');
         
         // register directives inside module
-        $find = glob($hive->app_path . "/module/*/*/directive/*.php");
+        $find = array_merge(
+            glob($hive->app_path . "/module/*/*/directive/*.php"),
+            glob($hive->glob_path . "/module/*/*/directive/*.php")
+        );
+        print_r($find);
         if(sizeof($find)){
             $find = implode("\n", $find);
             preg_match_all("#\/module\/(.*)\/(.*)\/directive\/(.*).php#", $find, $matches);
@@ -35,7 +39,10 @@ class Directive extends Invokable
         }
 
         // register default directives, default will overwrite all
-        $find = glob($hive->app_path . "/directive/*.php");
+        $find = array_merge(
+            glob($hive->app_path . "/directive/*.php"),
+            glob($hive->glob_path . "/directive/*.php")
+        );
         if(sizeof($find)){
             $find = implode("\n", $find);
             preg_match_all("#\/directive\/(.*).php#", $find, $matches);
