@@ -52,11 +52,11 @@ class Event
      */
     public function trigger($event, $args = array())
     {
-        // TODO : need to do generators here
-        $return = '';
+        // TODO : need to register a generator here
+        $return = [];
         if (isset(self::$events[$this->current]) && isset(self::$events[$this->current][$event])) {
             foreach (self::$events[$this->current][$event] as $c) {
-                $return .= call_user_func_array($c, $args);
+                array_push($return, call_user_func_array($c, $args));
             }
         }
 
