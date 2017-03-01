@@ -108,7 +108,7 @@ class Directive extends Invokable
                 ];
 
                 $temp[$idx[1]] = self::invoke($callable[0] . "::handle" . (isset($callable[1]) ? "@" . $callable[1] : ""));
-                $temp[$idx[1]] = Str::bindSyntax($word[0], empty($item->scope)?$scope:$item->scope, '$');
+                $temp[$idx[1]] = Str::bindSyntax($temp[$idx[1]], empty($item->scope)?$scope:$item->scope, '$');
             }
         }
         
@@ -122,15 +122,17 @@ class Directive extends Invokable
         
         $cls = new dynClass();
         foreach($matches[1] as $key => $text) {
+            $val = $matches[2][$key];
             if(Str::contains($text, '[')) {
                 $text = ltrim($text, '[');
                 $text = rtrim($text, ']');
                 $currentScope = new Scope($scope);
-                $cls->{$text} = $currentScope->{$matches[2][$key]};
+                $cls->{$text} = $currentScope->get($val);
             }else{
-                $cls->{$text} = $matches[2][$key];
+                $cls->{$text} = $val;
             }
         }
+        
         return $cls;
     }
 }
