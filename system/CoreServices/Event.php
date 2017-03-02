@@ -18,7 +18,9 @@ class Event
     {
         if ($name) {
             $this->current = $name;
-            self::$events[$name] = [];
+            if(!isset(self::$events[$name])){
+                self::$events[$name] = [];
+            }
         }
     }
 
