@@ -29,7 +29,6 @@ class Directive extends Invokable
             glob($hive->app_path . "/module/*/*/directive/*.php"),
             glob($hive->glob_path . "/module/*/*/directive/*.php")
         );
-        print_r($find);
         if(sizeof($find)){
             $find = implode("\n", $find);
             preg_match_all("#\/module\/(.*)\/(.*)\/directive\/(.*).php#", $find, $matches);
