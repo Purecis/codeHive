@@ -162,6 +162,44 @@ class Loader
         }
     }
 
+
+    /**
+     * get directory for pattern
+     * example : vendor@Container.Module or @Container.Module for direct access to module folder
+     *
+     * @access public
+     * @since release 3.0
+     *
+     * @return void
+     */
+    public static function getDir(){
+        $pattern = func_get_arg(0);
+        $hive = new Scope('config.hive');
+        
+        $app_path = $hive->container . "/" . $hive->app . "/";
+        $glob_path = $hive->container . "/" . $hive->glob . "/";
+        
+        if(Str::contains($pattern, '@')){
+            list($pattern, $module) = explode('@', $pattern);
+            
+            // check for module in app
+            $module_path = $app_path . "module/" . str_replace(".", "/", $module);
+            if(!is_dir($module_path)){
+
+                // check for module in glob folder
+                $module_path = $glob_path . "module/" . str_replace(".", "/", $module);
+                if(is_dir($module_path)){
+                    return $module_path . "/" . $pattern;
+                }
+            }
+        }
+
+        if(!empty($pattern)){
+            return $app_path . $pattern;
+        }
+        
+        return false;
+    }
 }
 
 // if (version_compare(PHP_VERSION, '7', '<')) {
