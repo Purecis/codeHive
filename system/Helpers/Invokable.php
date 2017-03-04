@@ -7,14 +7,16 @@ abstract class Invokable extends Injectable
 
     private static $__invokable = [];
 
+    // defining class in this array allow bootstrap to be called once.
+    protected static $__bootstraped = [];
+
     function __construct()
     {
         $class = get_called_class();
-        if(!in_array($class, self::$__modules)){
-            array_push(self::$__modules, $class);
-            if(is_callable([$this, "__bootstrap"])){
-                // $this->__bootstrap();
-                // using DI to call boostrap or other function
+        if(!in_array($class, self::$__bootstraped)){
+            array_push(self::$__bootstraped, $class);
+            if(method_exists($this, "__bootstrap")){
+                // invoke bootstrap with DI and Ioc from extending Base
                 self::__directInvoke($this, "__bootstrap");
             }
         }
