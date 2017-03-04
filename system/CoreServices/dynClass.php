@@ -21,7 +21,7 @@ class dynClass extends \stdClass
 
     public function __call($key, $params)
     {
-        echo "calling..";
+        // echo "calling..";
         if (!isset($this->__container[$key])) {
             throw new Exception("Call to undefined method ".get_class($this)."::".$key."()");
         }
