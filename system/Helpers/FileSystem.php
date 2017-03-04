@@ -56,4 +56,16 @@ class FileSystem
             return false;
         }
     }
+
+    /**
+	 * File Extension
+	 * extract Extension from string
+	 *
+	 * @access	public
+	 * @param	string Path to File
+	 * @return	string
+	 */
+	public static function extension($filename){
+		return strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+	}
 }
