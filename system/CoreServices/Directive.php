@@ -78,7 +78,9 @@ class Directive extends Invokable
         $temp_priority = [];
         $index = 0;
         foreach($keywords as $k => $word) {
-            array_push($temp, Str::bindSyntax($word[0], $scope, '$'));
+            $word[0] = Str::bindDefaults($word[0]); // parse ~/ special variables
+            $word[0] = Str::bindSyntax($word[0], $scope, '$'); // parse ${variables}
+            array_push($temp, $word[0]);
             array_push($temp_priority, [-1, $index]);
             $index++;
             if($k < sizeof($matches)){
@@ -114,11 +116,12 @@ class Directive extends Invokable
                 ];
 
                 $temp[$idx[1]] = self::invoke($callable[0] . "::handle" . (isset($callable[1]) ? "@" . $callable[1] : ""));
+                $temp[$idx[1]] = Str::bindDefaults($temp[$idx[1]]);
                 $temp[$idx[1]] = Str::bindSyntax($temp[$idx[1]], empty($item->scope)?$scope:$item->scope, '$');
             }
         }
         
-        return implode("",$temp);
+        return implode("", $temp);
     }
 
 

@@ -80,6 +80,29 @@ class Str
         return preg_replace_callback($regex, $callable, $text);
     }
     
+    /**
+     * search for codehive special variables and parse them
+     * Example "~/link" this ~/ special character change to base address
+     *
+     * @access	public
+     * @param	integer         $text
+     * @return	string          parsed string
+     */
+    public static function bindDefaults($text){
+        $request = new Request;
+
+        $text = str_replace(
+            [
+                "~/"
+            ],
+            [
+                $request->base
+            ],
+            $text);
+            
+        return $text;
+    }
+
     public static function contains($haystack, $needles)
     {
         return strpos($haystack, $needles) !== false;
