@@ -21,7 +21,8 @@ class Str
      * @access	public
      * @param	integer         $text
      * @param	array|callable  $args
-     * @return	string
+     * @param	string          $regex  the command prefix ${var}
+     * @return	string                  parsed string
      */
     public static function bindSyntax($text, $args, $regex = ':', $onEmpty='empty')
     {
@@ -43,11 +44,11 @@ class Str
             
             case '$':
             case 'variable':
-                $regex = '/\${(\w+)}/'; // hello ${name}
+                $regex = '/\${(.+)}/'; // hello ${name}
                 break;
             
             default:
-                $regex = '/\\' . $regex . '{(\w+)}/'; // hello _{name} regex is any char instad $
+                $regex = '/\\' . $regex . '{(.+)}/'; // hello _{name} regex is any char instad $
                 break;
         }
 
@@ -56,6 +57,7 @@ class Str
             $args = new Scope($args);
         }
         
+        // if you send a callable then parse using it
         if(is_callable($args)){
             $callable = call_user_func_array($args, $matches);
         }else{
@@ -63,16 +65,26 @@ class Str
                 if(is_array($args)){
                     $args = (object) $args;
                 }
-                return $args->{$matches[1]} ? $args->{$matches[1]} : ($onEmpty=='same'?$matches[0]:'');
+
+                $param = trim($matches[1]);
+
+                if(self::contains($param, '@')){
+                    list($param, $scope) = explode('@', $param);
+                    $args = new Scope($scope);
+                }
+                
+                return $args->{$param} ? $args->{$param} : ($onEmpty=='same'?$matches[0]:'');
             };
         }
-
+        
         return preg_replace_callback($regex, $callable, $text);
     }
+    
     public static function contains($haystack, $needles)
     {
         return strpos($haystack, $needles) !== false;
     }
+
     public static function extractCase($str)
     {
         preg_match_all('/[a-z]+|[A-Z][a-z]*/',$str,$matches);
