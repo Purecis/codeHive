@@ -51,20 +51,20 @@ abstract class Invokable extends Injectable
             }else{
                 $class .= static::$__namespace . "\\" . $invokable;
             }
-                        
+            
             // make (ClassName@Container.Module) to register it inside a invokable class
             $path = $invokable . (isset($module) ? "@" . $module : "");
 
             // check if class injected before or intialize it
             if(!isset(self::$__invokable[$path])){
-                self::$__invokable[$path] = (new $class);
+                self::$__invokable[$path] = ['path' => $class, 'instance' => (new $class)];
             }
 
             // call injected class
             $cls->{$invokable} = self::$__invokable[$path];
 
             // set __invokable_method if method exists
-            isset($method) && $cls->{$invokable}->__invokable_method = $method;
+            isset($method) && $cls->{$invokable}['__invokable_method'] = $method;
 
             // Use DI -> check module __get as DI + Implicit Binding here
         }
@@ -86,9 +86,10 @@ abstract class Invokable extends Injectable
 
         foreach ($args as $argument) {
             $injectable = self::inject($argument);
-            $method = $injectable->__invokable_method;
+            $instance = $injectable['instance'];
+            $method = $injectable['__invokable_method'];
 
-            $cls->{$method} = self::__directInvoke($injectable, $method);
+            $cls->{$method} = self::__directInvoke($instance, $method);
         }
 
         if (sizeof($args) == 1) {

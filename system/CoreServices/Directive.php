@@ -89,7 +89,7 @@ class Directive extends Invokable
                 $cls->scope     = $matches[$k][2];
                 $cls->arguments = $matches[$k][3];
                 $cls->content   = $matches[$k][4];
-                $cls->priority  = self::inject(self::$__elements[$cls->element])->priority;
+                $cls->priority  = self::inject(self::$__elements[$cls->element])['instance']->priority;
                 array_push($temp, $cls);
                 array_push($temp_priority, [$cls->priority, $index]);
                 $index++;
