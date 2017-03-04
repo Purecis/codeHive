@@ -93,7 +93,7 @@ class codeHive
         AutoLoader::config();
 
         // check if cli and bootstrap app
-        if (!Loader::CLI()) {
+        if (!CLI::access()) {
             if(!file_exists($hive->app_path. '/' . $hive->bootstrap)){
                 // TODO : error triggers from codehive it self
                 echo "<b>Error:</b> Application file (<b>" . $hive->app_path . "/" . $hive->bootstrap . "</b>) not exists.";

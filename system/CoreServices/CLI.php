@@ -1,6 +1,6 @@
 <?php
 /**
- * Loader
+ * CLI
  *
  * @category   codeHive Core
  * @package    System
@@ -13,7 +13,7 @@
  */
 namespace App\System;
 
-class Loader
+class CLI
 {
 
     /**
@@ -21,7 +21,7 @@ class Loader
      *
      * @return boolean
      */
-     public static function CLI()
+     public static function access()
      {
          // check is php running from command line
          $is_cli = (substr(php_sapi_name(), 0, 3) == 'cli');
