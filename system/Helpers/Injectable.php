@@ -6,8 +6,6 @@
 namespace App\System;
 
 abstract class Injectable{
-    
-    protected static $__modules = [];
 
     // use magic return as DI Implicit Binding
     function __get($name)
@@ -36,13 +34,14 @@ abstract class Injectable{
             $class .= implode("\\", $case);
         }
         
+        if(!class_exists($class)){
+            return false;
+        }
+
         return new $class;
     }
 
     function __call($callable, $arguments){
-        if($callable == '__bootstrap'){
-            return null; // this added to remove ERROR .. need more test to figerout what the real error was.
-        }
         $class = self::__get($callable);
         if($class)return call_user_func_array($class, $arguments);
         else return null;
