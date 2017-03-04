@@ -45,7 +45,6 @@ class Event
         return $callback;
     }
 
-    // --------------------------------------------------------------------
 
     /**
      * event trigger.
@@ -63,5 +62,19 @@ class Event
         }
 
         return $return;
+    }
+
+    /**
+     * event trigger.
+     *
+     * @return void
+     */
+    public function count($event)
+    {
+        if (isset(self::$events[$this->current]) && isset(self::$events[$this->current][$event])) {
+            return self::$events[$this->current][$event];
+        }
+        
+        return 0;
     }
 }
