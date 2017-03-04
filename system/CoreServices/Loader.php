@@ -1,6 +1,6 @@
 <?php
 /**
- * AutoLoader
+ * Loader
  *
  * @category   codeHive Core
  * @package    System
@@ -15,7 +15,7 @@ namespace App\System;
 
 require_once "system/Helpers/Str.php";
 
-class AutoLoader
+class Loader
 {
 
     /**
@@ -161,6 +161,7 @@ class AutoLoader
             require_once $class;
         }
     }
+
 }
 
 // if (version_compare(PHP_VERSION, '7', '<')) {

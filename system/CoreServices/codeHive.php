@@ -18,7 +18,7 @@ namespace App\System;
  */
 require "_globals.php";
 require "Scope.php";
-require "AutoLoader.php";
+require "Loader.php";
 
 /*
  * class codeHive
@@ -62,35 +62,35 @@ class codeHive
         $hive->packager     = 'http://codehive.purecis.com/package/';
 
         // Register System AutoLoaders
-        AutoLoader::register('App\\System\\', ':system/*/:class.php');
+        Loader::register('App\\System\\', ':system/*/:class.php');
 
         // Register Model & Controller AutoLoaders
-        AutoLoader::register('App\\Model\\', [
+        Loader::register('App\\Model\\', [
             ':app_path/model/:class.php',
             ':glob_path/model/:class.php'
         ]);
-        AutoLoader::register('App\\Controller\\', [
+        Loader::register('App\\Controller\\', [
             ':app_path/controller/:class.php',
             ':glob_path/controller/:class.php'
         ]);
-        AutoLoader::register('App\\Middleware\\', [
+        Loader::register('App\\Middleware\\', [
             ':app_path/middleware/:class.php',
             ':glob_path/middleware/:class.php'
         ]);
-        AutoLoader::register('App\\Directive\\', [
+        Loader::register('App\\Directive\\', [
             ':app_path/directive/:class.php',
             ':glob_path/directive/:class.php'
         ]);
 
         // Register Modules autoloader
-        AutoLoader::register('App\\', [
+        Loader::register('App\\', [
             ':app_path/module/:path/:class/:class.class.php',
             ':app_path/module/:path/:class.php',
             ':glob_path/module/:path/:class/:class.class.php',
             ':glob_path/module/:path/:class.php'
         ]);
 
-        AutoLoader::config();
+        Loader::config();
 
         // check if cli and bootstrap app
         if (!CLI::access()) {
@@ -99,7 +99,7 @@ class codeHive
                 echo "<b>Error:</b> Application file (<b>" . $hive->app_path . "/" . $hive->bootstrap . "</b>) not exists.";
                 exit;
             }
-            AutoLoader::boot();
+            Loader::boot();
             Directive::boot();
             require_once $hive->app_path. '/' . $hive->bootstrap;
 
