@@ -114,6 +114,12 @@ class Str
         return $matches[0];
     }
 
+    public static function miniPath($path, $size = 4){
+        $path = explode("/", $path);
+        if(sizeof($path) - $size > 0)$path = array_slice($path, sizeof($path) - $size);
+        return implode("/", $path);
+    }
+
 
 
 

@@ -38,7 +38,7 @@ class Loader
 
         // register the autoloader
         spl_autoload_register(function ($class) use ($prefix, $patterns) {
-
+            
             // does the class use the namespace prefix?
             $len = strlen($prefix);
             if (strncmp($prefix, $class, $len) !== 0) {
@@ -81,22 +81,21 @@ class Loader
                     ["Model", "Controller", "Interface", "Middleware", "Directive"],
                     ['model', "controller", "interface", "middleware", "directive"],
                     $pattern);
-                
                 $classes = glob($pattern);
                 if (sizeof($classes)) {
                     foreach ($classes as $class) {
                         // check if class loaded b4
-                        if(in_array(basename($class), self::$class_files)){
+                        if(in_array(Str::miniPath($class), self::$class_files)){
                             continue;
                         }
-                        array_push(self::$class_files, basename($class));
+                        array_push(self::$class_files, Str::miniPath($class));
 
                         // checking for interface
                         $interface = str_replace('.class.php', ".interface.php", $class);
                         if (file_exists($interface)) {
                             require_once $interface;
                         }
-
+                        
                         require_once $class;
                         // TODO: register class to shutdown it later
                     }
@@ -154,10 +153,10 @@ class Loader
         );
         $classes = [];
         foreach ($boot as $class) {
-            if(in_array(basename($class), $classes)){
+            if(in_array(Str::miniPath($class), $classes)){
                 continue;
             }
-            array_push($classes, basename($class));
+            array_push($classes, Str::miniPath($class));
             require_once $class;
         }
     }
