@@ -71,7 +71,7 @@ class CLI
         $json = json_decode($json);
         $json = $json->latest;
         
-        $module_path = $hive->app_path . "/module/Develop/Console";
+        $module_path = $hive->glob_path . "/module/Develop/Console";
         
         // create folder if not exists
         FileSystem::mkdirRecursive($module_path);
