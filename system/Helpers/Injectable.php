@@ -1,26 +1,17 @@
 <?php
+/**
+ * Injectable allow us to use $this->moduleName
+ */
+
 namespace App\System;
 
 abstract class Injectable{
     
     protected static $__modules = [];
-    
-    function __construct()
-    {
-        $class = get_called_class();
-        if(!in_array($class, self::$__modules)){
-            array_push(self::$__modules, $class);
-            if(is_callable([$this, "__bootstrap"])){
-                // using DI to call boostrap or other function
-                $this->__bootstrap();
-            }
-        }
-    }
 
     // use magic return as DI Implicit Binding
     function __get($name)
     {
-        if($name == '__bootstrap')return; // this added to remove ERROR .. need more test to figerout what the real error was.
         $class = "App\\";
 
         $case = Str::extractCase($name);
@@ -49,6 +40,9 @@ abstract class Injectable{
     }
 
     function __call($callable, $arguments){
+        if($callable == '__bootstrap'){
+            return null; // this added to remove ERROR .. need more test to figerout what the real error was.
+        }
         $class = self::__get($callable);
         if($class)return call_user_func_array($class, $arguments);
         else return null;

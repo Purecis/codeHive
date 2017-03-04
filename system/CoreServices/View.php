@@ -12,6 +12,6 @@ class View
         $path = $hive->app_path . "/view/" . $view . ".html";
         $view = file_get_contents($path);
         
-        return (new Directive)->trigger($view, $scope);
+        return Directive::trigger($view, $scope);
     }
 }

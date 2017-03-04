@@ -7,6 +7,18 @@ abstract class Invokable extends Injectable
 
     private static $__invokable = [];
 
+    function __construct()
+    {
+        $class = get_called_class();
+        if(!in_array($class, self::$__modules)){
+            array_push(self::$__modules, $class);
+            if(is_callable([$this, "__bootstrap"])){
+                // $this->__bootstrap();
+                // using DI to call boostrap or other function
+                self::__directInvoke($this, "__bootstrap");
+            }
+        }
+    }
 
     // this will only inject the class to the system without calling any function
     public static function inject()
@@ -34,18 +46,22 @@ abstract class Invokable extends Injectable
             isset($module) && $class .= str_replace(".", "\\", $module) . "\\";
             
             // complete injecting class namespace
-            $class .= static::$__namespace . "\\" . $invokable;
-
+            if(empty(static::$__namespace)){
+                $class .= str_replace(".", "\\", $invokable);
+            }else{
+                $class .= static::$__namespace . "\\" . $invokable;
+            }
+                        
             // make (ClassName@Container.Module) to register it inside a invokable class
             $path = $invokable . (isset($module) ? "@" . $module : "");
 
             // check if class injected before or intialize it
-            if(!isset($__invokable[$path])){
-                $__invokable[$path] = (new $class);
+            if(!isset(self::$__invokable[$path])){
+                self::$__invokable[$path] = (new $class);
             }
 
             // call injected class
-            $cls->{$invokable} = $__invokable[$path];
+            $cls->{$invokable} = self::$__invokable[$path];
 
             // set __invokable_method if method exists
             isset($method) && $cls->{$invokable}->__invokable_method = $method;
@@ -72,12 +88,7 @@ abstract class Invokable extends Injectable
             $injectable = self::inject($argument);
             $method = $injectable->__invokable_method;
 
-            $params = self::extractFuncParams($injectable, $method);
-            $params = array_map(function ($e) {
-                return $e->type ? new $e->type : $e->value;
-            }, $params);
-
-            $cls->{$method} = call_user_func_array(array($injectable, $method), $params);
+            $cls->{$method} = self::__directInvoke($injectable, $method);
         }
 
         if (sizeof($args) == 1) {
@@ -87,9 +98,21 @@ abstract class Invokable extends Injectable
         return $cls;
     }
 
+    public static function __directInvoke()
+    {
+        list($injectable, $method) = func_get_args();
+        
+        $params = self::__extractFuncParams($injectable, $method);
+        $params = array_map(function ($e) {
+            return $e->type ? new $e->type : $e->value;
+        }, $params);
+        
+        return call_user_func_array(array($injectable, $method), $params);
+    }
+
 
     // extract function arguments
-    public static function extractFuncParams($class, $method)
+    public static function __extractFuncParams($class, $method)
     {
         $arr = [];
         $parameters = (new \ReflectionMethod($class, $method))->getParameters();
