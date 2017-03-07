@@ -78,7 +78,7 @@ class Directive extends Invokable
         $temp_priority = [];
         $index = 0;
         foreach($keywords as $k => $word) {
-            $word[0] = Str::bindDefaults($word[0]); // parse ~/ special variables
+            $word[0] = self::bindDefaults($word[0]); // parse ~/ special variables
             $word[0] = Str::bindSyntax($word[0], $scope, '$'); // parse ${variables}
             array_push($temp, $word[0]);
             array_push($temp_priority, [-1, $index]);
@@ -116,7 +116,7 @@ class Directive extends Invokable
                 ];
 
                 $temp[$idx[1]] = self::invoke($callable[0] . "::handle" . (isset($callable[1]) ? "@" . $callable[1] : ""));
-                $temp[$idx[1]] = Str::bindDefaults($temp[$idx[1]]);
+                $temp[$idx[1]] = self::bindDefaults($temp[$idx[1]]);
                 $temp[$idx[1]] = Str::bindSyntax($temp[$idx[1]], empty($item->scope)?$scope:$item->scope, '$');
             }
         }
@@ -143,5 +143,29 @@ class Directive extends Invokable
         }
         
         return $cls;
+    }
+
+    /**
+     * search for codehive special variables and parse them
+     * Example "~/link" this ~/ special character change to base address
+     *
+     * @access	public
+     * @param	integer         $text
+     * @return	string          parsed string
+     */
+    public static function bindDefaults($text){
+        $request = new Request;
+
+        // search for ~/ base
+        $text = str_replace(
+            [
+                "~/"
+            ],
+            [
+                $request->base
+            ],
+            $text);
+            
+        return $text;
     }
 }

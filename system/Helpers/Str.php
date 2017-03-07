@@ -34,21 +34,21 @@ class Str
 
             case '__()':
             case 'translation':
-                $regex = '/__\((.+)\)/'; // hello __(name)
+                $regex = '/__\((.+?)\)/'; // hello __(name)
                 break;
 
             case '{{}}':
             case 'mustache':
-                $regex = '/{{(.+)}}/'; // hello {{name}}
+                $regex = '/{{(.+?)}}/'; // hello {{name}}
                 break;
             
             case '$':
             case 'variable':
-                $regex = '/\${(.+)}/'; // hello ${name}
+                $regex = '/\${(.+?)}/'; // hello ${name}
                 break;
             
             default:
-                $regex = '/\\' . $regex . '{(.+)}/'; // hello _{name} regex is any char instad $
+                $regex = '/\\' . $regex . '{(.+?)}/'; // hello _{name} regex is any char instad $
                 break;
         }
 
@@ -59,7 +59,7 @@ class Str
         
         // if you send a callable then parse using it
         if(is_callable($args)){
-            $callable = call_user_func_array($args, $matches);
+            $callable = $args;//call_user_func_array($args, $matches);
         }else{
             $callable = function ($matches) use($args, $onEmpty) {
                 if(is_array($args)){
@@ -79,29 +79,6 @@ class Str
         
         return preg_replace_callback($regex, $callable, $text);
     }
-    
-    /**
-     * search for codehive special variables and parse them
-     * Example "~/link" this ~/ special character change to base address
-     *
-     * @access	public
-     * @param	integer         $text
-     * @return	string          parsed string
-     */
-    public static function bindDefaults($text){
-        $request = new Request;
-
-        $text = str_replace(
-            [
-                "~/"
-            ],
-            [
-                $request->base
-            ],
-            $text);
-            
-        return $text;
-    }
 
     public static function contains($haystack, $needles)
     {
@@ -119,10 +96,7 @@ class Str
         if(sizeof($path) - $size > 0)$path = array_slice($path, sizeof($path) - $size);
         return implode("/", $path);
     }
-
-
-
-
+    
     /**
 	 * Random String
 	 *
