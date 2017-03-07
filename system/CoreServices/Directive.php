@@ -156,6 +156,11 @@ class Directive extends Invokable
     public static function bindDefaults($text){
         $request = new Request;
 
+        // search for ~{dir} to bind it
+        $text = Str::bindSyntax($text, function($e){
+            return Loader::getDir($e[1]);
+        }, '~');
+
         // search for ~/ base
         $text = str_replace(
             [
