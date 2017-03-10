@@ -18,16 +18,26 @@ abstract class Injectable{
             $class .= "System\\" . ucfirst($name);
 
         }else{
+            // extract for ModuleNameContainer
             $class_path = [];
-            $container = array_pop($case);
-            $module = implode("", $case);
+            $case_copy = $case;
+            $container = array_pop($case_copy);
+            $module = implode("", $case_copy);
             array_push($class_path, $container);
             array_push($class_path, $module);
             $path = $class . implode("\\", $class_path);
+            
+            // reversed extract as ContainerModuleName
             if(!class_exists($path)){
-                $class_path = array_reverse($class_path);
+                $class_path = [];
+                $case_copy = $case;
+                $container = array_shift($case_copy);
+                $module = implode("", $case_copy);
+                array_push($class_path, $container);
+                array_push($class_path, $module);
                 $path = $class . implode("\\", $class_path);
             }
+
             $class = $path;
         }
         
