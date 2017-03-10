@@ -84,9 +84,11 @@ class codeHive
 
         // Register Modules autoloader
         Loader::register('App\\', [
-            ':app_path/module/:path/:class/:class.class.php',
+            ':app_path/module/:path/:class/:class.:suffix.php',
+            ':app_path/module/:path/:class.:suffix.php',
             ':app_path/module/:path/:class.php',
-            ':glob_path/module/:path/:class/:class.class.php',
+            ':glob_path/module/:path/:class/:class.:suffix.php',
+            ':glob_path/module/:path/:class.:suffix.php',
             ':glob_path/module/:path/:class.php'
         ]);
 
