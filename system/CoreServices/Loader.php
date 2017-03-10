@@ -55,6 +55,7 @@ class Loader
             $class_name = end($explode);
             array_pop($explode);
             $relative_path = implode("/", $explode);
+            $suffix = sizeof($explode) >= 3 ? $explode[sizeof($explode)-1] : "class";
 
             $hive = new Scope('config.hive');
 
@@ -69,6 +70,7 @@ class Loader
                     "path"      => $relative_path,
                     "all"       => $relative_class,
                     "class"     => $class_name,
+                    "suffix"    => $suffix,
                     "system"    => $hive->system,
                     "container" => $hive->container,
                     "assets"    => $hive->assets,
