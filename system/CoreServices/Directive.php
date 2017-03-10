@@ -31,7 +31,7 @@ class Directive extends Invokable
         );
         if(sizeof($find)){
             $find = implode("\n", $find);
-            preg_match_all("#\/module\/(.*)\/(.*)\/directive\/(.*).php#", $find, $matches);
+            preg_match_all("#\/module\/(.*)\/(.*)\/directive\/([^.]+).*.php#", $find, $matches);
             foreach($matches[1] as $key => $directive){
                 self::register($matches[3][$key] . "@" . $matches[1][$key] . "." . $matches[2][$key]);
             }
@@ -44,7 +44,7 @@ class Directive extends Invokable
         );
         if(sizeof($find)){
             $find = implode("\n", $find);
-            preg_match_all("#\/directive\/(.*).php#", $find, $matches);
+            preg_match_all("#\/directive\/([^.]*).*.php#", $find, $matches);
             foreach($matches[1] as $directive){
                 self::register($directive);
             }
