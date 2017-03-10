@@ -18,20 +18,17 @@ abstract class Injectable{
             $class .= "System\\" . ucfirst($name);
 
         }else{
-            // check 5 or greater means the module name has more than one capital letter
-            $prefix = [];
-            $suffix = [];
-            if(sizeof($case) >= 5){
-                array_push($suffix, array_pop($case));
-                array_push($suffix, array_pop($case));
-                $suffix = array_reverse($suffix);
+            $class_path = [];
+            $container = array_pop($case);
+            $module = implode("", $case);
+            array_push($class_path, $container);
+            array_push($class_path, $module);
+            $path = $class . implode("\\", $class_path);
+            if(!class_exists($path)){
+                $class_path = array_reverse($class_path);
+                $path = $class . implode("\\", $class_path);
             }
-            array_push($prefix, array_shift($case));
-            array_push($prefix, implode("", $case));
-
-            $case = array_merge($prefix, $suffix);
-
-            $class .= implode("\\", $case);
+            $class = $path;
         }
         
         if(!class_exists($class)){
