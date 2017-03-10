@@ -89,6 +89,12 @@ class Response
         return print $this->content;
     }
 
+    public function kill()
+    {
+        $this->spread();
+        exit;
+    }
+
     // download
     // file
     // redirect
