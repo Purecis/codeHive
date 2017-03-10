@@ -21,30 +21,33 @@ class dynClass extends \stdClass
 
     public function __call($key, $params)
     {
-        // echo "calling..";
-        if (!isset($this->__container[$key])) {
+        if (!in_array($key, $this->__container)) {
             throw new Exception("Call to undefined method ".get_class($this)."::".$key."()");
         }
-        $subject = $this->__container[$key];
+        $subject = $this->{$key};
         return call_user_func_array($subject, $params);
     }
 
     public function __get($key)
     {
-        if (!isset($this->__container[$key])) {
+        if (!in_array($key, $this->__container)) {
             return NULL;
         }
-        return $this->__container[$key];
+        return $this->{$key};
     }
     public function __set($key, $value)
     {
-        $this->__container[$key] = $value;
+        array_push($this->__container, $key);
+        $this->{$key} = $value;
         $this->__event->trigger("setter", [$key, $value]);
     }
     
     public function __unset($key)
     {
-        unset($this->__container[$key]);
+        if(($idx = array_search($key, $this->__container)) !== false) {
+            unset($this->__container[$idx]);
+        }
+        unset($this->{$key});
         $this->__event->trigger("remover", [$key]);
     }
     
@@ -60,14 +63,15 @@ class dynClass extends \stdClass
 
     public function each($callable){
         if(is_callable($callable)){
-            foreach($this->__container as $k => $v){
-                $callable($v, $k);
+            foreach($this->__container as $key){
+                $callable($this->{$key}, $key);
             }
         }
 
-        return $this->__container;
+        return get_object_vars($this);
     }
 
-    // register getter fillter
-    // register setter caller EVENT
+    public function get(){
+        return get_object_vars($this);
+    }
 }
