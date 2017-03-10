@@ -87,10 +87,18 @@ abstract class Invokable extends Injectable
         $cls = new \stdClass;
 
         foreach ($args as $argument) {
-            $injectable = self::inject($argument);
-            $instance = $injectable['instance'];
-            $method = $injectable['__invokable_method'];
 
+            if(!Str::contains($argument, '::')){
+                // todo : search if instance already in memory
+                $class = get_called_class();
+                $instance = new $class;
+                $method = $argument;
+            }else{
+                $injectable = self::inject($argument);
+                $instance = $injectable['instance'];
+                $method = $injectable['__invokable_method'];
+            }
+            
             $cls->{$method} = self::__directInvoke($instance, $method);
         }
 
