@@ -32,7 +32,7 @@ class Route
     public static function params()
     {
         $request = new Request;
-        return $request->routeParams;
+        return $request->router;
     }
 
     public function middleware()
@@ -70,7 +70,7 @@ class Route
 
         foreach(self::$routes as $url => $calback){
             // $url = key(self::$routes);
-            $request->routeParams = new \stdClass;
+            $request->router = new \stdClass;
 
             $regix = "~:(\w+)~";
 
@@ -84,9 +84,9 @@ class Route
                 array_shift($matches);
                 
                 foreach ($matches as $key => $value) {
-                    $request->routeParams->{$original[1][$key]} = $value;
+                    $request->router->{$original[1][$key]} = $value;
                 }
-
+                
                 $request->route = $url;
                 
                 $callable = isset(self::$routes[$url][$method]) ? self::$routes[$url][$method] : null;
