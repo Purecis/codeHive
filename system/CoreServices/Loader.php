@@ -80,8 +80,8 @@ class Loader
                 ], 'colon', 'same');
 
                 $pattern = str_replace(
-                    ["Model", "Controller", "Interface", "Middleware", "Directive"],
-                    ['model', "controller", "interface", "middleware", "directive"],
+                    ["Model", "Controller", "Interface", "Middleware", "Directive", "Driver"],
+                    ['model', "controller", "interface", "middleware", "directive", "driver"],
                     $pattern);
                 $classes = glob($pattern);
                 if (sizeof($classes)) {

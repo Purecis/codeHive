@@ -9,6 +9,7 @@
  * @license    http://codehive.purecis.com/license  MIT License
  * @version    Release: 3.0
  * @link       http://codehive.purecis.com/package/System.Scope
+ * @link       http://codehive.purecis.com/package/System.codeHive
  * @since      Class available since Release 1.0
  */
 namespace App\System;
@@ -81,6 +82,10 @@ class codeHive
             ':app_path/directive/:class.php',
             ':glob_path/directive/:class.php'
         ]);
+        Loader::register('App\\Driver\\', [
+            ':app_path/driver/:class.php',
+            ':glob_path/driver/:class.php'
+        ]);
 
         // Register Modules autoloader
         Loader::register('App\\', [
@@ -101,8 +106,8 @@ class codeHive
                 echo "<b>Error:</b> Application file (<b>" . $hive->app_path . "/" . $hive->bootstrap . "</b>) not exists.";
                 exit;
             }
-            Loader::boot();
             Directive::boot();
+            Loader::boot();
             require_once $hive->app_path. '/' . $hive->bootstrap;
 
             Route::trigger();
