@@ -116,7 +116,7 @@ class Route
             }
         }
         if(isset($invoke)){
-            if(is_callable($invoke)){
+            if(is_callable($invoke) & !$invoke instanceof Response){
                 $invoke = $invoke();
             }
             if($invoke instanceof Response) {
