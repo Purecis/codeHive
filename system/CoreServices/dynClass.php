@@ -30,6 +30,11 @@ class dynClass extends \stdClass
 
     public function __get($key)
     {
+        $getter = $this->__event->trigger("getter", [$key]);
+        if(sizeof($getter)){
+            return sizeof($getter) > 1 ? $getter : $getter[0];
+        }
+
         if (!in_array($key, $this->__container)) {
             return NULL;
         }
