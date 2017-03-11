@@ -153,6 +153,19 @@ class Scope
     }
 
     /**
+     * get all registered scopes
+     *
+     * @access public
+     * @since release 3.0
+     *
+     * @return mixed values
+     */
+    public function keys()
+    {
+        return array_keys(self::base());
+    }
+
+    /**
      * set return mode for getters, Array when true and stdObject when false.
      *
      * @access public
