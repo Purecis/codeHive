@@ -467,14 +467,6 @@ class Query
         return $this->records = DataObject::query($this->query);
     }
 
-    public function record()
-    {
-        $this->get();
-        Module::import('QueryRecord');
-
-        return new QueryRecord($this->records);
-    }
-
     private function _table()
     {
         $args = func_get_args();
