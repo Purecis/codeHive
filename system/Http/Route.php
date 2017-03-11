@@ -116,6 +116,9 @@ class Route
             }
         }
         if(isset($invoke)){
+            if(is_callable($invoke)){
+                $invoke = $invoke();
+            }
             if($invoke instanceof Response) {
                 $invoke->spread();
 
