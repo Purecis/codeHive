@@ -201,6 +201,22 @@ class Loader
         
         return false;
     }
+
+    /**
+     * merge arguments
+     */
+     public static function mergeArguments(){
+         $arguments = func_get_arg(0);
+         $args = [];
+         foreach($arguments as $argument){
+            if(is_array($argument)){
+                $args = array_merge($args, $argument);
+            }else{
+                array_push($args, $argument);
+            }
+         }
+         return $args;
+     }
 }
 
 // if (version_compare(PHP_VERSION, '7', '<')) {

@@ -8,7 +8,6 @@
  * @copyright  Copyright (c) 2013 - 2016, Purecis, Inc.
  * @license    http://codehive.purecis.com/license  MIT License
  * @version    Release: 3.0
- * @link       http://codehive.purecis.com/package/System.Scope
  * @link       http://codehive.purecis.com/package/System.codeHive
  * @since      Class available since Release 1.0
  */
@@ -38,6 +37,9 @@ class codeHive
             throw new \Exception('The codeHive Framework v3.0 requires PHP version 5.4 or higher, (5.6) is Recomonded.');
         }
         
+        // initialize sessions
+        session_start();
+
         // defining config.version scope
         $version = new Scope('config.version');
         $version->major = '3';
@@ -106,6 +108,7 @@ class codeHive
                 echo "<b>Error:</b> Application file (<b>" . $hive->app_path . "/" . $hive->bootstrap . "</b>) not exists.";
                 exit;
             }
+            Session::boot();
             Directive::boot();
             Loader::boot();
             require_once $hive->app_path. '/' . $hive->bootstrap;

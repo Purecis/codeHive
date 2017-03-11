@@ -41,6 +41,18 @@ class Request extends Dynable
             setcookie($key, "", time() - 3600);
         });
 
+        // define sessions
+        self::$__dynable->session             = new dynClass();
+        self::$__dynable->session->onGet(function ($key) {
+            return Session::get($key);
+        });
+        self::$__dynable->session->onSet(function ($key, $value) {
+            Session::set($key, $value);
+        });
+        self::$__dynable->session->onDelete(function ($key) {
+            Session::remove($key);
+        });
+
         // define http header
         self::$__dynable->http                = new dynClass();
         self::$__dynable->http->host          = isset($_SERVER['HTTP_HOST'])            ? $_SERVER['HTTP_HOST']                     : null;
