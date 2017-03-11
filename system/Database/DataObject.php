@@ -107,7 +107,7 @@ class DataObject
                     break;
             }
 
-            $connection = self::$current = new PDO($dsn, $db->user, $db->pass);
+            $connection = new PDO($dsn, $db->user, $db->pass);
             $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         } catch (PDOException $e) {
