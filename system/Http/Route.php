@@ -8,10 +8,41 @@ class Route
     private static $currentRoute = null;
     private static $currentMethod = null;
 
-    // TODO : define methods
-    public static function get($route, $invoke)
+    public static function group($route, $class){
+        // get all users
+        Route::get($route, $class . '::index');
+        // get user
+        Route::get($route . '/:id', $class . '::view');
+        // add new user
+        Route::post($route, $class . '::store');
+        // edit user ( all accept one or all fields )
+        Route::post($route . '/:id', $class . '::store');
+        Route::put($route . '/:id', $class . '::store');
+        Route::patch($route . '/:id', $class . '::store');
+        // delete user
+        Route::delete($route . '/:id', $class . '::remove');
+    }
+    public static function get($route, $invoke){
+        return self::register($route, $invoke, 'GET');
+    }
+    public static function post($route, $invoke){
+        return self::register($route, $invoke, 'POST');
+    }
+    public static function put($route, $invoke){
+        return self::register($route, $invoke, 'PUT');
+    }
+    public static function patch($route, $invoke){
+        return self::register($route, $invoke, 'PATCH');
+    }
+    public static function delete($route, $invoke){
+        return self::register($route, $invoke, 'DELETE');
+    }
+    public static function options($route, $invoke){
+        return self::register($route, $invoke, 'OPTIONS');
+    }
+
+    public static function register($route, $invoke, $method = 'GET')
     {
-        $method = "get";
         if (!isset(self::$routes[$route])) {
             self::$routes[$route] = [];
         }
@@ -58,7 +89,7 @@ class Route
     public static function trigger()
     {
         $request = new Request;        
-        $method = strtolower($request->method);
+        $method = strtoupper($request->method);
 
         // rearrange routes before looping to call tallest path first if in same url
         uksort(self::$routes, function($a, $b) {
