@@ -68,19 +68,17 @@ class Route
 
     public function middleware()
     {
-        $args = func_get_args();
-        foreach($args as $middleware){
-            array_push(self::$routes[self::$currentRoute][self::$currentMethod]['middleware']['before'], $middleware);
-        }
-        
+        $arguments = Loader::mergeArguments(func_get_args());
+        $before = &self::$routes[self::$currentRoute][self::$currentMethod]['middleware']['before'];
+        $before = array_merge($before, $arguments);
+
         return $this;
     }
     public function middlewareAfter()
     {
-        $args = func_get_args();
-        foreach($args as $middleware){
-            array_push(self::$routes[self::$currentRoute][self::$currentMethod]['middleware']['after'], $middleware);
-        }
+        $arguments = Loader::mergeArguments(func_get_args());
+        $before = &self::$routes[self::$currentRoute][self::$currentMethod]['middleware']['after'];
+        $before = array_merge($before, $arguments);
 
         return $this;
     }
@@ -98,7 +96,7 @@ class Route
             if ($a == $b) return 0;
             else return ($a < $b) ? 1: -1;
         });
-
+        
         foreach(self::$routes as $url => $calback){
             // $url = key(self::$routes);
             $request->router = new \stdClass;
@@ -124,8 +122,18 @@ class Route
                 $callable = isset(self::$routes[$url]['group']) ? self::$routes[$url]['group'] : $callable;
 
                 if(!is_null($callable)){
+                    $inject = Controller::inject($callable['invoke']);
+                    if(isset($inject['instance']->middlewares)){
+                        if(isset($inject['instance']->middlewares[$inject['__invokable_method']])){
+                            $middleware = $inject['instance']->middlewares[$inject['__invokable_method']];
+                            if(!is_array($middleware)){
+                                $middleware = [$middleware];
+                            }
+                            $callable['middleware']['before'] = array_merge($callable['middleware']['before'], $middleware);
+                        }
+                    }
                     if(sizeof($callable['middleware']['before'])){
-                        $middleware = (new \App\System\Middleware($callable['middleware']['before']))->beginQueue();
+                        $middleware = (new Middleware($callable['middleware']['before']))->beginQueue();
                         if($middleware instanceof Response){
                             $middleware->spread();
                             break;
@@ -133,10 +141,10 @@ class Route
                     }
 
                     // TODO : send invoked value to pipe .. 
-                    $invoke = Controller::invoke($callable['invoke']);
+                    $invoke = Controller::invoke($inject);
                     
                     if(sizeof($callable['middleware']['after'])){
-                        $middleware = (new \App\System\Middleware($callable['middleware']['after']))->beginQueue();
+                        $middleware = (new Middleware($callable['middleware']['after']))->beginQueue();
                         if($middleware instanceof Response){
                             $middleware->spread();
                             break;
