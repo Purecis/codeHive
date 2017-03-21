@@ -87,8 +87,10 @@ abstract class Invokable extends Injectable
         $cls = new \stdClass;
 
         foreach ($args as $argument) {
-
-            if(!Str::contains($argument, '::')){
+            if(!is_string($argument)){ // if not string then its invokable instance
+                $instance = $argument['instance'];
+                $method = $argument['__invokable_method'];
+            }else if(!Str::contains($argument, '::')){
                 // todo : search if instance already in memory
                 $class = get_called_class();
                 $instance = new $class;
@@ -125,6 +127,10 @@ abstract class Invokable extends Injectable
     // extract function arguments
     public static function __extractFuncParams($class, $method)
     {
+        if(!method_exists($class, $method)){
+            $class = get_class($class);
+            die("Error : Method <b>{$method}</b> not existed in class <b>{$class}</b>");
+        }
         $arr = [];
         $parameters = (new \ReflectionMethod($class, $method))->getParameters();
         foreach ($parameters as $param) {
