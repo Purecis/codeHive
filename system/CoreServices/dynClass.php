@@ -72,11 +72,11 @@ class dynClass extends \stdClass
                 $callable($this->{$key}, $key);
             }
         }
-
-        return get_object_vars($this);
+        return $this->get();
     }
 
     public function get(){
-        return get_object_vars($this);
+        // to get public vars
+        return call_user_func('get_object_vars', $this);
     }
 }
