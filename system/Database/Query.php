@@ -14,6 +14,8 @@
  */
 namespace App\System;
 
+use \Closure as Closure;
+
 class Query
 {
 
@@ -55,7 +57,9 @@ class Query
      */
     public function param()
     {
-        $this->param = array_merge($this->param, func_get_args());
+        // $arguments = Loader::mergeArguments(func_get_args());
+        $arguments = func_get_args();
+        $this->param = array_merge($this->param, $arguments);
 
         return $this;
     }
@@ -181,9 +185,9 @@ class Query
         if (sizeof($args) == 2) {
             array_push($this->order, array($args[0], strtoupper($args[1])));
         } elseif (sizeof($args) == 1) {
-            if (strpos($args[0], '(') !== FALSE) {
+            if (strpos($args[0], '(') !== false) {
                 array_push($this->order, [$args[0]]);
-            }else{
+            } else {
                 array_push($this->order, [$args[0], 'DESC']);
             }
         } else {
@@ -248,7 +252,8 @@ class Query
 
         return $this;
     }
-    public function appearAs(){
+    public function appearAs()
+    {
         $args = func_get_args();
         $this->appear = $args[0];
         return $this;
@@ -266,7 +271,7 @@ class Query
             array_push($this->masterQuery->param, $col);
             $this->where($args[0], 'in', $this->masterQuery);
         }
-        if($args[1] == 'by'){
+        if ($args[1] == 'by') {
             $this->masterQuery->param = [];
             array_push($this->masterQuery->param, $col);
         }
@@ -287,11 +292,10 @@ class Query
 
             if (is_callable($args[1]) && $args[1] instanceof Closure) {
                 call_user_func($args[1], $q);
-                if (
-                    !(
+                if (!(
                         array_search($q->withSecColumn, $q->param) !== false ||
-                        sizeof(preg_grep("#(.{$q->withSecColumn})#", $q->param)) != 0 
-                    ) && 
+                        sizeof(preg_grep("#(.{$q->withSecColumn})#", $q->param)) != 0
+                    ) &&
                     sizeof($q->param)
                 ) {
                     array_push($q->param, $q->withSecColumn);
@@ -303,7 +307,7 @@ class Query
 
             $newQuery = $q->get();
 
-            if($newQuery->status){
+            if ($newQuery->status) {
                 $q = (Object) $q;
                 foreach ($this->records->record as $key => $record) {
                     //$record = (Object) $record;
@@ -317,18 +321,18 @@ class Query
                         return $e->{$q->withSecColumn} == $record->{$q->withFirstColumn};
                     }));
                     // TODO: remove the sec column from the child if not sended
-                    if(isset($config['database']['fetch']) && $config['database']['fetch'] == 'array'){
+                    if (isset($config['database']['fetch']) && $config['database']['fetch'] == 'array') {
                         $this->records->record[$key][$q->appear] = $filter;
-                    }else {
+                    } else {
                         $record->{$q->appear} = $filter;
                     }
                 }
-            }else{
+            } else {
                 if (isset($this->records->error) && is_string($this->records->error)) {
                     $temp = $this->records->error;
                     $this->records->error = [];
                     array_push($this->records->error, $temp);
-                }else{
+                } else {
                     $this->records->error = [];
                 }
                 array_push($this->records->error, $newQuery->error);
@@ -380,7 +384,7 @@ class Query
         $this->records = DataObject::query($this->query);
         $this->withParse();
 
-        if(isset($args[0])){
+        if (isset($args[0])) {
             return (Object) $this->records->record[$args[0]];
         }
         return $this->records;
@@ -470,8 +474,8 @@ class Query
     private function _table()
     {
         $args = func_get_args();
-        if(isset($args[1])){
-            return "`{$args[0]}` as `{$args[1]}`";    
+        if (isset($args[1])) {
+            return "`{$args[0]}` as `{$args[1]}`";
         }
         return "`{$args[0]}`";
     }
@@ -505,17 +509,18 @@ class Query
 
         if (strpos($args[0], '~~') === 0) { // as is
             return substr($args[0], 2);
-        }else if (strpos($args[0], '(') !== FALSE && ((isset($args[1]) && $args[1] != "string") || !isset($args[1]))) {
+        } elseif (strpos($args[0], '(') !== false && ((isset($args[1]) && $args[1] != "string") || !isset($args[1]))) {
             // TODO : fix 2 arguments sql functions
-            return preg_replace_callback("#\((.*)\)#six", function($match){
-                if(empty($match[1]))return "()";
+            return preg_replace_callback("#\((.*)\)#six", function ($match) {
+                if (empty($match[1])) {
+                    return "()";
+                }
                 $match[1] = self::_col($match[1], "InBrackets");
                 return "(".$match[1].")";
             }, $args[0]);
-
-        }else if (strpos($args[0], '~') === 0) {
+        } elseif (strpos($args[0], '~') === 0) {
             return $this->_col(substr($args[0], 1));
-        } elseif (substr_count($args[0], ' as ') == 1 && (!isset($args[1]) || $args[1] == "InBrackets") ) {
+        } elseif (substr_count($args[0], ' as ') == 1 && (!isset($args[1]) || $args[1] == "InBrackets")) {
             $exp = explode(' as ', $args[0]);
             
             return $this->_col($exp[0]) . " AS " . (isset($args[1]) && $args[1] == "InBrackets" ? $exp[1] : "`{$exp[1]}`");
@@ -524,14 +529,13 @@ class Query
         //     return $this->_col($args[0],"single");
         } elseif (substr_count($args[0], '.') == 1 && !isset($args[1])) {
             $exp = explode('.', $args[0]);
-            if($exp[1] == "*"){
+            if ($exp[1] == "*") {
                 return "`{$exp[0]}`.{$exp[1]}";
-            }else{
+            } else {
                 return "`{$exp[0]}`.`{$exp[1]}`";
             }
         } elseif (isset($args[1]) && $args[1] == 'single') {
             return "`{$args[0]}`";
-
         } elseif (isset($args[1]) && $args[1] == 'string') {
             if (is_array($args[0])) {
                 return "('".implode("', '", $args[0])."')";
@@ -539,12 +543,11 @@ class Query
                 return "'".Str::escape($args[0])."'";
             }
         } else {
-            if($args[0] == "*"){
+            if ($args[0] == "*") {
                 return "`{$this->table}`.{$args[0]}";
-            }else{
+            } else {
                 return "`{$this->table}`.`{$args[0]}`";
             }
-
         }
     }
 
@@ -591,7 +594,7 @@ class Query
         }
 
         //$this->param = $this->_col($this->param);
-
+        // TODO : fix when insert as array
         if (isset($args[0]) && $args[0] == 'insert') {
             for ($i = $args[1] - 1; $i < sizeof($this->param); $i += 2) {
                 array_push($arr, $this->_col($this->param[$i], $args[1] == 1 ? 'single' : 'string'));
@@ -639,7 +642,7 @@ class Query
     {
         $this->join_on = '';
         $str = "";
-        if($place){
+        if ($place) {
             $str .= " {$place}";
         }
         $str .= ' JOIN ';
@@ -649,15 +652,19 @@ class Query
             $exp = explode(' as ', $join_table);
             $join_table = $exp[1];
             $str .= $this->_table($exp[0], $exp[1]);
-        }else{
+        } else {
             $str .= $this->_table($join_table);
         }
         
         array_shift($args);
         
         // TODO : support new way in config to setup type as (snakecase, camelcase)
-        if(!isset($args[0]))$args[0] = "{$join_table}.{$this->table}Id";
-        if(!isset($args[1]))$args[1] = "~id";
+        if (!isset($args[0])) {
+            $args[0] = "{$join_table}.{$this->table}Id";
+        }
+        if (!isset($args[1])) {
+            $args[1] = "~id";
+        }
 
         if (is_callable($args[0]) && $args[0] instanceof Closure) {
             $q = new self();
@@ -707,8 +714,8 @@ class Query
                 break;
 
             case '!=':
-            $str .= ' != '.$this->_col($args[2], 'string');
-            break;
+                $str .= ' != '.$this->_col($args[2], 'string');
+                break;
 
             case '<>':
                 $str .= ' <> '.$this->_col($args[2], 'string');
@@ -765,7 +772,7 @@ class Query
             case '!><':
                 $b = in_array($type, array('bet', 'between', '><')) ? 'BETWEEN' : 'NOT BETWEEN';
                 
-               if (is_array($args[2])) {
+                if (is_array($args[2])) {
                     $str .= " {$b} ".$this->_col($args[2][0], 'string').' AND '.$this->_col($args[2][1], 'string');
                 } else {
                     $str .= " {$b} ".$this->_col($args[2], 'string').' AND '.$this->_col($args[3], 'string');
@@ -774,16 +781,19 @@ class Query
 
             case 'set':
             case 'inset':
-            case 'oneofset': 
-            case 'inset-or': 
+            case 'oneofset':
+            case 'inset-or':
                 if (is_array($args[2])) {
                     $temp = array();
                     foreach ($args[2] as $v) {
                         array_push($temp, 'FIND_IN_SET ('.$this->_col($v, 'string').','.$this->_col($args[0]).')');
                     }
                     
-                    if($type == 'oneofset' || $type == 'inset-or')$operator = ' OR ';
-                    else $operator = ' AND ';
+                    if ($type == 'oneofset' || $type == 'inset-or') {
+                        $operator = ' OR ';
+                    } else {
+                        $operator = ' AND ';
+                    }
 
                     $str .= '( '.implode($operator, $temp).')';
                 } else {
