@@ -1,7 +1,7 @@
 <?php
 namespace App\System;
 
-abstract class Authenticate
+abstract class Auth
 {
 
     public static $current;
