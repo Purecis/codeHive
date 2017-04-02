@@ -16,15 +16,15 @@ class Str
     }
     /**
      * parse string with special char to variable
-     * Example "my name is :name and i am :age years old." 
+     * Example "my name is :name and i am :age years old."
      *
-     * @access	public
-     * @param	integer         $text
-     * @param	array|callable  $args
-     * @param	string          $regex  the command prefix ${var}
-     * @return	string                  parsed string
+     * @access  public
+     * @param   integer         $text
+     * @param   array|callable  $args
+     * @param   string          $regex  the command prefix ${var}
+     * @return  string                  parsed string
      */
-    public static function bindSyntax($text, $args, $regex = ':', $onEmpty='empty')
+    public static function bindSyntax($text, $args, $regex = ':', $onEmpty = 'empty')
     {
         switch ($regex) {
             case ':':
@@ -53,22 +53,22 @@ class Str
         }
 
         // check if the args is string, then its a scope name
-        if(is_string($args)){
+        if (is_string($args)) {
             $args = new Scope($args);
         }
         
         // if you send a callable then parse using it
-        if(is_callable($args)){
+        if (is_callable($args)) {
             $callable = $args;//call_user_func_array($args, $matches);
-        }else{
-            $callable = function ($matches) use($args, $onEmpty) {
-                if(is_array($args)){
+        } else {
+            $callable = function ($matches) use ($args, $onEmpty) {
+                if (is_array($args)) {
                     $args = (object) $args;
                 }
 
                 $param = trim($matches[1]);
 
-                if(self::contains($param, '@')){
+                if (self::contains($param, '@')) {
                     list($param, $scope) = explode('@', $param);
                     $args = new Scope($scope);
                 }
@@ -87,7 +87,7 @@ class Str
 
     public static function extractCase($str)
     {
-        preg_match_all('/[a-z]+|[A-Z][a-z]*/',$str,$matches);
+        preg_match_all('/[a-z]+|[A-Z][a-z]*/', $str, $matches);
         return $matches[0];
     }
 
@@ -99,30 +99,105 @@ class Str
         return $class;
     }
 
-    public static function miniPath($path, $size = 4){
+    public static function miniPath($path, $size = 4)
+    {
         $path = explode("/", $path);
-        if(sizeof($path) - $size > 0)$path = array_slice($path, sizeof($path) - $size);
+        if (sizeof($path) - $size > 0) {
+            $path = array_slice($path, sizeof($path) - $size);
+        }
         return implode("/", $path);
     }
     
     /**
-	 * Random String
-	 *
-	 * Generate Random String From Scratch
-	 *
-	 * @access	public
-	 * @param	integer string length that will generate
-	 * @param	string 	special characters that you want to generate from
-	 * @return	string
-	 */
-	public static function random($len = 8,$characters = false){
-		if(!$characters && $len < 32){
-			return substr(md5(rand().rand()), 0, $len);
-		}else{
-			if($characters === false)$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-			$randomString = '';
-			for($i=0; $i<$len; $i++)$randomString .= $characters[rand(0, strlen($characters) - 1)];
-			return $randomString;
-		}
-	}
+     * Random String
+     *
+     * Generate Random String From Scratch
+     *
+     * @access  public
+     * @param   integer string length that will generate
+     * @param   string  special characters that you want to generate from
+     * @return  string
+     */
+    public static function random($len = 8, $characters = false)
+    {
+        if (!$characters && $len < 32) {
+            return substr(md5(rand().rand()), 0, $len);
+        } else {
+            if ($characters === false) {
+                $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            }
+            $randomString = '';
+            for ($i=0; $i<$len;
+            $i++) {
+                $randomString .= $characters[rand(0, strlen($characters) - 1)];
+            }
+            return $randomString;
+        }
+    }
+
+    /**
+     * String Encrypt
+     *
+     * Secure and Encrypt String with secret key
+     *
+     * @param   string text to encrypt
+     * @param   string hash key
+     * @return  string
+     */
+    public static function encrypt($string, $key = null)
+    {
+        if (!$key) {
+            $security = new Scope('config.security');
+            $key = $security->hash;
+        }
+        
+        $key = sha1($key);
+        $strLen = strlen($string);
+        $keyLen = strlen($key);
+        $j=null;
+        $hash='';
+        for ($i = 0; $i < $strLen; $i++) {
+            $ordStr = ord(substr($string, $i, 1));
+            if ($j == $keyLen) {
+                $j = 0;
+            }
+            $ordKey = ord(substr($key, $j, 1));
+            $j++;
+            $hash .= strrev(base_convert(dechex($ordStr + $ordKey), 16, 36));
+        }
+        return $hash;
+    }
+
+    /**
+     * String Decrypt
+     *
+     * Decrypt Encrypted String with secret key
+     *
+     * @param   string text to decrypt
+     * @param   string hash key
+     * @return  string
+     */
+    public static function decrypt($string, $key = null)
+    {
+        if (!$key) {
+            $security = new Scope('config.security');
+            $key = $security->hash;
+        }
+
+        $key = sha1($key);
+        $strLen = strlen($string);
+        $keyLen = strlen($key);
+        $j=null;
+        $hash='';
+        for ($i = 0; $i < $strLen; $i+=2) {
+            $ordStr = hexdec(base_convert(strrev(substr($string, $i, 2)), 36, 16));
+            if ($j == $keyLen) {
+                $j = 0;
+            }
+            $ordKey = ord(substr($key, $j, 1));
+            $j++;
+            $hash .= chr($ordStr - $ordKey);
+        }
+        return $hash;
+    }
 }
