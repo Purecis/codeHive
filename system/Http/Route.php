@@ -8,36 +8,43 @@ class Route
     private static $currentRoute = null;
     private static $currentMethod = null;
 
-    public static function group($route, $class){
-        // get all users
+    public static function group($route, $class)
+    {
+        // get all
         Route::get($route, $class . '::index');
-        // get user
-        Route::get($route . '/:id', $class . '::view');
-        // add new user
+        // get one
+        Route::get($route . '/:id', $class . '::index');
+        // add new
         Route::post($route, $class . '::store');
-        // edit user ( all accept one or all fields )
+        // edit ( all accept one or more fields )
         Route::post($route . '/:id', $class . '::store');
         Route::put($route . '/:id', $class . '::store');
         Route::patch($route . '/:id', $class . '::store');
         // delete user
         Route::delete($route . '/:id', $class . '::remove');
     }
-    public static function get($route, $invoke){
+    public static function get($route, $invoke)
+    {
         return self::register($route, $invoke, 'GET');
     }
-    public static function post($route, $invoke){
+    public static function post($route, $invoke)
+    {
         return self::register($route, $invoke, 'POST');
     }
-    public static function put($route, $invoke){
+    public static function put($route, $invoke)
+    {
         return self::register($route, $invoke, 'PUT');
     }
-    public static function patch($route, $invoke){
+    public static function patch($route, $invoke)
+    {
         return self::register($route, $invoke, 'PATCH');
     }
-    public static function delete($route, $invoke){
+    public static function delete($route, $invoke)
+    {
         return self::register($route, $invoke, 'DELETE');
     }
-    public static function options($route, $invoke){
+    public static function options($route, $invoke)
+    {
         return self::register($route, $invoke, 'OPTIONS');
     }
 
@@ -86,20 +93,23 @@ class Route
 
     public static function trigger()
     {
-        $request = new Request;        
+        $request = new Request;
         $method = strtoupper($request->method);
 
         // rearrange routes before looping to call tallest path first if in same url
-        uksort(self::$routes, function($a, $b) {
+        uksort(self::$routes, function ($a, $b) {
             $a = strlen($a);
             $b = strlen($b);
-            if ($a == $b) return 0;
-            else return ($a < $b) ? 1: -1;
+            if ($a == $b) {
+                return 0;
+            } else {
+                return ($a < $b) ? 1: -1;
+            }
         });
         
-        foreach(self::$routes as $url => $calback){
+        foreach (self::$routes as $url => $calback) {
             // $url = key(self::$routes);
-            $request->router = new \stdClass;
+            $request->router = new dynClass;
 
             $regix = "~:(\w+)~";
 
@@ -121,31 +131,31 @@ class Route
                 $callable = isset(self::$routes[$url][$method]) ? self::$routes[$url][$method] : null;
                 $callable = isset(self::$routes[$url]['group']) ? self::$routes[$url]['group'] : $callable;
 
-                if(!is_null($callable)){
+                if (!is_null($callable)) {
                     $inject = Controller::inject($callable['invoke']);
-                    if(isset($inject['instance']->middlewares)){
-                        if(isset($inject['instance']->middlewares[$inject['__invokable_method']])){
+                    if (isset($inject['instance']->middlewares)) {
+                        if (isset($inject['instance']->middlewares[$inject['__invokable_method']])) {
                             $middleware = $inject['instance']->middlewares[$inject['__invokable_method']];
-                            if(!is_array($middleware)){
+                            if (!is_array($middleware)) {
                                 $middleware = [$middleware];
                             }
                             $callable['middleware']['before'] = array_merge($callable['middleware']['before'], $middleware);
                         }
                     }
-                    if(sizeof($callable['middleware']['before'])){
+                    if (sizeof($callable['middleware']['before'])) {
                         $middleware = (new Middleware($callable['middleware']['before']))->beginQueue();
-                        if($middleware instanceof Response){
+                        if ($middleware instanceof Response) {
                             $middleware->spread();
                             break;
                         }
                     }
 
-                    // TODO : send invoked value to pipe .. 
+                    // TODO : send invoked value to pipe ..
                     $invoke = Controller::invoke($inject);
                     
-                    if(sizeof($callable['middleware']['after'])){
+                    if (sizeof($callable['middleware']['after'])) {
                         $middleware = (new Middleware($callable['middleware']['after']))->beginQueue();
-                        if($middleware instanceof Response){
+                        if ($middleware instanceof Response) {
                             $middleware->spread();
                             break;
                         }
@@ -154,18 +164,16 @@ class Route
                 }
             }
         }
-        if(isset($invoke)){
-            if(is_callable($invoke) & !$invoke instanceof Response){
+        if (isset($invoke)) {
+            if (is_callable($invoke) & !$invoke instanceof Response) {
                 $invoke = $invoke();
             }
-            if($invoke instanceof Response) {
+            if ($invoke instanceof Response) {
                 $invoke->spread();
-
             } else {
                 $response = new Response();
                 $response->body($invoke);
                 $response->spread();
-                
             }
         }
     }
