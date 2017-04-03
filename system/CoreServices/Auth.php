@@ -24,17 +24,41 @@ abstract class Auth
      */
     public static function once()
     {
-        $args = func_get_arg(0);
+        $credentials = func_get_arg(0);
 
         $query = (new Query)
-            ->table('users')
-            ->where(function ($e) use ($args) {
+            ->table(static::$table)
+            ->where(function ($e) use ($credentials) {
                 $fields = static::$fields['login'];
-                $e->where(array_shift($fields), $args['login']);
+                $e->where(array_shift($fields), $credentials['login']);
                 foreach ($fields as $value) {
-                    $e->orWhere($value, $args['login']);
+                    $e->orWhere($value, $credentials['login']);
                 }
-            })->where(static::$fields['password'], self::encpass($args['password']))
+            })->where(static::$fields['password'], self::encpass($credentials['password']))
+            ->get();
+
+        if ($query->count) {
+            static::$current = $query->record[0];
+            return true;
+        } else {
+            static::$current = null;
+            return false;
+        }
+    }
+
+    /**
+     * login once by id
+     *
+     * @param  int
+     * @return bool
+     */
+    public static function onceById()
+    {
+        $id = func_get_arg(0);
+
+        $query = (new Query)
+            ->table(static::$table)
+            ->where(static::$fields['primary'], $id)
             ->get();
 
         if ($query->count) {
@@ -54,15 +78,69 @@ abstract class Auth
      */
     public static function login()
     {
-        $args = func_get_arg(0);
+        $credentials = func_get_arg(0);
 
-        if (static::once($args)) {
+        if (static::once($credentials)) {
             Session::set(static::$table.static::$sessId, static::$current->{static::$fields['primary']});
             return true;
         } else {
             static::logout();
             return false;
         }
+    }
+    
+    /**
+     * login by id and save to session
+     *
+     * @param  int
+     * @return bool
+     */
+    public static function loginById()
+    {
+        $id = func_get_arg(0);
+        if (static::onceById($id)) {
+            Session::set(static::$table.static::$sessId, static::$current->{static::$fields['primary']});
+            return true;
+        } else {
+            static::logout();
+            return false;
+        }
+    }
+    
+    /**
+     * get logged user data
+     *
+     * @return bool | object
+     */
+    public static function user()
+    {
+        if (static::logged() && !static::$current) {
+            $query = (new Query)
+            ->table(static::$table)
+            ->where(static::$fields['primary'], static::id())
+            ->get();
+
+            if ($query->count) {
+                static::$current = $query->record[0];
+                return static::$current;
+            } else {
+                static::$current = null;
+                return false;
+            }
+        }
+
+        return static::$current;
+    }
+    
+    /**
+     * get logged user id or return zero
+     *
+     * @return bool | int
+     */
+    public static function id()
+    {
+        $id = Session::get(static::$table.static::$sessId);
+        return $id ?: 0;
     }
     
     /**
@@ -96,6 +174,7 @@ abstract class Auth
     {
         return md5(Str::encrypt($pass)).sha1(Str::encrypt($pass));
     }
+    
     /**
      * return kill screen, called when fail
      *
