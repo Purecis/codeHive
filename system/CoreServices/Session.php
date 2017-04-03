@@ -16,7 +16,8 @@ namespace App\System;
 class Session
 {
     private static $sessHash = '';
-    public static function boot(){
+    public static function boot()
+    {
         $hive = new Scope('config.hive');
         
         static::$sessHash = $hive->session ? $hive->session : '_';
@@ -25,7 +26,7 @@ class Session
     /**
      * session get.
      *
-     * @param	mixen   string/array/multiple arguments | session name
+     * @param   mixen   string/array/multiple arguments | session name
      * @return  mixen   array/string
      */
     public static function get()
@@ -47,16 +48,14 @@ class Session
      * session exists.
      * will check all is exist or none
      *
-     * @param	mixen   string/array/multiple arguments | session name
+     * @param   mixen   string/array/multiple arguments | session name
      * @return  bool
      */
     public static function exists()
     {
         $arguments = Loader::mergeArguments(func_get_args());
-
         foreach ($arguments as $session) {
-            if (
-                !isset($_SESSION[static::$sessHash.$session]) or
+            if (!isset($_SESSION[static::$sessHash.$session]) or
                 $_SESSION[static::$sessHash.$session] == false
             ) {
                 return false;
@@ -69,17 +68,18 @@ class Session
      * session set.
      * register array of sessions with values
      *
-     * @param	array   key,value array to set
+     * @param   array   key,value array to set
      * @return  void
      */
     public static function set()
     {
         $arguments = func_get_args();
-        if(is_array($arguments[0])){
+        
+        if (is_array($arguments[0])) {
             foreach ($arguments[0] as $session => $value) {
                 $_SESSION[static::$sessHash.$session] = $value;
             }
-        }else{
+        } else {
             $_SESSION[static::$sessHash.$arguments[0]] = $arguments[1];
         }
     }
@@ -88,7 +88,7 @@ class Session
      * session remove.
      * remove all sessions
      *
-     * @param	array 	str or array key value
+     * @param   array   str or array key value
      */
     public static function remove()
     {
@@ -96,21 +96,24 @@ class Session
         $sessions = $arguments[0];
         $clear = isset($arguments[1]) ? true : false;
 
-        if(is_array($sessions)){
+        if (is_array($sessions)) {
             foreach ($sessions as $session) {
                 unset($_SESSION[static::$sessHash.$session]);
             }
+        } else {
+            unset($_SESSION[static::$sessHash.$sessions]);
         }
 
-        if($clear){
+        if ($clear) {
             @session_unset();
             @session_destroy();
         }
     }
 
-    public static function id(){
+    public static function id()
+    {
         $sessId = func_get_arg(0);
-        if($sessId){
+        if ($sessId) {
             session_id($sessId);
         }
         return session_id();
