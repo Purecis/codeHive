@@ -41,7 +41,7 @@ class Session
                 array_push($sessions, $_SESSION[static::$sessHash.$session]);
             }
         }
-        return sizeof($sessions) > 1 ? $sessions : $sessions[0];
+        return sizeof($sessions) > 1 ? $sessions : (isset($sessions[0]) ? $sessions[0] : false);
     }
     
     /**
